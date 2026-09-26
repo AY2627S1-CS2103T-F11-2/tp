@@ -126,6 +126,19 @@ Examples:
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
+### Adding a remark: `remark`
+
+Adds or replaces an optional remark for an existing person.
+
+Format: `remark INDEX r/REMARK`
+
+* The index refers to the index number shown in the displayed person list.
+* The index **must be a positive integer** 1, 2, 3, …​
+* To remove a person's remark, leave the remark empty: `remark INDEX r/`.
+
+Example:
+* `remark 2 r/Likes baseball` adds the remark `Likes baseball` to the 2nd person.
+
 ### Deleting a person: `delete`
 
 Deletes the specified person from the address book.
@@ -195,4 +208,5 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List** | `list`
+**Remark** | `remark INDEX r/REMARK`<br> e.g., `remark 2 r/Likes baseball`
 **Help** | `help`
