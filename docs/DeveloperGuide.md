@@ -9,7 +9,7 @@ title: Developer Guide
 
 ## **Acknowledgements**
 
-* _{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}_
+* This project is based on the [AddressBook-Level3](https://github.com/se-edu/addressbook-level3) project created by the [SE-EDU initiative](https://se-education.org).
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -261,42 +261,46 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
+* is a logistics coordinator of a student club
+* manages a significant amount of reusable club equipment (cameras, microphones, projectors, etc.)
+* needs to know at any time which equipment is available and who is holding the rest
 * prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
+* can type fast and prefers typing to mouse interactions
 * is reasonably comfortable using CLI apps
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
-
+**Value proposition**: Track club equipment and its current holder faster and more reliably than with spreadsheets or chat messages, using a simple CLI.
 
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …​                                    | I want to …​                     | So that I can…​                                                        |
-| -------- | ------------------------------------------ | ------------------------------ | ---------------------------------------------------------------------- |
-| `* * *`  | new user                                   | see usage instructions         | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person               |                                                                        |
-| `* * *`  | user                                       | delete a person                | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name          | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details   | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name           | locate a person easily                                                 |
+| Priority | As a …​                     | I want to …​                                 | So that I can…​                                        |
+| -------- | --------------------------- | ------------------------------------------ | ------------------------------------------------------ |
+| `* * *`  | logistics coordinator       | add a piece of equipment with an ID and name | start tracking new equipment                           |
+| `* * *`  | logistics coordinator       | list all equipment with their status         | see at a glance what is available and what is issued   |
+| `* * *`  | logistics coordinator       | issue equipment to a person                  | know who is responsible for it                         |
+| `* * *`  | logistics coordinator       | record that equipment has been returned      | mark it as available for others                        |
+| `* * *`  | logistics coordinator       | remove an equipment record                   | correct mistakes or stop tracking retired equipment    |
+| `* *`    | new user                    | see usage instructions                       | refer to them when I forget how to use the app         |
+| `* *`    | logistics coordinator       | be prevented from issuing already-issued equipment | avoid double-booking an item                     |
+| `* *`    | logistics coordinator       | be prevented from removing issued equipment  | avoid losing track of who holds it                     |
+| `*`      | logistics coordinator       | search equipment by name                     | find an item without scanning the whole list           |
+| `*`      | logistics coordinator       | see the history of who borrowed an item      | investigate lost or damaged equipment                  |
 
-*{More to be added}*
+Stories considered but **not** being implemented in the MVP: member accounts, due dates and overdue reminders, equipment reservations, exporting the register, and a GUI with interactive controls.
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
+(For all use cases below, the **System** is `ClubLogistics` and the **Actor** is the `user`, unless specified otherwise)
 
-**Use case: Delete a person**
+**Use case: Issue equipment**
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  User requests to list equipment
+2.  ClubLogistics shows the list of equipment
+3.  User requests to issue a specific equipment item to a person
+4.  ClubLogistics records the person as the current holder and shows the updated item
 
     Use case ends.
 
@@ -306,26 +310,96 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
   Use case ends.
 
-* 3a. The given index is invalid.
+* 3a. The equipment ID does not exist.
 
-    * 3a1. AddressBook shows an error message.
+    * 3a1. ClubLogistics shows an error message.
 
       Use case resumes at step 2.
 
-*{More to be added}*
+* 3b. The equipment is already issued.
+
+    * 3b1. ClubLogistics shows an error message naming the current holder.
+
+      Use case resumes at step 2.
+
+* 3c. The person name is invalid.
+
+    * 3c1. ClubLogistics shows an error message.
+
+      Use case resumes at step 2.
+
+**Use case: Return equipment**
+
+**MSS**
+
+1.  User requests to list equipment
+2.  ClubLogistics shows the list of equipment
+3.  User requests to return a specific issued equipment item
+4.  ClubLogistics marks the item as available and shows the updated item
+
+    Use case ends.
+
+**Extensions**
+
+* 3a. The equipment ID does not exist.
+
+    * 3a1. ClubLogistics shows an error message.
+
+      Use case resumes at step 2.
+
+* 3b. The equipment is not currently issued.
+
+    * 3b1. ClubLogistics shows an error message.
+
+      Use case resumes at step 2.
+
+**Use case: Add and remove equipment**
+
+**MSS**
+
+1.  User requests to add equipment with an ID and name
+2.  ClubLogistics adds the equipment as available
+3.  User realises the record was a mistake and requests to remove it by ID
+4.  ClubLogistics removes the equipment
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. The equipment ID already exists (case-insensitive).
+
+    * 1a1. ClubLogistics shows an error message.
+
+      Use case ends.
+
+* 1b. The equipment ID or name is invalid.
+
+    * 1b1. ClubLogistics shows an error message.
+
+      Use case ends.
+
+* 3a. The equipment is currently issued.
+
+    * 3a1. ClubLogistics shows an error message naming the current holder.
+
+      Use case ends.
 
 ### Non-Functional Requirements
 
 1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
+2.  Should be able to hold up to 1000 equipment records without noticeable sluggishness in performance for typical usage.
 3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
-
-*{More to be added}*
+4.  Equipment records should be saved automatically to a local file so that no data is lost when the app is closed.
+5.  Error messages should clearly state what was wrong and, for format errors, the correct command usage.
 
 ### Glossary
 
 * **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **Equipment**: A reusable physical item owned by the club and tracked by ClubLogistics
+* **Equipment ID**: A unique, case-insensitive identifier of 1–20 letters and digits for one piece of equipment
+* **Available**: Status of equipment that is not issued to anyone
+* **Issued**: Status of equipment that is currently held by a person
+* **Holder**: The person to whom equipment is currently issued (at most one per item)
 
 --------------------------------------------------------------------------------------------------------------------
 
