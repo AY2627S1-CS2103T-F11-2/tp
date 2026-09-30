@@ -14,34 +14,40 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 <img src="images/jaredseezw.png" width="200px">
 
 [[github](https://github.com/jaredseezw)]
+### Justin
+
+<img src="images/xdjanaut.png" width="200px">
+
+[[github](http://github.com/xdJanaut)]
+[[portfolio](team/xdjanaut.md)]
 
 * Role: Project Advisor
 
-### Jane Doe
+### Junius Lui
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/juniuslui.png" width="200px">
 
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](http://github.com/juniuslui)]
+[[portfolio](team/juniuslui.md)]
 
 * Role: Team Lead
 * Responsibilities: UI
 
-### Johnny Doe
+### Jason Loh
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/imgorf.jpg" width="200px">
 
-[[github](http://github.com/johndoe)] [[portfolio](team/johndoe.md)]
+[[github](http://github.com/imgorf)] [[portfolio](team/imgorf.md)]
 
 * Role: Developer
 * Responsibilities: Data
 
-### Jean Doe
+### Zhang Yangchuan
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/zyangchuan.png" width="200px">
 
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/zyangchuan)]
+[[portfolio](team/zyangchuan.md)]
 
 * Role: Developer
 * Responsibilities: Dev Ops + Threading
