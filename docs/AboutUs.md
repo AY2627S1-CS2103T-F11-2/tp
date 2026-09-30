@@ -16,5 +16,5 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 [[github](http://github.com/xdJanaut)]
 [[portfolio](team/xdjanaut.md)]
 
-* Role: Developer
+* Role: UI Developer
 * Responsibilities: Documentation
