@@ -9,6 +9,11 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
+### Jared See
+
+<img src="images/jaredseezw.png" width="200px">
+
+[[github](https://github.com/jaredseezw)]
 ### Justin
 
 <img src="images/xdjanaut.png" width="200px">
