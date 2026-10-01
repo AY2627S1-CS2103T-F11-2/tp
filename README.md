@@ -3,13 +3,22 @@
 
 ![Ui](docs/images/Ui.png)
 
-* This is **a sample project for Software Engineering (SE) students**.<br>
-  Example usages:
-  * as a starting point of a course project (as opposed to writing everything from scratch)
-  * as a case study
-* The project simulates an ongoing software project for a desktop application (called _AddressBook_) used for managing contact details.
-  * It is **written in an object-oriented programming (OOP) style** and provides a **reasonably well-written** codebase of about 6 KLoC. It is **larger** than what students typically write in beginner-level software-engineering modules, without being overwhelming.
-  * It comes with a **reasonable level of user and developer documentation**.
-* It is named `AddressBook Level 3` (`AB3` for short) because it was initially created as a part of a series of `AddressBook` projects (`Level 1`, `Level 2`, `Level 3` ...).
-* For the detailed documentation of this project, see the **[Address Book Product Website](https://se-education.org/addressbook-level3)**.
-* This project is a **part of the se-education.org** initiative. If you would like to contribute code to this project, see [se-education.org](https://se-education.org/#contributing-to-se-edu) for more info.
+# ClubLogistics
+
+ClubLogistics is a desktop application for student-club logistics coordinators to manage reusable equipment. It keeps the club's equipment register and loan information in one place, helping coordinators identify available equipment, current borrowers, and outstanding returns quickly.
+
+The application is designed for a single coordinator who prefers a fast, keyboard-driven workflow. Its command-line interface supports short, repeatable updates while the graphical interface provides an overview of the club's records.
+
+## Key capabilities
+
+* Record individual equipment using unique equipment IDs.
+* View and find equipment without searching through spreadsheets or messages.
+* Track whether equipment is available or currently issued.
+* Record who is responsible for issued equipment.
+* Record equipment returns so that availability remains accurate.
+
+## Documentation
+
+* [User Guide](docs/UserGuide.md) - instructions for using ClubLogistics.
+* [Developer Guide](docs/DeveloperGuide.md) - product requirements and technical documentation.
+* [About Us](docs/AboutUs.md) - information about the project team.
