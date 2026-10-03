@@ -16,8 +16,8 @@ You can reach us at the email `E1155502@u.nus.edu`
 [[github](https://github.com/jaredseezw)]
 [[portfolio](team/jaredseezw.md)]
 
-Role: Developer
-Responsibilities: UI
+* Role: Developer
+* Responsibilities: UI
 
 ### Justin
 
