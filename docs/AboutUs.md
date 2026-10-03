@@ -14,6 +14,11 @@ You can reach us at the email `E1155502@u.nus.edu`
 <img src="images/jaredseezw.png" width="200px">
 
 [[github](https://github.com/jaredseezw)]
+[[portfolio](team/jaredseezw.md)]
+
+* Role: Developer
+* Responsibilities: UI
+
 ### Justin
 
 <img src="images/xdjanaut.png" width="200px">
@@ -35,7 +40,7 @@ You can reach us at the email `E1155502@u.nus.edu`
 
 ### Jason Loh
 
-<img src="images/imgorf.jpg" width="200px">
+<img src="images/imgorf.png" width="200px">
 
 [[github](http://github.com/imgorf)] [[portfolio](team/imgorf.md)]
 
