@@ -1,9 +1,12 @@
 package seedu.address.model;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.Person;
 
 /**
@@ -59,6 +62,21 @@ public interface Model {
      * The person identity of {@code editedPerson} must not be the same as another existing person in the address book.
      */
     void setPerson(Person target, Person editedPerson);
+
+    /**
+     * Returns the equipment with the given case-insensitive ID, if present.
+     */
+    Optional<Equipment> findEquipment(EquipmentId id);
+
+    /**
+     * Adds equipment whose ID is not already registered.
+     */
+    void addEquipment(Equipment equipment);
+
+    /**
+     * Replaces an existing equipment record with a new immutable record.
+     */
+    void setEquipment(Equipment target, Equipment replacement);
 
     /** Returns an unmodifiable view of the filtered person list */
     ObservableList<Person> getFilteredPersonList();

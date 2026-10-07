@@ -20,8 +20,11 @@ import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
+import seedu.address.logic.commands.IssueCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.equipment.BorrowerName;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
@@ -85,6 +88,18 @@ public class AddressBookParserTest {
     public void parseCommand_list() throws Exception {
         assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD) instanceof ListCommand);
         assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD + " 3") instanceof ListCommand);
+    }
+
+    @Test
+    public void parseCommand_issue() throws Exception {
+        assertEquals(new IssueCommand(new EquipmentId("CAM001"), new BorrowerName("John Tan")),
+                parser.parseCommand("  issue cam001 John   Tan  "));
+    }
+
+    @Test
+    public void parseCommand_issueMissingName_throwsParseException() {
+        assertThrows(ParseException.class, IssueCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
+                -> parser.parseCommand("issue CAM001"));
     }
 
     @Test

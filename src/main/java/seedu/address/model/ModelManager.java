@@ -3,6 +3,7 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -10,6 +11,8 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.Person;
 
 /**
@@ -91,6 +94,21 @@ public class ModelManager implements Model {
         requireAllNonNull(target, editedPerson);
 
         addressBook.setPerson(target, editedPerson);
+    }
+
+    @Override
+    public Optional<Equipment> findEquipment(EquipmentId id) {
+        return addressBook.findEquipment(id);
+    }
+
+    @Override
+    public void addEquipment(Equipment equipment) {
+        addressBook.addEquipment(equipment);
+    }
+
+    @Override
+    public void setEquipment(Equipment target, Equipment replacement) {
+        addressBook.setEquipment(target, replacement);
     }
 
     //=========== Filtered Person List Accessors =============================================================
