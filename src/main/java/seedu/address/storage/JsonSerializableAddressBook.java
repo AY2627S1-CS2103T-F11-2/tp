@@ -43,13 +43,6 @@ class JsonSerializableAddressBook {
     }
 
     /**
-     * Constructs a {@code JsonSerializableAddressBook} containing only legacy person records.
-     */
-    public JsonSerializableAddressBook(List<JsonAdaptedPerson> persons) {
-        this(persons, null);
-    }
-
-    /**
      * Converts a given {@code ReadOnlyAddressBook} into this class for Jackson use.
      *
      * @param source future changes to this will not affect the created {@code JsonSerializableAddressBook}.

@@ -142,6 +142,21 @@ public class AddressBookTest {
     }
 
     @Test
+    public void setEquipment_unusedReplacementId_updatesIdentityAndPreservesOtherRecords() {
+        Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
+        Equipment microphone = new Equipment(new EquipmentId("MIC001"), "Wireless Microphone");
+        Equipment replacement = new Equipment(new EquipmentId("CAM002"), "Sony Camera");
+        addressBook.setEquipments(List.of(camera, microphone));
+
+        addressBook.setEquipment(camera, replacement);
+
+        assertEquals(Optional.empty(), addressBook.findEquipment(new EquipmentId("cam001")));
+        assertEquals(Optional.of(replacement), addressBook.findEquipment(new EquipmentId("cam002")));
+        assertEquals(Optional.of(microphone), addressBook.findEquipment(new EquipmentId("mic001")));
+        assertEquals(List.of(replacement, microphone), addressBook.getEquipmentList());
+    }
+
+    @Test
     public void setEquipment_duplicateOrMissingTarget_rejectsWithoutMutation() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
         Equipment microphone = new Equipment(new EquipmentId("MIC001"), "Wireless Microphone");
