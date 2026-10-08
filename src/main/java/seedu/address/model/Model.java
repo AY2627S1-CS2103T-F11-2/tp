@@ -1,10 +1,12 @@
 package seedu.address.model;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.Person;
 
 /**
@@ -61,6 +63,16 @@ public interface Model {
 
     /** Adds the given equipment to the equipment register. */
     default void addEquipment(Equipment equipment) {
+        throw new UnsupportedOperationException("Equipment is not supported by this model");
+    }
+
+    /** Returns the equipment with the given case-insensitive ID, if present. */
+    default Optional<Equipment> findEquipment(EquipmentId id) {
+        throw new UnsupportedOperationException("Equipment is not supported by this model");
+    }
+
+    /** Removes the given equipment from the equipment register. {@code equipment} must exist. */
+    default void removeEquipment(Equipment equipment) {
         throw new UnsupportedOperationException("Equipment is not supported by this model");
     }
 

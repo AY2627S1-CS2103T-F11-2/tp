@@ -3,10 +3,12 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.UniqueEquipmentList;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
@@ -98,6 +100,19 @@ public class AddressBook implements ReadOnlyAddressBook {
     /** Adds an equipment item to the register. */
     public void addEquipment(Equipment item) {
         equipment.add(item);
+    }
+
+    /** Returns the equipment item with the given case-insensitive ID, if present. */
+    public Optional<Equipment> findEquipment(EquipmentId id) {
+        return equipment.find(id);
+    }
+
+    /**
+     * Removes the equipment item {@code key} from the register.
+     * {@code key} must exist in the register.
+     */
+    public void removeEquipment(Equipment key) {
+        equipment.remove(key);
     }
 
     //// util methods
