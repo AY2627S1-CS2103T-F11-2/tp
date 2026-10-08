@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+
 public class EquipmentTest {
 
     private final EquipmentId cameraId = new EquipmentId("CAM001");
@@ -17,16 +18,16 @@ public class EquipmentTest {
     @Test
     public void constructor_nullFields_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Equipment(null, "Sony Camera"));
-        assertThrows(NullPointerException.class, () -> new Equipment(cameraId, null));
-        assertThrows(NullPointerException.class, () -> Equipment.isValidName(null));
+        assertThrows(NullPointerException.class, () -> new Equipment(cameraId, (String) null));
+        assertFalse(EquipmentName.isValidName(null));
     }
 
     @Test
     public void constructor_invalidNames_throwsIllegalArgumentException() {
-        String[] invalidNames = {"", " ", "A".repeat(51), "Sony\nCamera", "Sony\tCamera"};
+        String[] invalidNames = {"", " ", "A".repeat(51)};
         for (String name : invalidNames) {
-            assertFalse(Equipment.isValidName(name));
-            assertThrows(IllegalArgumentException.class, Equipment.MESSAGE_NAME_CONSTRAINTS, ()
+            assertFalse(EquipmentName.isValidName(name));
+            assertThrows(IllegalArgumentException.class, EquipmentName.MESSAGE_CONSTRAINTS, ()
                     -> new Equipment(cameraId, name));
         }
     }
@@ -34,13 +35,14 @@ public class EquipmentTest {
     @Test
     public void constructor_validName_preservesCaseAndPunctuation() {
         Equipment equipment = new Equipment(cameraId, "  Sony   Camera-1 / Club's  ");
-        assertEquals("Sony Camera-1 / Club's", equipment.getName());
+        assertEquals("Sony Camera-1 / Club's", equipment.getName().value);
         assertEquals(cameraId, equipment.getId());
         assertEquals(Optional.empty(), equipment.getIssuedTo());
         assertFalse(equipment.isIssued());
-        assertTrue(Equipment.isValidName("A"));
-        assertTrue(Equipment.isValidName("A".repeat(50)));
-        assertTrue(Equipment.isValidName("A".repeat(24) + "   " + "B".repeat(25)));
+        assertTrue(EquipmentName.isValidName("A"));
+        assertTrue(EquipmentName.isValidName("A".repeat(50)));
+        assertTrue(EquipmentName.isValidName("A".repeat(24) + "   " + "B".repeat(25)));
+        assertEquals("Sony Camera", new Equipment(cameraId, " Sony\n Camera ").getName().value);
     }
 
     @Test

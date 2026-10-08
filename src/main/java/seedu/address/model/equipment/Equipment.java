@@ -6,86 +6,87 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * An immutable equipment record containing its ID, display name, and current borrower.
- */
-public final class Equipment {
-
-    public static final String MESSAGE_NAME_CONSTRAINTS =
-            "Error: Equipment name cannot be empty and must be 1–50 characters long.";
+/** An immutable equipment record with its register status and optional borrower. */
+public class Equipment {
 
     private final EquipmentId id;
-    private final String name;
+    private final EquipmentName name;
+    private final EquipmentStatus status;
     private final BorrowerName issuedTo;
 
-    /**
-     * Constructs an available equipment record.
-     */
+    /** Creates an available equipment item. */
+    public Equipment(EquipmentId id, EquipmentName name) {
+        this(id, name, EquipmentStatus.AVAILABLE, null);
+    }
+
+    /** Convenience constructor for callers that have not yet migrated to {@link EquipmentName}. */
     public Equipment(EquipmentId id, String name) {
-        this(id, name, null);
+        this(id, new EquipmentName(name));
     }
 
-    /**
-     * Constructs an equipment record. A null borrower denotes available equipment.
-     */
-    public Equipment(EquipmentId id, String name, BorrowerName issuedTo) {
+    /** Creates an equipment item with its stored status and no borrower. */
+    public Equipment(EquipmentId id, EquipmentName name, EquipmentStatus status) {
+        this(id, name, status, null);
+    }
+
+    /** Creates an issued equipment item for the given borrower. */
+    public Equipment(EquipmentId id, EquipmentName name, BorrowerName borrower) {
+        this(id, name, EquipmentStatus.ISSUED, borrower);
+    }
+
+    /** Convenience constructor retained for the issue workflow's existing call sites. */
+    public Equipment(EquipmentId id, String name, BorrowerName borrower) {
+        this(id, new EquipmentName(name), borrower);
+    }
+
+    /** Creates an equipment item from its persisted status and optional borrower. */
+    public Equipment(EquipmentId id, EquipmentName name, EquipmentStatus status, BorrowerName issuedTo) {
         this.id = requireNonNull(id);
-        requireNonNull(name);
-        checkArgument(isValidName(name), MESSAGE_NAME_CONSTRAINTS);
-        this.name = normalizeName(name);
+        this.name = requireNonNull(name);
+        this.status = requireNonNull(status);
         this.issuedTo = issuedTo;
-    }
-
-    /**
-     * Returns true if the normalized display name has 1–50 characters and no control characters.
-     */
-    public static boolean isValidName(String name) {
-        requireNonNull(name);
-        String normalizedName = normalizeName(name);
-        return !normalizedName.isEmpty() && normalizedName.length() <= 50
-                && normalizedName.chars().noneMatch(Character::isISOControl);
-    }
-
-    private static String normalizeName(String name) {
-        return name.trim().replaceAll(" +", " ");
+        checkArgument((status == EquipmentStatus.ISSUED) == (issuedTo != null),
+                "Issued equipment must have a borrower, and available equipment must not.");
     }
 
     public EquipmentId getId() {
         return id;
     }
 
-    public String getName() {
+    public EquipmentName getName() {
         return name;
+    }
+
+    public EquipmentStatus getStatus() {
+        return status;
     }
 
     public Optional<BorrowerName> getIssuedTo() {
         return Optional.ofNullable(issuedTo);
     }
 
-    /**
-     * Returns whether the equipment currently has a borrower.
-     */
     public boolean isIssued() {
-        return issuedTo != null;
+        return status == EquipmentStatus.ISSUED;
     }
 
-    /**
-     * Returns an issued copy of this record without modifying the available record.
-     *
-     * @throws IllegalStateException if the equipment already has a borrower.
-     */
+    /** Returns whether this equipment has the same ID as {@code other}. */
+    public boolean isSameEquipment(Equipment other) {
+        return other != null && id.isSameId(other.id);
+    }
+
+    /** Returns an issued copy, leaving this record unchanged. */
     public Equipment issueTo(BorrowerName borrower) {
         requireNonNull(borrower);
         if (isIssued()) {
             throw new IllegalStateException("Equipment " + id + " is already issued to " + issuedTo + ".");
         }
-        return new Equipment(id, name, borrower);
+        return new Equipment(id, name, EquipmentStatus.ISSUED, borrower);
     }
 
     @Override
     public String toString() {
-        String status = isIssued() ? "Issued to: " + issuedTo : "Available";
-        return id + " | " + name + " | " + status;
+        String displayStatus = isIssued() ? "Issued to: " + issuedTo : "Available";
+        return id + " | " + name + " | " + displayStatus;
     }
 
     @Override
@@ -93,17 +94,15 @@ public final class Equipment {
         if (other == this) {
             return true;
         }
-
         if (!(other instanceof Equipment otherEquipment)) {
             return false;
         }
-
-        return id.equals(otherEquipment.id) && name.equals(otherEquipment.name)
+        return id.equals(otherEquipment.id) && name.equals(otherEquipment.name) && status == otherEquipment.status
                 && Objects.equals(issuedTo, otherEquipment.issuedTo);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, issuedTo);
+        return Objects.hash(id, name, status, issuedTo);
     }
 }

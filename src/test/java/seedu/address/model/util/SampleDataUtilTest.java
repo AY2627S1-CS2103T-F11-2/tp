@@ -17,6 +17,6 @@ public class SampleDataUtilTest {
         assertEquals(3, sample.getEquipmentList().size());
         assertTrue(sample.getEquipmentList().stream().noneMatch(equipment -> equipment.isIssued()));
         assertEquals(new EquipmentId("CAM001"), sample.getEquipmentList().get(0).getId());
-        assertEquals("Sony Camera", sample.getEquipmentList().get(0).getName());
+        assertEquals("Sony Camera", sample.getEquipmentList().get(0).getName().value);
     }
 }

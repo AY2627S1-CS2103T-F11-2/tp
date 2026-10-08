@@ -90,6 +90,17 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public boolean hasEquipment(Equipment equipment) {
+        requireNonNull(equipment);
+        return addressBook.hasEquipment(equipment);
+    }
+
+    @Override
+    public void addEquipment(Equipment equipment) {
+        addressBook.addEquipment(equipment);
+    }
+
+    @Override
     public void setPerson(Person target, Person editedPerson) {
         requireAllNonNull(target, editedPerson);
 
@@ -102,13 +113,14 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public void addEquipment(Equipment equipment) {
-        addressBook.addEquipment(equipment);
+    public void setEquipment(Equipment target, Equipment replacement) {
+        addressBook.setEquipment(target, replacement);
     }
 
     @Override
-    public void setEquipment(Equipment target, Equipment replacement) {
-        addressBook.setEquipment(target, replacement);
+    public void removeEquipment(Equipment equipment) {
+        requireNonNull(equipment);
+        addressBook.removeEquipment(equipment);
     }
 
     //=========== Filtered Person List Accessors =============================================================

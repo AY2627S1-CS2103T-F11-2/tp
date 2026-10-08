@@ -3,35 +3,36 @@ package seedu.address.model.equipment;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
-import java.util.Locale;
-
 /**
- * Represents a unique, case-insensitive equipment ID.
+ * Represents the unique identifier of an equipment item.
  */
-public final class EquipmentId {
+public class EquipmentId {
 
     public static final String MESSAGE_CONSTRAINTS =
             "Error: Equipment ID must contain only letters and numbers and cannot contain spaces.";
     public static final String VALIDATION_REGEX = "[A-Za-z0-9]{1,20}";
 
-    private final String value;
+    public final String value;
 
     /**
-     * Constructs an ID after trimming, validating, and converting it to uppercase.
+     * Creates an equipment ID from a valid identifier.
      */
     public EquipmentId(String id) {
         requireNonNull(id);
         String trimmedId = id.trim();
-        checkArgument(isValidEquipmentId(trimmedId), MESSAGE_CONSTRAINTS);
-        value = trimmedId.toUpperCase(Locale.ROOT);
+        checkArgument(isValidId(trimmedId), MESSAGE_CONSTRAINTS);
+        value = trimmedId;
     }
 
-    /**
-     * Returns true if the trimmed ID contains between 1 and 20 ASCII letters or digits.
-     */
-    public static boolean isValidEquipmentId(String id) {
-        requireNonNull(id);
-        return id.trim().matches(VALIDATION_REGEX);
+    /** Returns whether {@code test} is a valid equipment ID. */
+    public static boolean isValidId(String test) {
+        return test != null && test.trim().matches(VALIDATION_REGEX);
+    }
+
+    /** Returns whether this ID represents the same identifier as {@code other}, ignoring case. */
+    public boolean isSameId(EquipmentId other) {
+        requireNonNull(other);
+        return value.equalsIgnoreCase(other.value);
     }
 
     @Override
@@ -41,19 +42,11 @@ public final class EquipmentId {
 
     @Override
     public boolean equals(Object other) {
-        if (other == this) {
-            return true;
-        }
-
-        if (!(other instanceof EquipmentId otherId)) {
-            return false;
-        }
-
-        return value.equals(otherId.value);
+        return other == this || (other instanceof EquipmentId otherId && isSameId(otherId));
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return value.toLowerCase(java.util.Locale.ROOT).hashCode();
     }
 }

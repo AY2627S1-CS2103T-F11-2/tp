@@ -1,5 +1,6 @@
 package seedu.address.model;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.person.Person;
@@ -16,8 +17,10 @@ public interface ReadOnlyAddressBook {
     ObservableList<Person> getPersonList();
 
     /**
-     * Returns an unmodifiable view of the equipment list, containing unique equipment IDs.
+     * Returns an unmodifiable view of the equipment register.
      */
-    ObservableList<Equipment> getEquipmentList();
+    default ObservableList<Equipment> getEquipmentList() {
+        return FXCollections.emptyObservableList();
+    }
 
 }

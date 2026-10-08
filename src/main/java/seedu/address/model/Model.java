@@ -63,20 +63,24 @@ public interface Model {
      */
     void setPerson(Person target, Person editedPerson);
 
-    /**
-     * Returns the equipment with the given case-insensitive ID, if present.
-     */
-    Optional<Equipment> findEquipment(EquipmentId id);
+    /** Returns true if equipment with the same ID exists in the equipment register. */
+    default boolean hasEquipment(Equipment equipment) {
+        throw new UnsupportedOperationException("Equipment is not supported by this model");
+    }
 
-    /**
-     * Adds equipment whose ID is not already registered.
-     */
+    /** Adds the given equipment to the equipment register. */
     void addEquipment(Equipment equipment);
 
-    /**
-     * Replaces an existing equipment record with a new immutable record.
-     */
+    /** Returns the equipment with the given case-insensitive ID, if present. */
+    Optional<Equipment> findEquipment(EquipmentId id);
+
+    /** Replaces an existing equipment record. */
     void setEquipment(Equipment target, Equipment replacement);
+
+    /** Removes the given equipment from the equipment register. {@code equipment} must exist. */
+    default void removeEquipment(Equipment equipment) {
+        throw new UnsupportedOperationException("Equipment removal is not supported by this model");
+    }
 
     /** Returns an unmodifiable view of the filtered person list */
     ObservableList<Person> getFilteredPersonList();

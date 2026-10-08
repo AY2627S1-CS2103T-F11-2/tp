@@ -125,7 +125,7 @@ public class AddressBookTest {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
         assertThrows(NullPointerException.class, () -> addressBook.addEquipment(null));
         assertThrows(NullPointerException.class, () -> addressBook.findEquipment(null));
-        assertThrows(NullPointerException.class, () -> addressBook.hasEquipment(null));
+        assertThrows(NullPointerException.class, () -> addressBook.hasEquipment((Equipment) null));
         assertThrows(NullPointerException.class, () -> addressBook.setEquipment(null, camera));
         assertThrows(NullPointerException.class, () -> addressBook.setEquipment(camera, null));
         assertThrows(NullPointerException.class, () -> addressBook.setEquipments(null));

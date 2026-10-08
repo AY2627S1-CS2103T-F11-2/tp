@@ -28,8 +28,7 @@ class JsonSerializableAddressBook {
     private final List<JsonAdaptedEquipment> equipment = new ArrayList<>();
 
     /**
-     * Constructs a {@code JsonSerializableAddressBook} with the given persons and equipment.
-     * Missing lists are empty so existing address book files can still be loaded.
+     * Constructs a {@code JsonSerializableAddressBook} with the given people and equipment.
      */
     @JsonCreator
     public JsonSerializableAddressBook(@JsonProperty("persons") List<JsonAdaptedPerson> persons,
@@ -49,8 +48,8 @@ class JsonSerializableAddressBook {
      */
     public JsonSerializableAddressBook(ReadOnlyAddressBook source) {
         persons.addAll(source.getPersonList().stream().map(JsonAdaptedPerson::new).collect(Collectors.toList()));
-        equipment.addAll(source.getEquipmentList().stream().map(JsonAdaptedEquipment::new)
-                .collect(Collectors.toList()));
+        equipment.addAll(source.getEquipmentList().stream()
+                .map(JsonAdaptedEquipment::new).collect(Collectors.toList()));
     }
 
     /**
@@ -71,11 +70,11 @@ class JsonSerializableAddressBook {
             if (jsonAdaptedEquipment == null) {
                 throw new IllegalValueException(MESSAGE_NULL_EQUIPMENT);
             }
-            Equipment equipmentItem = jsonAdaptedEquipment.toModelType();
-            if (addressBook.hasEquipment(equipmentItem.getId())) {
+            Equipment item = jsonAdaptedEquipment.toModelType();
+            if (addressBook.hasEquipment(item)) {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_EQUIPMENT);
             }
-            addressBook.addEquipment(equipmentItem);
+            addressBook.addEquipment(item);
         }
         return addressBook;
     }

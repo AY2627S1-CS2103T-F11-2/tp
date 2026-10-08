@@ -1,37 +1,31 @@
 package seedu.address.model;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.commons.util.AppUtil.checkArgument;
-import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
+import seedu.address.model.equipment.UniqueEquipmentList;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
 /**
  * Wraps all data at the address-book level.
- * Duplicate persons and case-insensitive equipment IDs are not allowed.
+ * Duplicates are not allowed (by .isSamePerson comparison).
  */
 public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniquePersonList persons = new UniquePersonList();
-    private final ObservableList<Equipment> equipment = FXCollections.observableArrayList();
-    private final ObservableList<Equipment> unmodifiableEquipment = FXCollections.unmodifiableObservableList(equipment);
+    private final UniqueEquipmentList equipment = new UniqueEquipmentList();
 
     public AddressBook() {}
 
     /**
-     * Creates an AddressBook using the persons and equipment in {@code toBeCopied}.
+     * Creates an AddressBook using the Persons in the {@code toBeCopied}
      */
     public AddressBook(ReadOnlyAddressBook toBeCopied) {
         this();
@@ -48,11 +42,9 @@ public class AddressBook implements ReadOnlyAddressBook {
         this.persons.setPersons(persons);
     }
 
-    /**
-     * Replaces the equipment list. Duplicate IDs are rejected before changing the existing data.
-     */
+    /** Replaces the equipment register after checking for duplicate IDs. */
     public void setEquipments(List<Equipment> equipment) {
-        this.equipment.setAll(validatedEquipmentCopy(equipment));
+        this.equipment.setEquipment(equipment);
     }
 
     /**
@@ -63,9 +55,11 @@ public class AddressBook implements ReadOnlyAddressBook {
 
         UniquePersonList replacementPersons = new UniquePersonList();
         replacementPersons.setPersons(newData.getPersonList());
-        List<Equipment> replacementEquipment = validatedEquipmentCopy(newData.getEquipmentList());
-        persons.setPersons(replacementPersons);
-        equipment.setAll(replacementEquipment);
+        UniqueEquipmentList replacementEquipment = new UniqueEquipmentList();
+        replacementEquipment.setEquipment(newData.getEquipmentList());
+
+        setPersons(replacementPersons.asUnmodifiableObservableList());
+        equipment.setEquipment(replacementEquipment.asUnmodifiableObservableList());
     }
 
     //// person-level operations
@@ -107,49 +101,39 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     //// equipment-level operations
 
-    /**
-     * Returns the equipment with the given case-insensitive ID, if present.
-     */
-    public Optional<Equipment> findEquipment(EquipmentId id) {
-        requireNonNull(id);
-        return equipment.stream().filter(item -> item.getId().equals(id)).findFirst();
+    /** Returns true if an equipment item with the same ID exists in the register. */
+    public boolean hasEquipment(Equipment item) {
+        requireNonNull(item);
+        return equipment.contains(item);
     }
 
-    /**
-     * Returns whether an equipment record with the given ID exists.
-     */
+    /** Returns whether an equipment ID is present, ignoring letter case. */
     public boolean hasEquipment(EquipmentId id) {
-        return findEquipment(id).isPresent();
+        requireNonNull(id);
+        return equipment.find(id).isPresent();
     }
 
-    /**
-     * Adds equipment. The ID must not already exist in the address book.
-     */
-    public void addEquipment(Equipment toAdd) {
-        requireNonNull(toAdd);
-        checkArgument(!hasEquipment(toAdd.getId()), "Equipment ID already exists: " + toAdd.getId());
-        equipment.add(toAdd);
+    /** Adds an equipment item to the register. */
+    public void addEquipment(Equipment item) {
+        equipment.add(item);
     }
 
-    /**
-     * Replaces an existing record. The replacement ID must not conflict with another item.
-     */
+    /** Replaces an existing equipment record. */
     public void setEquipment(Equipment target, Equipment replacement) {
-        requireAllNonNull(target, replacement);
-        int index = equipment.indexOf(target);
-        checkArgument(index != -1, "Equipment does not exist: " + target.getId());
-        checkArgument(target.getId().equals(replacement.getId()) || !hasEquipment(replacement.getId()),
-                "Equipment ID already exists: " + replacement.getId());
-        equipment.set(index, replacement);
+        equipment.set(target, replacement);
     }
 
-    private static List<Equipment> validatedEquipmentCopy(List<Equipment> equipment) {
-        requireAllNonNull(equipment);
-        Set<EquipmentId> ids = new HashSet<>();
-        for (Equipment item : equipment) {
-            checkArgument(ids.add(item.getId()), "Equipment ID already exists: " + item.getId());
-        }
-        return List.copyOf(equipment);
+    /** Returns the equipment item with the given case-insensitive ID, if present. */
+    public Optional<Equipment> findEquipment(EquipmentId id) {
+        return equipment.find(id);
+    }
+
+    /**
+     * Removes the equipment item {@code key} from the register.
+     * {@code key} must exist in the register.
+     */
+    public void removeEquipment(Equipment key) {
+        equipment.remove(key);
     }
 
     //// util methods
@@ -169,7 +153,7 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     @Override
     public ObservableList<Equipment> getEquipmentList() {
-        return unmodifiableEquipment;
+        return equipment.asUnmodifiableObservableList();
     }
 
     @Override
@@ -188,6 +172,6 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     @Override
     public int hashCode() {
-        return Objects.hash(persons, equipment);
+        return java.util.Objects.hash(persons, equipment);
     }
 }

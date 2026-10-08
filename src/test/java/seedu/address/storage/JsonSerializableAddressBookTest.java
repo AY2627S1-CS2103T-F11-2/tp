@@ -50,8 +50,9 @@ public class JsonSerializableAddressBookTest {
 
     @Test
     public void toModelType_duplicateEquipmentIds_throwsIllegalValueException() {
-        List<JsonAdaptedEquipment> equipment = List.of(new JsonAdaptedEquipment("CAM001", "Sony Camera", null),
-                new JsonAdaptedEquipment("cam001", "Another Camera", "John Tan"));
+        List<JsonAdaptedEquipment> equipment = List.of(
+                new JsonAdaptedEquipment("CAM001", "Sony Camera", null, null),
+                new JsonAdaptedEquipment("cam001", "Another Camera", null, "John Tan"));
         JsonSerializableAddressBook data = new JsonSerializableAddressBook(null, equipment);
         assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_DUPLICATE_EQUIPMENT,
                 data::toModelType);
@@ -60,7 +61,7 @@ public class JsonSerializableAddressBookTest {
     @Test
     public void toModelType_nullEquipmentRecord_throwsIllegalValueException() {
         JsonSerializableAddressBook data = new JsonSerializableAddressBook(null, Arrays.asList(
-                new JsonAdaptedEquipment("CAM001", "Sony Camera", null), null));
+                new JsonAdaptedEquipment("CAM001", "Sony Camera", null, null), null));
         assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_NULL_EQUIPMENT,
                 data::toModelType);
     }

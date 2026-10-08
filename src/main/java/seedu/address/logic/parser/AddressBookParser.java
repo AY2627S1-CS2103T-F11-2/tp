@@ -18,6 +18,7 @@ import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.IssueCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.RemoveCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
@@ -53,11 +54,12 @@ public class AddressBookParser {
         logger.fine("Command word: " + commandWord + "; Arguments: " + arguments);
 
         return switch (commandWord) {
-            case AddCommand.COMMAND_WORD -> new AddCommandParser().parse(arguments);
+            case AddCommand.COMMAND_WORD -> parseAddCommand(arguments);
             case EditCommand.COMMAND_WORD -> new EditCommandParser().parse(arguments);
             case DeleteCommand.COMMAND_WORD -> new DeleteCommandParser().parse(arguments);
             case ClearCommand.COMMAND_WORD -> new ClearCommand();
             case FindCommand.COMMAND_WORD -> new FindCommandParser().parse(arguments);
+            case RemoveCommand.COMMAND_WORD -> new RemoveCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new ListCommand();
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
             case HelpCommand.COMMAND_WORD -> new HelpCommand();
@@ -67,6 +69,16 @@ public class AddressBookParser {
                 throw new ParseException(MESSAGE_UNKNOWN_COMMAND);
             }
         };
+    }
+
+    /**
+     * Keeps the original prefixed contact form while accepting the two-part equipment form.
+     */
+    private Command parseAddCommand(String arguments) throws ParseException {
+        if (arguments.trim().startsWith("n/")) {
+            return new AddCommandParser().parse(arguments);
+        }
+        return new AddEquipmentCommandParser().parse(arguments);
     }
 
 }

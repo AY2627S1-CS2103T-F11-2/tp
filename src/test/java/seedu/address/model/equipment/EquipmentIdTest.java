@@ -12,29 +12,29 @@ public class EquipmentIdTest {
     @Test
     public void constructor_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new EquipmentId(null));
-        assertThrows(NullPointerException.class, () -> EquipmentId.isValidEquipmentId(null));
+        assertFalse(EquipmentId.isValidId(null));
     }
 
     @Test
     public void constructor_invalidIds_throwsIllegalArgumentException() {
         String[] invalidIds = {"", " ", "CAM 001", "CAM-001", "CAM_001", "é", "A".repeat(21)};
         for (String id : invalidIds) {
-            assertFalse(EquipmentId.isValidEquipmentId(id));
+            assertFalse(EquipmentId.isValidId(id));
             assertThrows(IllegalArgumentException.class, EquipmentId.MESSAGE_CONSTRAINTS, () -> new EquipmentId(id));
         }
     }
 
     @Test
-    public void constructor_validIds_normalizesCaseAndWhitespace() {
+    public void constructor_validIds_trimsAndPreservesCase() {
         String[] validIds = {"A", "7", "A".repeat(20), "cam001", " CAM001 "};
         for (String id : validIds) {
-            assertTrue(EquipmentId.isValidEquipmentId(id));
-            assertEquals(id.trim().toUpperCase(java.util.Locale.ROOT), new EquipmentId(id).toString());
+            assertTrue(EquipmentId.isValidId(id));
+            assertEquals(id.trim(), new EquipmentId(id).toString());
         }
     }
 
     @Test
-    public void equals_normalizedIds_comparesCanonicalValues() {
+    public void equals_caseInsensitiveIds_comparesIdentity() {
         EquipmentId id = new EquipmentId(" cam001 ");
         EquipmentId sameId = new EquipmentId("CAM001");
         assertEquals(sameId, id);
