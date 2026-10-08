@@ -2,6 +2,8 @@ package seedu.address.model.equipment;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Optional;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -24,6 +26,29 @@ public class UniqueEquipmentList {
             throw new IllegalArgumentException("Duplicate equipment ID");
         }
         internalList.add(equipment);
+    }
+
+    /** Returns the item with the same ID as {@code id}, ignoring case, if present. */
+    public Optional<Equipment> find(EquipmentId id) {
+        requireNonNull(id);
+        return internalList.stream().filter(item -> item.getId().isSameId(id)).findFirst();
+    }
+
+    /**
+     * Replaces {@code target} with {@code replacement}, keeping its position.
+     * {@code target} must exist, and {@code replacement} must not clash with another item's ID.
+     */
+    public void setEquipment(Equipment target, Equipment replacement) {
+        requireNonNull(target);
+        requireNonNull(replacement);
+        int index = internalList.indexOf(target);
+        if (index == -1) {
+            throw new IllegalArgumentException("Equipment does not exist: " + target.getId());
+        }
+        if (!target.isSameEquipment(replacement) && contains(replacement)) {
+            throw new IllegalArgumentException("Duplicate equipment ID");
+        }
+        internalList.set(index, replacement);
     }
 
     /** Replaces the register contents after checking IDs for uniqueness. */

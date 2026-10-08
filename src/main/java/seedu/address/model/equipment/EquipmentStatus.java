@@ -2,7 +2,8 @@ package seedu.address.model.equipment;
 
 /** Status of an equipment item. */
 public enum EquipmentStatus {
-    AVAILABLE("Available");
+    AVAILABLE("Available"),
+    DAMAGED("Damaged");
 
     private final String displayName;
 

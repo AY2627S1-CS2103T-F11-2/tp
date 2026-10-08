@@ -35,6 +35,23 @@ public class Equipment {
         return status;
     }
 
+    /** Returns whether this equipment is marked as damaged. */
+    public boolean isDamaged() {
+        return status == EquipmentStatus.DAMAGED;
+    }
+
+    /**
+     * Returns a damaged copy of this equipment, leaving this record unchanged.
+     *
+     * @throws IllegalStateException if the equipment is already damaged.
+     */
+    public Equipment markDamaged() {
+        if (isDamaged()) {
+            throw new IllegalStateException("Equipment " + id + " is already damaged.");
+        }
+        return new Equipment(id, name, EquipmentStatus.DAMAGED);
+    }
+
     /** Returns whether this equipment has the same ID as {@code other}. */
     public boolean isSameEquipment(Equipment other) {
         return other != null && id.isSameId(other.id);

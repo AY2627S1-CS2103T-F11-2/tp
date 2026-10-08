@@ -11,11 +11,15 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
+import seedu.address.model.equipment.EquipmentName;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.exceptions.DuplicatePersonException;
 import seedu.address.testutil.PersonBuilder;
@@ -104,4 +108,35 @@ public class AddressBookTest {
         }
     }
 
+    @Test
+    public void findEquipment_ignoresCase() {
+        Equipment camera = new Equipment(
+                new EquipmentId("CAM001"),
+                new EquipmentName("Sony Camera"));
+        addressBook.addEquipment(camera);
+
+        assertEquals(Optional.of(camera),
+                addressBook.findEquipment(new EquipmentId("cam001")));
+        assertEquals(Optional.empty(),
+                addressBook.findEquipment(new EquipmentId("MIC001")));
+    }
+
+    @Test
+    public void setEquipment_replacesInPlace_andRejectsMissingTarget() {
+        Equipment camera = new Equipment(
+                new EquipmentId("CAM001"),
+                new EquipmentName("Sony Camera"));
+        Equipment mic = new Equipment(
+                new EquipmentId("MIC001"),
+                new EquipmentName("Microphone"));
+        addressBook.addEquipment(camera);
+        addressBook.addEquipment(mic);
+
+        addressBook.setEquipment(camera, camera.markDamaged());
+
+        assertEquals(List.of(camera.markDamaged(), mic), addressBook.getEquipmentList());
+        assertThrows(IllegalArgumentException.class, () -> addressBook.setEquipment(camera, camera.markDamaged()));
+        assertThrows(IllegalArgumentException.class, () -> addressBook.setEquipment(mic,
+                new Equipment(camera.getId(), mic.getName())));
+    }
 }

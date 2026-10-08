@@ -1,12 +1,15 @@
 package seedu.address.model;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.List;
+import java.util.Optional;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.UniqueEquipmentList;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
@@ -98,6 +101,20 @@ public class AddressBook implements ReadOnlyAddressBook {
     /** Adds an equipment item to the register. */
     public void addEquipment(Equipment item) {
         equipment.add(item);
+    }
+
+    /** Returns the equipment item with the given case-insensitive ID, if present. */
+    public Optional<Equipment> findEquipment(EquipmentId id) {
+        return equipment.find(id);
+    }
+
+    /**
+     * Replaces the equipment item {@code target} with {@code replacement}.
+     * {@code target} must exist in the register.
+     */
+    public void setEquipment(Equipment target, Equipment replacement) {
+        requireAllNonNull(target, replacement);
+        equipment.setEquipment(target, replacement);
     }
 
     //// util methods

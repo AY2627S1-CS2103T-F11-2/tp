@@ -87,6 +87,24 @@ Examples:
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
 
+### Marking equipment as damaged: `damaged`
+
+Flags an equipment item as damaged.
+
+Format: `damaged <equipment-id>`
+
+* The item must exist. Equipment IDs are matched without regard to capitalization.
+* Marking an item that is already damaged is rejected.
+* The damaged status is saved automatically and retained when the application restarts.
+
+Example: `damaged cam001`
+
+Successful output:
+
+```text
+Equipment CAM001 marked as damaged.
+```
+
 ### Listing all persons: `list`
 
 Shows a list of all persons in the address book.

@@ -3,6 +3,7 @@ package seedu.address.model.equipment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,5 +30,24 @@ public class EquipmentTest {
         Equipment equipment = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
 
         assertEquals(EquipmentStatus.AVAILABLE, equipment.getStatus());
+    }
+
+    @Test
+    public void markDamaged_availableEquipment_returnsDamagedCopy() {
+        Equipment equipment = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
+        Equipment damaged = equipment.markDamaged();
+
+        assertTrue(damaged.isDamaged());
+        assertFalse(equipment.isDamaged());
+        assertEquals(EquipmentStatus.DAMAGED, damaged.getStatus());
+        assertEquals("Damaged", damaged.getStatus().toString());
+        assertTrue(equipment.isSameEquipment(damaged));
+        assertFalse(equipment.equals(damaged));
+    }
+
+    @Test
+    public void markDamaged_alreadyDamaged_throwsIllegalStateException() {
+        Equipment damaged = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera")).markDamaged();
+        assertThrows(IllegalStateException.class, damaged::markDamaged);
     }
 }
