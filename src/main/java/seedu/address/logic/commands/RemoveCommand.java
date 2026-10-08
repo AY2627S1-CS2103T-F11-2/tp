@@ -21,7 +21,8 @@ public class RemoveCommand extends Command {
             "Error: Invalid command format. Usage: " + MESSAGE_USAGE;
     public static final String MESSAGE_SUCCESS = "Equipment %1$s removed successfully.";
     public static final String MESSAGE_EQUIPMENT_NOT_FOUND = "Error: Equipment with ID %1$s does not exist.";
-    public static final String MESSAGE_EQUIPMENT_ISSUED = "Error: Equipment %1$s is issued to %2$s and cannot be removed.";
+    public static final String MESSAGE_EQUIPMENT_ISSUED =
+            "Error: Equipment %1$s is issued to %2$s and cannot be removed.";
 
     private final EquipmentId equipmentId;
 
