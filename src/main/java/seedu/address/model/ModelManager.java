@@ -3,6 +3,7 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -11,6 +12,7 @@ import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.Person;
 
 /**
@@ -110,6 +112,17 @@ public class ModelManager implements Model {
     public void updateFilteredEquipmentList(Predicate<Equipment> predicate) {
         requireNonNull(predicate);
         filteredEquipment.setPredicate(predicate);
+    }
+
+    @Override
+    public Optional<Equipment> findEquipment(EquipmentId id) {
+        return addressBook.findEquipment(id);
+    }
+
+    @Override
+    public void removeEquipment(Equipment equipment) {
+        requireNonNull(equipment);
+        addressBook.removeEquipment(equipment);
     }
 
     @Override

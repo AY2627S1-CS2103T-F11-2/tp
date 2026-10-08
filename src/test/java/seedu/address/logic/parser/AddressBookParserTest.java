@@ -21,7 +21,9 @@ import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.RemoveCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
@@ -96,5 +98,16 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_unknownCommand_throwsParseException() {
         assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand("unknownCommand"));
+    }
+
+    @Test
+    public void parseCommand_remove() throws Exception {
+        assertEquals(new RemoveCommand(new EquipmentId("CAM001")), parser.parseCommand("  remove cam001 "));
+    }
+
+    @Test
+    public void parseCommand_removeMissingId_throwsParseException() {
+        assertThrows(ParseException.class, RemoveCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
+                -> parser.parseCommand("remove"));
     }
 }
