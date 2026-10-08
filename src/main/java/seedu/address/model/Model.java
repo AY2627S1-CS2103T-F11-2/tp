@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.equipment.Equipment;
 import seedu.address.model.person.Person;
 
 /**
@@ -52,6 +53,16 @@ public interface Model {
      * {@code person} must not already exist in the address book.
      */
     void addPerson(Person person);
+
+    /** Returns true if equipment with the same ID exists in the equipment register. */
+    default boolean hasEquipment(Equipment equipment) {
+        throw new UnsupportedOperationException("Equipment is not supported by this model");
+    }
+
+    /** Adds the given equipment to the equipment register. */
+    default void addEquipment(Equipment equipment) {
+        throw new UnsupportedOperationException("Equipment is not supported by this model");
+    }
 
     /**
      * Replaces the given person {@code target} with {@code editedPerson}.
