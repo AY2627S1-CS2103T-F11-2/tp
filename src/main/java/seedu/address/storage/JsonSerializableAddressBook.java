@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.equipment.Equipment;
 import seedu.address.model.person.Person;
 
 /**
@@ -22,13 +23,20 @@ class JsonSerializableAddressBook {
     public static final String MESSAGE_DUPLICATE_PERSON = "Persons list contains duplicate person(s).";
 
     private final List<JsonAdaptedPerson> persons = new ArrayList<>();
+    private final List<JsonAdaptedEquipment> equipment = new ArrayList<>();
 
     /**
-     * Constructs a {@code JsonSerializableAddressBook} with the given persons.
+     * Constructs a {@code JsonSerializableAddressBook} with the given people and equipment.
      */
     @JsonCreator
-    public JsonSerializableAddressBook(@JsonProperty("persons") List<JsonAdaptedPerson> persons) {
-        this.persons.addAll(persons);
+    public JsonSerializableAddressBook(@JsonProperty("persons") List<JsonAdaptedPerson> persons,
+            @JsonProperty("equipment") List<JsonAdaptedEquipment> equipment) {
+        if (persons != null) {
+            this.persons.addAll(persons);
+        }
+        if (equipment != null) {
+            this.equipment.addAll(equipment);
+        }
     }
 
     /**
@@ -38,6 +46,8 @@ class JsonSerializableAddressBook {
      */
     public JsonSerializableAddressBook(ReadOnlyAddressBook source) {
         persons.addAll(source.getPersonList().stream().map(JsonAdaptedPerson::new).collect(Collectors.toList()));
+        equipment.addAll(source.getEquipmentList().stream()
+                .map(JsonAdaptedEquipment::new).collect(Collectors.toList()));
     }
 
     /**
@@ -53,6 +63,13 @@ class JsonSerializableAddressBook {
                 throw new IllegalValueException(MESSAGE_DUPLICATE_PERSON);
             }
             addressBook.addPerson(person);
+        }
+        for (JsonAdaptedEquipment jsonAdaptedEquipment : equipment) {
+            Equipment item = jsonAdaptedEquipment.toModelType();
+            if (addressBook.hasEquipment(item)) {
+                throw new IllegalValueException("Equipment list contains duplicate equipment ID(s).");
+            }
+            addressBook.addEquipment(item);
         }
         return addressBook;
     }

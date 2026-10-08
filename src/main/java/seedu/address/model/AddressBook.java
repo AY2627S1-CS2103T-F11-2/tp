@@ -6,6 +6,8 @@ import java.util.List;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.UniqueEquipmentList;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
@@ -16,6 +18,7 @@ import seedu.address.model.person.UniquePersonList;
 public class AddressBook implements ReadOnlyAddressBook {
 
     private final UniquePersonList persons = new UniquePersonList();
+    private final UniqueEquipmentList equipment = new UniqueEquipmentList();
 
     public AddressBook() {}
 
@@ -44,6 +47,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(newData);
 
         setPersons(newData.getPersonList());
+        equipment.setEquipment(newData.getEquipmentList());
     }
 
     //// person-level operations
@@ -83,18 +87,37 @@ public class AddressBook implements ReadOnlyAddressBook {
         persons.remove(key);
     }
 
+    //// equipment-level operations
+
+    /** Returns true if an equipment item with the same ID exists in the register. */
+    public boolean hasEquipment(Equipment item) {
+        requireNonNull(item);
+        return equipment.contains(item);
+    }
+
+    /** Adds an equipment item to the register. */
+    public void addEquipment(Equipment item) {
+        equipment.add(item);
+    }
+
     //// util methods
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("persons", persons)
+                .add("equipment", equipment)
                 .toString();
     }
 
     @Override
     public ObservableList<Person> getPersonList() {
         return persons.asUnmodifiableObservableList();
+    }
+
+    @Override
+    public ObservableList<Equipment> getEquipmentList() {
+        return equipment.asUnmodifiableObservableList();
     }
 
     @Override
@@ -108,11 +131,11 @@ public class AddressBook implements ReadOnlyAddressBook {
             return false;
         }
 
-        return persons.equals(otherAddressBook.persons);
+        return persons.equals(otherAddressBook.persons) && equipment.equals(otherAddressBook.equipment);
     }
 
     @Override
     public int hashCode() {
-        return persons.hashCode();
+        return java.util.Objects.hash(persons, equipment);
     }
 }

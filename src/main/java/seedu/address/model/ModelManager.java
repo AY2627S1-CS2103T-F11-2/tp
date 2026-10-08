@@ -10,6 +10,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.model.equipment.Equipment;
 import seedu.address.model.person.Person;
 
 /**
@@ -84,6 +85,17 @@ public class ModelManager implements Model {
     public void addPerson(Person person) {
         addressBook.addPerson(person);
         updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+    }
+
+    @Override
+    public boolean hasEquipment(Equipment equipment) {
+        requireNonNull(equipment);
+        return addressBook.hasEquipment(equipment);
+    }
+
+    @Override
+    public void addEquipment(Equipment equipment) {
+        addressBook.addEquipment(equipment);
     }
 
     @Override
