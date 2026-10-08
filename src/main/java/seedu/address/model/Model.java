@@ -15,6 +15,7 @@ import seedu.address.model.person.Person;
 public interface Model {
     /** {@code Predicate} that always evaluates to true */
     Predicate<Person> PREDICATE_SHOW_ALL_PERSONS = unused -> true;
+    Predicate<Equipment> PREDICATE_SHOW_ALL_EQUIPMENT = unused -> true;
 
     /**
      * Returns the user prefs.
@@ -70,6 +71,16 @@ public interface Model {
 
     /** Adds the given equipment to the equipment register. */
     void addEquipment(Equipment equipment);
+
+    /** Returns the equipment currently shown to the user. */
+    default ObservableList<Equipment> getFilteredEquipmentList() {
+        return getAddressBook().getEquipmentList();
+    }
+
+    /** Updates which equipment is shown to the user. */
+    default void updateFilteredEquipmentList(Predicate<Equipment> predicate) {
+        throw new UnsupportedOperationException("Equipment filtering is not supported by this model");
+    }
 
     /** Returns the equipment with the given case-insensitive ID, if present. */
     Optional<Equipment> findEquipment(EquipmentId id);
