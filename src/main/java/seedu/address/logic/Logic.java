@@ -5,6 +5,7 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.equipment.Equipment;
 import seedu.address.model.person.Person;
 
 /**
@@ -22,6 +23,9 @@ public interface Logic {
 
     /** Returns an unmodifiable view of the filtered list of persons */
     ObservableList<Person> getFilteredPersonList();
+
+    /** Returns the equipment currently shown to the user. */
+    ObservableList<Equipment> getFilteredEquipmentList();
 
     /**
      * Returns the user prefs' GUI settings.
