@@ -1,10 +1,13 @@
 package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +30,7 @@ public class JsonSerializableAddressBookTest {
         AddressBook addressBookFromFile = dataFromFile.toModelType();
         AddressBook typicalPersonsAddressBook = TypicalPersons.getTypicalAddressBook();
         assertEquals(addressBookFromFile, typicalPersonsAddressBook);
+        assertTrue(addressBookFromFile.getEquipmentList().isEmpty());
     }
 
     @Test
@@ -42,6 +46,30 @@ public class JsonSerializableAddressBookTest {
                 JsonSerializableAddressBook.class).get();
         assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_DUPLICATE_PERSON,
                 dataFromFile::toModelType);
+    }
+
+    @Test
+    public void toModelType_duplicateEquipmentIds_throwsIllegalValueException() {
+        List<JsonAdaptedEquipment> equipment = List.of(
+                new JsonAdaptedEquipment("CAM001", "Sony Camera", null, null),
+                new JsonAdaptedEquipment("cam001", "Another Camera", null, "John Tan"));
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(null, equipment);
+        assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_DUPLICATE_EQUIPMENT,
+                data::toModelType);
+    }
+
+    @Test
+    public void toModelType_nullEquipmentRecord_throwsIllegalValueException() {
+        JsonSerializableAddressBook data = new JsonSerializableAddressBook(null, Arrays.asList(
+                new JsonAdaptedEquipment("CAM001", "Sony Camera", null, null), null));
+        assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_NULL_EQUIPMENT,
+                data::toModelType);
+    }
+
+    @Test
+    public void toModelType_missingLists_returnsEmptyAddressBook() throws Exception {
+        JsonSerializableAddressBook data = JsonUtil.fromJsonString("{}", JsonSerializableAddressBook.class);
+        assertEquals(new AddressBook(), data.toModelType());
     }
 
 }

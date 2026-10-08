@@ -115,21 +115,26 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public void setPerson(Person target, Person editedPerson) {
+        requireAllNonNull(target, editedPerson);
+
+        addressBook.setPerson(target, editedPerson);
+    }
+
+    @Override
     public Optional<Equipment> findEquipment(EquipmentId id) {
         return addressBook.findEquipment(id);
+    }
+
+    @Override
+    public void setEquipment(Equipment target, Equipment replacement) {
+        addressBook.setEquipment(target, replacement);
     }
 
     @Override
     public void removeEquipment(Equipment equipment) {
         requireNonNull(equipment);
         addressBook.removeEquipment(equipment);
-    }
-
-    @Override
-    public void setPerson(Person target, Person editedPerson) {
-        requireAllNonNull(target, editedPerson);
-
-        addressBook.setPerson(target, editedPerson);
     }
 
     //=========== Filtered Person List Accessors =============================================================

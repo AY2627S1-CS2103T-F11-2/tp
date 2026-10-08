@@ -2,6 +2,7 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.HOON;
@@ -9,6 +10,7 @@ import static seedu.address.testutil.TypicalPersons.IDA;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -18,9 +20,9 @@ import org.junit.jupiter.api.io.TempDir;
 import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
-import seedu.address.model.equipment.EquipmentName;
 
 public class JsonAddressBookStorageTest {
     private static final Path TEST_DATA_FOLDER = Paths.get("src", "test", "data", "JsonAddressBookStorageTest");
@@ -67,7 +69,6 @@ public class JsonAddressBookStorageTest {
     public void readAndSaveAddressBook_allInOrder_success() throws Exception {
         Path filePath = testFolder.resolve("TempAddressBook.json");
         AddressBook original = getTypicalAddressBook();
-        original.addEquipment(new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera")));
         JsonAddressBookStorage jsonAddressBookStorage = new JsonAddressBookStorage(filePath);
 
         // Save in new file and read back
@@ -88,6 +89,64 @@ public class JsonAddressBookStorageTest {
         readBack = jsonAddressBookStorage.readAddressBook().get(); // file path not specified
         assertEquals(original, new AddressBook(readBack));
 
+    }
+
+    @Test
+    public void readAndSaveAddressBook_availableAndIssuedEquipment_success() throws Exception {
+        Path filePath = testFolder.resolve("EquipmentAddressBook.json");
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(filePath);
+        AddressBook original = getTypicalAddressBook();
+        original.addEquipment(new Equipment(new EquipmentId("CAM001"), "Sony Camera"));
+        original.addEquipment(new Equipment(new EquipmentId("MIC001"), "Wireless Microphone",
+                new BorrowerName("John Tan")));
+
+        storage.saveAddressBook(original);
+        ReadOnlyAddressBook readBack = storage.readAddressBook().get();
+        assertEquals(original, new AddressBook(readBack));
+        assertFalse(readBack.getEquipmentList().get(0).isIssued());
+        assertEquals(new BorrowerName("John Tan"), readBack.getEquipmentList().get(1).getIssuedTo().get());
+
+        AddressBook returnedEquipment = new AddressBook();
+        returnedEquipment.addEquipment(new Equipment(new EquipmentId("MIC001"), "Wireless Microphone"));
+        storage.saveAddressBook(returnedEquipment);
+        assertEquals(returnedEquipment, new AddressBook(storage.readAddressBook().get()));
+    }
+
+    @Test
+    public void readAddressBook_equipmentWithoutPersons_success() throws Exception {
+        Path filePath = testFolder.resolve("EquipmentOnly.json");
+        Files.writeString(filePath, """
+                {"equipment": [
+                  {"id": "cam001", "name": "Sony Camera"},
+                  {"id": "MIC001", "name": "Wireless Microphone", "issuedTo": ""}
+                ]}
+                """);
+        ReadOnlyAddressBook readBack = new JsonAddressBookStorage(filePath).readAddressBook().get();
+        assertTrue(readBack.getPersonList().isEmpty());
+        assertEquals(2, readBack.getEquipmentList().size());
+        assertEquals(new EquipmentId("CAM001"), readBack.getEquipmentList().get(0).getId());
+        assertTrue(readBack.getEquipmentList().stream().noneMatch(Equipment::isIssued));
+    }
+
+    @Test
+    public void readAddressBook_invalidEquipmentAfterValidRecord_throwsDataLoadingException() throws Exception {
+        Path filePath = testFolder.resolve("InvalidEquipment.json");
+        String[] invalidRecords = {
+            "{\"name\": \"Camera\"}",
+            "{\"id\": \"CAM-002\", \"name\": \"Camera\"}",
+            "{\"id\": \"CAM002\"}",
+            "{\"id\": \"CAM002\", \"name\": \" \"}",
+            "{\"id\": \"CAM002\", \"name\": \"Camera\", \"issuedTo\": \"John3\"}",
+            "{\"id\": \"cam001\", \"name\": \"Duplicate Camera\"}",
+            "null"
+        };
+        for (String invalidRecord : invalidRecords) {
+            String json = "{\"equipment\": [{\"id\": \"CAM001\", \"name\": \"Sony Camera\"},"
+                    + invalidRecord + "]}";
+            Files.writeString(filePath, json);
+            JsonAddressBookStorage storage = new JsonAddressBookStorage(filePath);
+            assertThrows(DataLoadingException.class, storage::readAddressBook);
+        }
     }
 
     @Test

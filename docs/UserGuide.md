@@ -55,7 +55,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 * Items followed by `…`​ can appear zero or more times.<br>
   For example, `[t/TAG]…​` may be omitted, or written as `t/friend` or `t/friend t/family`.
 
-* Parameters can be in any order.<br>
+* Prefixed parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
 * Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
@@ -86,6 +86,33 @@ A person can have any number of tags, including zero.
 Examples:
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+
+### Issuing equipment: `issue`
+
+Records who currently holds an available equipment item.
+
+Format: `issue <equipment-id> <person-name>`
+
+* Supply the equipment ID first. All text after the ID is treated as the person's name, including spaces.
+* Equipment IDs contain 1–20 letters or digits and are matched without regard to capitalization.
+* Person names contain 1–50 letters or spaces. Leading and trailing spaces are removed, and consecutive spaces
+  are combined. Digits and punctuation are rejected.
+* An item must exist and be available. Issuing an item that is already issued is rejected, preserving its current holder.
+* Different items can be issued to the same person. You do not need to add the person as a contact first.
+* The current holder is saved automatically and retained when the application restarts.
+
+Example: `issue cam001 John Tan`
+
+Successful output:
+
+```text
+Equipment CAM001 issued to John Tan.
+CAM001 | Sony Camera | Issued to: John Tan
+```
+
+On a fresh installation without a saved data file, `CAM001`, `MIC001`, and `PROJ001` are available sample equipment.
+The existing `add` and `list` commands still operate on contacts; equipment add, list, remove, and return commands
+are separate features. To try issuing equipment with an existing data file, see [Editing the data file](#editing-the-data-file).
 
 ### Listing all equipment: `list`
 
@@ -160,6 +187,18 @@ AddressBook automatically saves data after every command. You do not need to sav
 
 AddressBook data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
 
+Equipment is stored in the top-level `equipment` array. Existing files without this array are supported and have no
+equipment records. To add a test item, close the application and add the following field to the existing JSON object,
+separated from other fields by a comma:
+
+```json
+"equipment": [
+  { "id": "CAM001", "name": "Sony Camera", "issuedTo": null }
+]
+```
+
+An empty or null `issuedTo` value means the item is available. A valid person's name means it is already issued.
+
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If your changes make the data file invalid, AddressBook starts with an empty address book at the next run. The invalid file remains on disk until you run a command (AddressBook saves after every command). Still, we recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause the AddressBook to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
@@ -194,5 +233,6 @@ Action | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Issue equipment** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
 **List** | `list`
 **Help** | `help`
