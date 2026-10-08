@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
@@ -45,7 +47,21 @@ public class SampleDataUtil {
         for (Person samplePerson : getSamplePersons()) {
             sampleAb.addPerson(samplePerson);
         }
+        for (Equipment sampleEquipment : getSampleEquipment()) {
+            sampleAb.addEquipment(sampleEquipment);
+        }
         return sampleAb;
+    }
+
+    /**
+     * Returns available sample equipment for trying the issue command on a fresh installation.
+     */
+    public static Equipment[] getSampleEquipment() {
+        return new Equipment[] {
+            new Equipment(new EquipmentId("CAM001"), "Sony Camera"),
+            new Equipment(new EquipmentId("MIC001"), "Wireless Microphone"),
+            new Equipment(new EquipmentId("PROJ001"), "Epson Projector")
+        };
     }
 
     /**

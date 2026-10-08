@@ -20,10 +20,12 @@ import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
+import seedu.address.logic.commands.IssueCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RemoveCommand;
 import seedu.address.logic.commands.ReturnCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
@@ -91,6 +93,18 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_issue() throws Exception {
+        assertEquals(new IssueCommand(new EquipmentId("CAM001"), new BorrowerName("John Tan")),
+                parser.parseCommand("  issue cam001 John   Tan  "));
+    }
+
+    @Test
+    public void parseCommand_issueMissingName_throwsParseException() {
+        assertThrows(ParseException.class, IssueCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
+                -> parser.parseCommand("issue CAM001"));
+    }
+
+    @Test
     public void parseCommand_unrecognisedInput_throwsParseException() {
         assertThrows(ParseException.class, String.format(MESSAGE_INVALID_COMMAND_FORMAT, HelpCommand.MESSAGE_USAGE), ()
             -> parser.parseCommand(""));
@@ -99,17 +113,6 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_unknownCommand_throwsParseException() {
         assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand("unknownCommand"));
-    }
-
-    @Test
-    public void parseCommand_remove() throws Exception {
-        assertEquals(new RemoveCommand(new EquipmentId("CAM001")), parser.parseCommand("  remove cam001 "));
-    }
-
-    @Test
-    public void parseCommand_removeMissingId_throwsParseException() {
-        assertThrows(ParseException.class, RemoveCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
-                -> parser.parseCommand("remove"));
     }
 
     @Test

@@ -57,15 +57,20 @@ public interface Model {
      */
     void addPerson(Person person);
 
+    /**
+     * Replaces the given person {@code target} with {@code editedPerson}.
+     * {@code target} must exist in the address book.
+     * The person identity of {@code editedPerson} must not be the same as another existing person in the address book.
+     */
+    void setPerson(Person target, Person editedPerson);
+
     /** Returns true if equipment with the same ID exists in the equipment register. */
     default boolean hasEquipment(Equipment equipment) {
         throw new UnsupportedOperationException("Equipment is not supported by this model");
     }
 
     /** Adds the given equipment to the equipment register. */
-    default void addEquipment(Equipment equipment) {
-        throw new UnsupportedOperationException("Equipment is not supported by this model");
-    }
+    void addEquipment(Equipment equipment);
 
     /** Returns the equipment currently shown to the user. */
     default ObservableList<Equipment> getFilteredEquipmentList() {
@@ -78,21 +83,15 @@ public interface Model {
     }
 
     /** Returns the equipment with the given case-insensitive ID, if present. */
-    default Optional<Equipment> findEquipment(EquipmentId id) {
-        throw new UnsupportedOperationException("Equipment is not supported by this model");
-    }
+    Optional<Equipment> findEquipment(EquipmentId id);
+
+    /** Replaces an existing equipment record. */
+    void setEquipment(Equipment target, Equipment replacement);
 
     /** Removes the given equipment from the equipment register. {@code equipment} must exist. */
     default void removeEquipment(Equipment equipment) {
-        throw new UnsupportedOperationException("Equipment is not supported by this model");
+        throw new UnsupportedOperationException("Equipment removal is not supported by this model");
     }
-
-    /**
-     * Replaces the given person {@code target} with {@code editedPerson}.
-     * {@code target} must exist in the address book.
-     * The person identity of {@code editedPerson} must not be the same as another existing person in the address book.
-     */
-    void setPerson(Person target, Person editedPerson);
 
     /** Returns an unmodifiable view of the filtered person list */
     ObservableList<Person> getFilteredPersonList();

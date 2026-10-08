@@ -9,10 +9,14 @@ import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.equipment.BorrowerName;
+import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.testutil.AddressBookBuilder;
 
@@ -71,6 +75,35 @@ public class ModelManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void equipmentOperations_issueEquipment_updatesModelAndPreservesOtherItems() {
+        Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
+        Equipment microphone = new Equipment(new EquipmentId("MIC001"), "Wireless Microphone");
+        modelManager.addEquipment(camera);
+        modelManager.addEquipment(microphone);
+        Equipment issuedCamera = camera.issueTo(new BorrowerName("John Tan"));
+        modelManager.setEquipment(camera, issuedCamera);
+        assertEquals(Optional.of(issuedCamera), modelManager.findEquipment(new EquipmentId("cam001")));
+        assertEquals(Optional.of(microphone), modelManager.findEquipment(microphone.getId()));
+        assertEquals(List.of(issuedCamera, microphone), modelManager.getAddressBook().getEquipmentList());
+    }
+
+    @Test
+    public void constructorAndSetAddressBook_equipment_copiesDataWithoutSharingLists() {
+        Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera", new BorrowerName("John Tan"));
+        AddressBook original = new AddressBook();
+        original.addEquipment(camera);
+        modelManager = new ModelManager(original, new UserPrefs());
+        original.setEquipments(List.of());
+        assertEquals(Optional.of(camera), modelManager.findEquipment(camera.getId()));
+
+        modelManager.setAddressBook(original);
+        assertEquals(Optional.empty(), modelManager.findEquipment(camera.getId()));
+        original.addEquipment(camera);
+        modelManager.setAddressBook(original);
+        assertEquals(Optional.of(camera), modelManager.findEquipment(camera.getId()));
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
+import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.EquipmentName;
@@ -49,6 +50,18 @@ public class RemoveCommandTest {
         assertCommandFailure(new RemoveCommand(new EquipmentId("MIC001")), model,
                 "Error: Equipment with ID MIC001 does not exist.");
         assertEquals(List.of(CAMERA), model.getAddressBook().getEquipmentList());
+    }
+
+    @Test
+    public void execute_issuedEquipment_rejectsRemoval() {
+        Model model = new ModelManager();
+        Equipment issuedCamera = new Equipment(CAMERA_ID, new EquipmentName("Sony Camera"),
+                new BorrowerName("John Tan"));
+        model.addEquipment(issuedCamera);
+
+        assertCommandFailure(new RemoveCommand(CAMERA_ID), model,
+                "Error: Equipment CAM001 is issued to John Tan and cannot be removed.");
+        assertEquals(List.of(issuedCamera), model.getAddressBook().getEquipmentList());
     }
 
     @Test
