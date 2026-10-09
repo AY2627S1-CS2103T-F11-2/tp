@@ -22,6 +22,7 @@ import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.IssueCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.ReturnCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.EquipmentId;
@@ -111,5 +112,16 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_unknownCommand_throwsParseException() {
         assertThrows(ParseException.class, MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand("unknownCommand"));
+    }
+
+    @Test
+    public void parseCommand_return() throws Exception {
+        assertEquals(new ReturnCommand(new EquipmentId("CAM001")), parser.parseCommand("  return cam001 "));
+    }
+
+    @Test
+    public void parseCommand_returnMissingId_throwsParseException() {
+        assertThrows(ParseException.class, ReturnCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
+                -> parser.parseCommand("return"));
     }
 }
