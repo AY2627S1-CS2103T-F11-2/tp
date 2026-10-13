@@ -173,6 +173,23 @@ Clears all entries from the address book.
 
 Format: `clear`
 
+### Adding or clearing a person's remark: `remark`
+
+Adds or replaces a note for a person in the displayed contact list.
+
+Format: `remark INDEX r/REMARK`
+
+The index is the person's displayed number, starting at 1. Remarks can contain any text and are saved automatically.
+Use an empty remark to remove a note. Following the AB3 tutorial, omitting `r/` also clears the remark.
+Repeating the `r/` prefix is rejected. Changing other contact details with `edit` preserves the remark.
+
+Examples:
+
+* `remark 1 r/Likes baseball` adds or replaces the first displayed person's note.
+* `remark 1 r/` clears that person's note.
+
+This command implements [AB3 Tutorial 2: Adding a Command](https://se-education.org/guides/tutorials/ab3AddRemark.html).
+
 ### Exiting the program: `exit`
 
 Exits the program.
@@ -236,3 +253,4 @@ Action | Format, Examples
 **Issue equipment** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
 **List** | `list`
 **Help** | `help`
+**Remark** | `remark INDEX r/REMARK`<br> e.g., `remark 1 r/Likes baseball`; clear with `remark 1 r/`
