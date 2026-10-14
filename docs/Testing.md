@@ -24,6 +24,34 @@ You can run tests in two ways.
 
 --------------------------------------------------------------------------------------------------------------------
 
+## JavaFX UI tests
+
+Run tests with Java 25. On macOS, select it with
+`sdk use java 25.0.3.fx-zulu` before running Gradle.
+
+To run only the UI tests:
+
+```sh
+./gradlew test --tests 'seedu.address.ui.*'
+```
+
+The UI tests require a graphical display. On Linux without a display,
+install Xvfb and run:
+
+```sh
+xvfb-run --auto-servernum ./gradlew check coverage
+```
+
+Linux CI uses this virtual display automatically. Tests initialise JavaFX
+once per test process and run UI operations on the JavaFX Application Thread.
+The window integration test closes its window after each run and saves data
+only in a JUnit temporary directory.
+
+The equipment tests check card labels, live list updates, cleanup of reused
+cells, and the main window's connection to the command and model layers.
+
+--------------------------------------------------------------------------------------------------------------------
+
 ## Types of tests
 
 This project has three types of tests:
