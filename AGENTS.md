@@ -4,9 +4,14 @@
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
 
+## Coding Instructions
+- Use Red/Green TDD by default.
+- Adhere to the Single Layer of Abstraction Principle (SLAP) for all new code and modified functions.
+- Include JavaDoc comment headers for all public methods.
+
 ## Testing
 
-Maintain JUnit test coverage for approximately the top 50% highest-value methods. Prioritize complex methods, core behavior, and critical business logic rather than selecting methods solely to increase the raw coverage count.
+Maintain JUnit test coverage for approximately the top 90% highest-value methods. Prioritize complex methods, core behavior, and critical business logic rather than selecting methods solely to increase the raw coverage count.
 
 After every code change, review the affected behavior and update the JUnit tests as needed to continue meeting this target. Run the relevant Gradle tests with Java 25 to verify the changes.
 
