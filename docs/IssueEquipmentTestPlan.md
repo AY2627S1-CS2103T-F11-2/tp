@@ -14,9 +14,15 @@ sdk use java 25.0.3.fx-zulu
 ./.github/run-checks.sh
 ```
 
-The verified run passes 333 JUnit tests, Checkstyle, the repository-wide
+The verified run passes 336 JUnit tests, Checkstyle, the repository-wide
 checks, and the JAR build. JaCoCo reports no missing or partial executable
 lines in `Equipment.java`, `JsonAdaptedEquipment.java`, or `Model.java`.
+Real JavaFX card tests also execute the equipment panel's card-building
+code and verify live updates and cell recycling. Linux CI uses Xvfb to
+provide the virtual display required to initialize JavaFX.
+
+On a Linux machine without a desktop display, run the Gradle command as
+`xvfb-run -a ./gradlew clean check coverage shadowJar` with Xvfb installed.
 
 The new regression tests cover:
 
