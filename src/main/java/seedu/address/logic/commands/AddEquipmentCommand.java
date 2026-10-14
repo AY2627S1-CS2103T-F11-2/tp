@@ -9,11 +9,14 @@ import seedu.address.model.equipment.Equipment;
 /** Adds an equipment item to the equipment register. */
 public class AddEquipmentCommand extends Command {
 
+    public static final String COMMAND_WORD = "add";
+
     public static final String MESSAGE_SUCCESS = "Equipment %1$s added successfully.";
     public static final String MESSAGE_DUPLICATE_EQUIPMENT = "Error: Equipment with ID %1$s already exists.";
 
     private final Equipment equipmentToAdd;
 
+    /** Creates a command to register the given equipment item. */
     public AddEquipmentCommand(Equipment equipment) {
         equipmentToAdd = requireNonNull(equipment);
     }

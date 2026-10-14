@@ -7,24 +7,24 @@ import java.util.logging.Logger;
 
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
-import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.ReadOnlyClubLogisticsData;
 import seedu.address.model.ReadOnlyUserPrefs;
 import seedu.address.model.UserPrefs;
 
 /**
- * Manages storage of AddressBook data in local storage.
+ * Manages storage of ClubLogistics data in local storage.
  */
 public class StorageManager implements Storage {
 
     private static final Logger logger = LogsCenter.getLogger(StorageManager.class);
-    private JsonAddressBookStorage addressBookStorage;
+    private JsonClubLogisticsStorage clubLogisticsStorage;
     private JsonUserPrefsStorage userPrefsStorage;
 
     /**
-     * Creates a {@code StorageManager} with the given address book and user prefs storage.
+     * Creates a {@code StorageManager} with the given ClubLogistics data and user prefs storage.
      */
-    public StorageManager(JsonAddressBookStorage addressBookStorage, JsonUserPrefsStorage userPrefsStorage) {
-        this.addressBookStorage = addressBookStorage;
+    public StorageManager(JsonClubLogisticsStorage clubLogisticsStorage, JsonUserPrefsStorage userPrefsStorage) {
+        this.clubLogisticsStorage = clubLogisticsStorage;
         this.userPrefsStorage = userPrefsStorage;
     }
 
@@ -46,23 +46,26 @@ public class StorageManager implements Storage {
     }
 
 
-    // ================ AddressBook methods ==============================
+    // ================ ClubLogisticsData methods ==============================
 
+    /** {@inheritDoc} */
     @Override
-    public Path getAddressBookFilePath() {
-        return addressBookStorage.getAddressBookFilePath();
+    public Path getClubLogisticsDataFilePath() {
+        return clubLogisticsStorage.getClubLogisticsDataFilePath();
     }
 
+    /** {@inheritDoc} */
     @Override
-    public Optional<ReadOnlyAddressBook> readAddressBook() throws DataLoadingException {
-        logger.fine("Attempting to read data from file: " + addressBookStorage.getAddressBookFilePath());
-        return addressBookStorage.readAddressBook();
+    public Optional<ReadOnlyClubLogisticsData> readClubLogisticsData() throws DataLoadingException {
+        logger.fine("Attempting to read data from file: " + clubLogisticsStorage.getClubLogisticsDataFilePath());
+        return clubLogisticsStorage.readClubLogisticsData();
     }
 
+    /** {@inheritDoc} */
     @Override
-    public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
-        logger.fine("Attempting to write to data file: " + addressBookStorage.getAddressBookFilePath());
-        addressBookStorage.saveAddressBook(addressBook);
+    public void saveClubLogisticsData(ReadOnlyClubLogisticsData clubLogisticsData) throws IOException {
+        logger.fine("Attempting to write to data file: " + clubLogisticsStorage.getClubLogisticsDataFilePath());
+        clubLogisticsStorage.saveClubLogisticsData(clubLogisticsData);
     }
 
 }

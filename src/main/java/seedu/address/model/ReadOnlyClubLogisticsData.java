@@ -6,9 +6,9 @@ import seedu.address.model.equipment.Equipment;
 import seedu.address.model.person.Person;
 
 /**
- * Unmodifiable view of an address book
+ * Unmodifiable view of an ClubLogistics data
  */
-public interface ReadOnlyAddressBook {
+public interface ReadOnlyClubLogisticsData {
 
     /**
      * Returns an unmodifiable view of the persons list.

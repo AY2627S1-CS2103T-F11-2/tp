@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox id="cardPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+  <VBox alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS">
+    <padding>
+      <Insets top="8" right="10" bottom="8" left="15" />
+    </padding>
+    <Label fx:id="equipmentId" styleClass="cell_big_label" />
+    <Label fx:id="name" styleClass="cell_small_label" wrapText="true" />
+    <Label fx:id="status" styleClass="cell_small_label" />
+    <Label fx:id="borrower" styleClass="cell_small_label" wrapText="true" />
+  </VBox>
+</HBox>
