@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import seedu.address.model.AddressBook;
+import seedu.address.model.ClubLogisticsData;
 import seedu.address.model.ModelManager;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
@@ -32,7 +32,7 @@ public class EquipmentListPanelTest extends JavaFxTest {
             assertEquals(List.of(CAMERA, MIC), list.getItems());
             model.removeEquipment(CAMERA);
             assertEquals(List.of(MIC), list.getItems());
-            model.setAddressBook(new AddressBook());
+            model.setClubLogisticsData(new ClubLogisticsData());
             assertTrue(list.getItems().isEmpty());
         });
     }

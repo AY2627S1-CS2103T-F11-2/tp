@@ -20,7 +20,7 @@ import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.EquipmentName;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
-import seedu.address.testutil.AddressBookBuilder;
+import seedu.address.testutil.ClubLogisticsDataBuilder;
 
 public class ModelManagerTest {
 
@@ -30,14 +30,14 @@ public class ModelManagerTest {
     public void constructor() {
         assertEquals(new UserPrefs(), modelManager.getUserPrefs());
         assertEquals(new GuiSettings(), modelManager.getGuiSettings());
-        assertEquals(new AddressBook(), new AddressBook(modelManager.getAddressBook()));
+        assertEquals(new ClubLogisticsData(), new ClubLogisticsData(modelManager.getClubLogisticsData()));
     }
 
     @Test
     public void constructor_validUserPrefs_copiesUserPrefs() {
         UserPrefs userPrefs = new UserPrefs();
         userPrefs.setGuiSettings(new GuiSettings(1, 2, 3, 4));
-        modelManager = new ModelManager(new AddressBook(), userPrefs);
+        modelManager = new ModelManager(new ClubLogisticsData(), userPrefs);
         assertEquals(userPrefs, modelManager.getUserPrefs());
 
         // Modifying userPrefs should not modify modelManager's userPrefs
@@ -64,12 +64,12 @@ public class ModelManagerTest {
     }
 
     @Test
-    public void hasPerson_personNotInAddressBook_returnsFalse() {
+    public void hasPerson_personNotInClubLogisticsData_returnsFalse() {
         assertFalse(modelManager.hasPerson(ALICE));
     }
 
     @Test
-    public void hasPerson_personInAddressBook_returnsTrue() {
+    public void hasPerson_personInClubLogisticsData_returnsTrue() {
         modelManager.addPerson(ALICE);
         assertTrue(modelManager.hasPerson(ALICE));
     }
@@ -89,22 +89,22 @@ public class ModelManagerTest {
         modelManager.setEquipment(camera, issuedCamera);
         assertEquals(Optional.of(issuedCamera), modelManager.findEquipment(new EquipmentId("cam001")));
         assertEquals(Optional.of(microphone), modelManager.findEquipment(microphone.getId()));
-        assertEquals(List.of(issuedCamera, microphone), modelManager.getAddressBook().getEquipmentList());
+        assertEquals(List.of(issuedCamera, microphone), modelManager.getClubLogisticsData().getEquipmentList());
     }
 
     @Test
-    public void constructorAndSetAddressBook_equipment_copiesDataWithoutSharingLists() {
+    public void constructorAndSetClubLogisticsData_equipment_copiesDataWithoutSharingLists() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera", new BorrowerName("John Tan"));
-        AddressBook original = new AddressBook();
+        ClubLogisticsData original = new ClubLogisticsData();
         original.addEquipment(camera);
         modelManager = new ModelManager(original, new UserPrefs());
         original.setEquipments(List.of());
         assertEquals(Optional.of(camera), modelManager.findEquipment(camera.getId()));
 
-        modelManager.setAddressBook(original);
+        modelManager.setClubLogisticsData(original);
         assertEquals(Optional.empty(), modelManager.findEquipment(camera.getId()));
         original.addEquipment(camera);
-        modelManager.setAddressBook(original);
+        modelManager.setClubLogisticsData(original);
         assertEquals(Optional.of(camera), modelManager.findEquipment(camera.getId()));
     }
 
@@ -118,19 +118,20 @@ public class ModelManagerTest {
         modelManager.removeEquipment(camera);
         assertTrue(equipment.isEmpty());
         modelManager.addEquipment(camera);
-        modelManager.setAddressBook(new AddressBook());
+        modelManager.setClubLogisticsData(new ClubLogisticsData());
         assertTrue(equipment.isEmpty());
     }
 
     @Test
     public void equals() {
-        AddressBook addressBook = new AddressBookBuilder().withPerson(ALICE).withPerson(BENSON).build();
-        AddressBook differentAddressBook = new AddressBook();
+        ClubLogisticsData clubLogisticsData =
+                new ClubLogisticsDataBuilder().withPerson(ALICE).withPerson(BENSON).build();
+        ClubLogisticsData differentClubLogisticsData = new ClubLogisticsData();
         UserPrefs userPrefs = new UserPrefs();
 
         // same values -> returns true
-        modelManager = new ModelManager(addressBook, userPrefs);
-        ModelManager modelManagerCopy = new ModelManager(addressBook, userPrefs);
+        modelManager = new ModelManager(clubLogisticsData, userPrefs);
+        ModelManager modelManagerCopy = new ModelManager(clubLogisticsData, userPrefs);
         assertTrue(modelManager.equals(modelManagerCopy));
 
         // same object -> returns true
@@ -142,13 +143,13 @@ public class ModelManagerTest {
         // different types -> returns false
         assertFalse(modelManager.equals(5));
 
-        // different addressBook -> returns false
-        assertFalse(modelManager.equals(new ModelManager(differentAddressBook, userPrefs)));
+        // different clubLogisticsData -> returns false
+        assertFalse(modelManager.equals(new ModelManager(differentClubLogisticsData, userPrefs)));
 
         // different filteredList -> returns false
         String[] keywords = ALICE.getName().fullName.split("\\s+");
         modelManager.updateFilteredPersonList(new NameContainsKeywordsPredicate(List.of(keywords)));
-        assertFalse(modelManager.equals(new ModelManager(addressBook, userPrefs)));
+        assertFalse(modelManager.equals(new ModelManager(clubLogisticsData, userPrefs)));
 
         // resets modelManager to initial state for upcoming tests
         modelManager.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
@@ -156,6 +157,6 @@ public class ModelManagerTest {
         // different userPrefs -> returns false
         UserPrefs differentUserPrefs = new UserPrefs();
         differentUserPrefs.setGuiSettings(new GuiSettings(1, 2, 3, 4));
-        assertFalse(modelManager.equals(new ModelManager(addressBook, differentUserPrefs)));
+        assertFalse(modelManager.equals(new ModelManager(clubLogisticsData, differentUserPrefs)));
     }
 }

@@ -14,20 +14,21 @@ import seedu.address.model.person.Person;
 import seedu.address.model.person.UniquePersonList;
 
 /**
- * Wraps all data at the address-book level.
- * Duplicates are not allowed (by .isSamePerson comparison).
+ * Stores contacts and equipment for ClubLogistics.
+ * Duplicate contacts and equipment IDs are not allowed.
  */
-public class AddressBook implements ReadOnlyAddressBook {
+public class ClubLogisticsData implements ReadOnlyClubLogisticsData {
 
     private final UniquePersonList persons = new UniquePersonList();
     private final UniqueEquipmentList equipment = new UniqueEquipmentList();
 
-    public AddressBook() {}
+    /** Creates an empty ClubLogistics data set. */
+    public ClubLogisticsData() {}
 
     /**
-     * Creates an AddressBook using the Persons in the {@code toBeCopied}
+     * Copies the contacts and equipment from the {@code toBeCopied}
      */
-    public AddressBook(ReadOnlyAddressBook toBeCopied) {
+    public ClubLogisticsData(ReadOnlyClubLogisticsData toBeCopied) {
         this();
         resetData(toBeCopied);
     }
@@ -48,9 +49,9 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Resets the existing data of this {@code AddressBook} with {@code newData}.
+     * Resets the existing data of this {@code ClubLogisticsData} with {@code newData}.
      */
-    public void resetData(ReadOnlyAddressBook newData) {
+    public void resetData(ReadOnlyClubLogisticsData newData) {
         requireNonNull(newData);
 
         UniquePersonList replacementPersons = new UniquePersonList();
@@ -65,7 +66,7 @@ public class AddressBook implements ReadOnlyAddressBook {
     //// person-level operations
 
     /**
-     * Returns true if a person with the same identity as {@code person} exists in the address book.
+     * Returns true if a person with the same identity as {@code person} exists in ClubLogistics data.
      */
     public boolean hasPerson(Person person) {
         requireNonNull(person);
@@ -73,8 +74,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Adds a person to the address book.
-     * The person must not already exist in the address book.
+     * Adds a person to the ClubLogistics data.
+     * The person must not already exist in ClubLogistics data.
      */
     public void addPerson(Person p) {
         persons.add(p);
@@ -82,8 +83,9 @@ public class AddressBook implements ReadOnlyAddressBook {
 
     /**
      * Replaces the given person {@code target} in the list with {@code editedPerson}.
-     * {@code target} must exist in the address book.
-     * The person identity of {@code editedPerson} must not be the same as another existing person in the address book.
+     * {@code target} must exist in ClubLogistics data.
+     * The person identity of {@code editedPerson} must not be the same as another existing person in
+     * ClubLogistics data.
      */
     public void setPerson(Person target, Person editedPerson) {
         requireNonNull(editedPerson);
@@ -92,8 +94,8 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Removes {@code key} from this {@code AddressBook}.
-     * {@code key} must exist in the address book.
+     * Removes {@code key} from this {@code ClubLogisticsData}.
+     * {@code key} must exist in ClubLogistics data.
      */
     public void removePerson(Person key) {
         persons.remove(key);
@@ -163,11 +165,11 @@ public class AddressBook implements ReadOnlyAddressBook {
         }
 
         // instanceof handles nulls
-        if (!(other instanceof AddressBook otherAddressBook)) {
+        if (!(other instanceof ClubLogisticsData otherClubLogisticsData)) {
             return false;
         }
 
-        return persons.equals(otherAddressBook.persons) && equipment.equals(otherAddressBook.equipment);
+        return persons.equals(otherClubLogisticsData.persons) && equipment.equals(otherClubLogisticsData.equipment);
     }
 
     @Override

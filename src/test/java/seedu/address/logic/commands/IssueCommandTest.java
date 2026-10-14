@@ -38,7 +38,7 @@ public class IssueCommandTest {
         Equipment expectedCamera = new Equipment(CAMERA_ID, "Sony Camera", JOHN);
         assertEquals("Equipment CAM001 issued to John Tan.\nCAM001 | Sony Camera | Issued to: John Tan",
                 result.getFeedbackToUser());
-        assertEquals(List.of(expectedCamera, microphone), model.getAddressBook().getEquipmentList());
+        assertEquals(List.of(expectedCamera, microphone), model.getClubLogisticsData().getEquipmentList());
         assertFalse(CAMERA.isIssued());
     }
 
@@ -50,7 +50,7 @@ public class IssueCommandTest {
 
         assertThrows(CommandException.class, "Error: Equipment with ID MIC001 does not exist.", ()
                 -> command.execute(model));
-        assertEquals(List.of(CAMERA), model.getAddressBook().getEquipmentList());
+        assertEquals(List.of(CAMERA), model.getClubLogisticsData().getEquipmentList());
     }
 
     @Test
@@ -62,7 +62,7 @@ public class IssueCommandTest {
 
         assertThrows(CommandException.class, "Error: Equipment CAM001 is already issued to John Tan.", ()
                 -> command.execute(model));
-        assertEquals(List.of(issuedCamera), model.getAddressBook().getEquipmentList());
+        assertEquals(List.of(issuedCamera), model.getClubLogisticsData().getEquipmentList());
     }
 
     @Test
@@ -76,7 +76,7 @@ public class IssueCommandTest {
         new IssueCommand(microphoneId, JOHN).execute(model);
 
         assertEquals(List.of(issuedCamera, new Equipment(microphoneId, "Wireless Microphone", JOHN)),
-                model.getAddressBook().getEquipmentList());
+                model.getClubLogisticsData().getEquipmentList());
     }
 
     @Test

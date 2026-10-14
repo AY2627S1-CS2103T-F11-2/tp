@@ -17,7 +17,7 @@ import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import seedu.address.logic.LogicManager;
 import seedu.address.model.ModelManager;
-import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonClubLogisticsStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
 
@@ -30,7 +30,7 @@ public class MainWindowTest extends JavaFxTest {
         runOnFxThread(() -> {
             ModelManager model = new ModelManager();
             Path dataFile = testFolder.resolve("data.json");
-            StorageManager storage = new StorageManager(new JsonAddressBookStorage(dataFile),
+            StorageManager storage = new StorageManager(new JsonClubLogisticsStorage(dataFile),
                     new JsonUserPrefsStorage(testFolder.resolve("prefs.json")));
             LogicManager logic = new LogicManager(model, storage);
             Stage stage = new Stage();

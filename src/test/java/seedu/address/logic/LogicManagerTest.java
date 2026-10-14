@@ -26,17 +26,17 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.AddressBook;
+import seedu.address.model.ClubLogisticsData;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
-import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.ReadOnlyClubLogisticsData;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.EquipmentName;
 import seedu.address.model.equipment.EquipmentStatus;
 import seedu.address.model.person.Person;
-import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonClubLogisticsStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
 import seedu.address.testutil.PersonBuilder;
@@ -53,10 +53,10 @@ public class LogicManagerTest {
 
     @BeforeEach
     public void setUp() {
-        JsonAddressBookStorage addressBookStorage =
-                new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
+        JsonClubLogisticsStorage clubLogisticsStorage =
+                new JsonClubLogisticsStorage(temporaryFolder.resolve("clubLogisticsData.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        StorageManager storage = new StorageManager(clubLogisticsStorage, userPrefsStorage);
         logic = new LogicManager(model, storage);
     }
 
@@ -89,17 +89,18 @@ public class LogicManagerTest {
         assertEquals(EquipmentStatus.AVAILABLE, equipment.get(0).getStatus());
         assertThrows(UnsupportedOperationException.class, () -> equipment.remove(camera));
 
-        JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
-        AddressBook saved = new AddressBook(storage.readAddressBook().orElseThrow());
-        assertEquals(model.getAddressBook(), saved);
+        JsonClubLogisticsStorage storage =
+                new JsonClubLogisticsStorage(temporaryFolder.resolve("clubLogisticsData.json"));
+        ClubLogisticsData saved = new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow());
+        assertEquals(model.getClubLogisticsData(), saved);
 
         assertCommandException("add-equipment cam001 Other Camera",
                 String.format(AddEquipmentCommand.MESSAGE_DUPLICATE_EQUIPMENT, "cam001"));
-        assertEquals(saved, new AddressBook(storage.readAddressBook().orElseThrow()));
+        assertEquals(saved, new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
 
         logic.execute("clear");
         assertEquals(List.of(), equipment);
-        assertEquals(new AddressBook(), new AddressBook(storage.readAddressBook().orElseThrow()));
+        assertEquals(new ClubLogisticsData(), new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
     }
 
     @Test
@@ -155,7 +156,7 @@ public class LogicManagerTest {
      */
     private void assertCommandFailure(String inputCommand, Class<? extends Throwable> expectedException,
             String expectedMessage) {
-        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        Model expectedModel = new ModelManager(model.getClubLogisticsData(), new UserPrefs());
         assertCommandFailure(inputCommand, expectedException, expectedMessage, expectedModel);
     }
 
@@ -181,21 +182,21 @@ public class LogicManagerTest {
     private void assertCommandFailureForExceptionFromStorage(IOException e, String expectedMessage) {
         Path prefPath = temporaryFolder.resolve("ExceptionUserPrefs.json");
 
-        // Inject LogicManager with a JsonAddressBookStorage that throws the IOException e when saving
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(prefPath) {
+        // Inject LogicManager with a JsonClubLogisticsStorage that throws the IOException e when saving
+        JsonClubLogisticsStorage clubLogisticsStorage = new JsonClubLogisticsStorage(prefPath) {
             @Override
-            public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+            public void saveClubLogisticsData(ReadOnlyClubLogisticsData clubLogisticsData) throws IOException {
                 throw e;
             }
         };
 
         JsonUserPrefsStorage userPrefsStorage =
                 new JsonUserPrefsStorage(temporaryFolder.resolve("ExceptionUserPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        StorageManager storage = new StorageManager(clubLogisticsStorage, userPrefsStorage);
 
         logic = new LogicManager(model, storage);
 
-        // Triggers the saveAddressBook method by executing an add command
+        // Triggers the saveClubLogisticsData method by executing an add command
         String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
                 + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
         Person expectedPerson = new PersonBuilder(AMY).withTags().build();

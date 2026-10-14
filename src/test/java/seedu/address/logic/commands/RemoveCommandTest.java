@@ -39,7 +39,7 @@ public class RemoveCommandTest {
 
         assertCommandSuccess(new RemoveCommand(new EquipmentId("cam001")), model,
                 "Equipment CAM001 removed successfully.", expectedModel);
-        assertEquals(List.of(MICROPHONE), model.getAddressBook().getEquipmentList());
+        assertEquals(List.of(MICROPHONE), model.getClubLogisticsData().getEquipmentList());
     }
 
     @Test
@@ -49,7 +49,7 @@ public class RemoveCommandTest {
 
         assertCommandFailure(new RemoveCommand(new EquipmentId("MIC001")), model,
                 "Error: Equipment with ID MIC001 does not exist.");
-        assertEquals(List.of(CAMERA), model.getAddressBook().getEquipmentList());
+        assertEquals(List.of(CAMERA), model.getClubLogisticsData().getEquipmentList());
     }
 
     @Test
@@ -61,7 +61,7 @@ public class RemoveCommandTest {
 
         assertCommandFailure(new RemoveCommand(CAMERA_ID), model,
                 "Error: Equipment CAM001 is issued to John Tan and cannot be removed.");
-        assertEquals(List.of(issuedCamera), model.getAddressBook().getEquipmentList());
+        assertEquals(List.of(issuedCamera), model.getClubLogisticsData().getEquipmentList());
     }
 
     @Test

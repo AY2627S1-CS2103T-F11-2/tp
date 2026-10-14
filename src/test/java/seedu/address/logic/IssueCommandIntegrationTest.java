@@ -17,11 +17,11 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.ModelManager;
-import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.ReadOnlyClubLogisticsData;
 import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
-import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.storage.JsonClubLogisticsStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
 
@@ -33,21 +33,21 @@ public class IssueCommandIntegrationTest {
     public Path temporaryFolder;
 
     private final ModelManager model = new ModelManager();
-    private JsonAddressBookStorage addressBookStorage;
+    private JsonClubLogisticsStorage clubLogisticsStorage;
     private Logic logic;
     private int saveCount;
 
     @BeforeEach
     public void setUp() {
-        addressBookStorage = new JsonAddressBookStorage(temporaryFolder.resolve("equipment.json")) {
+        clubLogisticsStorage = new JsonClubLogisticsStorage(temporaryFolder.resolve("equipment.json")) {
             @Override
-            public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+            public void saveClubLogisticsData(ReadOnlyClubLogisticsData clubLogisticsData) throws IOException {
                 saveCount++;
-                super.saveAddressBook(addressBook);
+                super.saveClubLogisticsData(clubLogisticsData);
             }
         };
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
-        logic = new LogicManager(model, new StorageManager(addressBookStorage, userPrefsStorage));
+        logic = new LogicManager(model, new StorageManager(clubLogisticsStorage, userPrefsStorage));
         model.addEquipment(CAMERA);
         model.addEquipment(MICROPHONE);
     }
@@ -59,9 +59,10 @@ public class IssueCommandIntegrationTest {
         assertEquals("Equipment CAM001 issued to John Tan.\nCAM001 | Sony Camera | Issued to: John Tan",
                 result.getFeedbackToUser());
         Equipment expectedCamera = new Equipment(CAMERA.getId(), CAMERA.getName(), new BorrowerName("John Tan"));
-        ReadOnlyAddressBook reloadedAddressBook = addressBookStorage.readAddressBook().orElseThrow();
-        assertEquals(List.of(expectedCamera, MICROPHONE), reloadedAddressBook.getEquipmentList());
-        assertEquals(model.getAddressBook(), reloadedAddressBook);
+        ReadOnlyClubLogisticsData reloadedClubLogisticsData =
+                clubLogisticsStorage.readClubLogisticsData().orElseThrow();
+        assertEquals(List.of(expectedCamera, MICROPHONE), reloadedClubLogisticsData.getEquipmentList());
+        assertEquals(model.getClubLogisticsData(), reloadedClubLogisticsData);
         assertEquals(1, saveCount);
     }
 
@@ -70,29 +71,29 @@ public class IssueCommandIntegrationTest {
         assertThrows(CommandException.class, "Error: Equipment with ID UNKNOWN does not exist.", ()
                 -> logic.execute("issue UNKNOWN John Tan"));
 
-        assertEquals(List.of(CAMERA, MICROPHONE), model.getAddressBook().getEquipmentList());
-        assertFalse(Files.exists(addressBookStorage.getAddressBookFilePath()));
+        assertEquals(List.of(CAMERA, MICROPHONE), model.getClubLogisticsData().getEquipmentList());
+        assertFalse(Files.exists(clubLogisticsStorage.getClubLogisticsDataFilePath()));
         assertEquals(0, saveCount);
     }
 
     @Test
     public void execute_repeatedIssue_preservesOriginalBorrowerAndSavedData() throws Exception {
         logic.execute("issue CAM001 John Tan");
-        String savedData = Files.readString(addressBookStorage.getAddressBookFilePath());
-        List<Equipment> expectedEquipment = List.copyOf(model.getAddressBook().getEquipmentList());
+        String savedData = Files.readString(clubLogisticsStorage.getClubLogisticsDataFilePath());
+        List<Equipment> expectedEquipment = List.copyOf(model.getClubLogisticsData().getEquipmentList());
 
         assertThrows(CommandException.class, "Error: Equipment CAM001 is already issued to John Tan.", ()
                 -> logic.execute("issue CAM001 Alice Lim"));
 
-        assertEquals(expectedEquipment, model.getAddressBook().getEquipmentList());
-        assertEquals(savedData, Files.readString(addressBookStorage.getAddressBookFilePath()));
+        assertEquals(expectedEquipment, model.getClubLogisticsData().getEquipmentList());
+        assertEquals(savedData, Files.readString(clubLogisticsStorage.getClubLogisticsDataFilePath()));
         assertEquals(1, saveCount);
     }
 
     @Test
     public void execute_invalidArguments_preservesModelAndSavedData() throws Exception {
-        addressBookStorage.saveAddressBook(model.getAddressBook());
-        String savedData = Files.readString(addressBookStorage.getAddressBookFilePath());
+        clubLogisticsStorage.saveClubLogisticsData(model.getClubLogisticsData());
+        String savedData = Files.readString(clubLogisticsStorage.getClubLogisticsDataFilePath());
 
         assertThrows(ParseException.class,
                 "Error: Person name must contain only letters and spaces and be 1–50 characters long.", ()
@@ -101,8 +102,8 @@ public class IssueCommandIntegrationTest {
                 "Error: Invalid command format. Usage: issue <equipment-id> <person-name>", ()
                 -> logic.execute("issue CAM001"));
 
-        assertEquals(List.of(CAMERA, MICROPHONE), model.getAddressBook().getEquipmentList());
-        assertEquals(savedData, Files.readString(addressBookStorage.getAddressBookFilePath()));
+        assertEquals(List.of(CAMERA, MICROPHONE), model.getClubLogisticsData().getEquipmentList());
+        assertEquals(savedData, Files.readString(clubLogisticsStorage.getClubLogisticsDataFilePath()));
         assertEquals(1, saveCount);
     }
 }
