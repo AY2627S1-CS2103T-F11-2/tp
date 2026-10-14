@@ -22,7 +22,7 @@ public class ListCommandTest {
     @BeforeEach
     public void setUp() {
         model = new ModelManager();
-        expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel = new ModelManager(model.getClubLogisticsData(), new UserPrefs());
     }
 
     @Test
@@ -35,7 +35,7 @@ public class ListCommandTest {
     public void execute_equipmentRegister_showsEveryItem() {
         model.addEquipment(equipment("CAM001", "Sony Camera"));
         model.addEquipment(equipment("MIC001", "Wireless Microphone"));
-        expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel = new ModelManager(model.getClubLogisticsData(), new UserPrefs());
 
         assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS, expectedModel);
         assertEquals(2, model.getFilteredEquipmentList().size());

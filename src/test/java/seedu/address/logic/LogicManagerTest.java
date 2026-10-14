@@ -1,37 +1,39 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
-import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.AMY;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import seedu.address.logic.commands.AddCommand;
+import javafx.collections.ObservableList;
+import seedu.address.logic.commands.AddEquipmentCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.ClubLogisticsData;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
-import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.ReadOnlyClubLogisticsData;
 import seedu.address.model.UserPrefs;
-import seedu.address.model.person.Person;
-import seedu.address.storage.JsonAddressBookStorage;
+import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
+import seedu.address.model.equipment.EquipmentName;
+import seedu.address.model.equipment.EquipmentStatus;
+import seedu.address.storage.JsonClubLogisticsStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
-import seedu.address.testutil.PersonBuilder;
 
 public class LogicManagerTest {
     private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");
@@ -45,10 +47,10 @@ public class LogicManagerTest {
 
     @BeforeEach
     public void setUp() {
-        JsonAddressBookStorage addressBookStorage =
-                new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
+        JsonClubLogisticsStorage clubLogisticsStorage =
+                new JsonClubLogisticsStorage(temporaryFolder.resolve("clubLogisticsData.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        StorageManager storage = new StorageManager(clubLogisticsStorage, userPrefsStorage);
         logic = new LogicManager(model, storage);
     }
 
@@ -68,6 +70,41 @@ public class LogicManagerTest {
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_SUCCESS, model);
+    }
+
+    @Test
+    public void execute_addEquipment_updatesViewAndPersistsWithContacts() throws Exception {
+        model.addPerson(AMY);
+        ObservableList<Equipment> equipment = logic.getEquipmentList();
+        CommandResult result = logic.execute("add CAM001 Sony Camera");
+        Equipment camera = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
+        assertEquals("Equipment CAM001 added successfully.", result.getFeedbackToUser());
+        assertEquals(List.of(camera), equipment);
+        assertEquals(EquipmentStatus.AVAILABLE, equipment.get(0).getStatus());
+        assertThrows(UnsupportedOperationException.class, () -> equipment.remove(camera));
+
+        JsonClubLogisticsStorage storage =
+                new JsonClubLogisticsStorage(temporaryFolder.resolve("clubLogisticsData.json"));
+        ClubLogisticsData saved = new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow());
+        assertEquals(model.getClubLogisticsData(), saved);
+
+        assertCommandException("add cam001 Other Camera",
+                String.format(AddEquipmentCommand.MESSAGE_DUPLICATE_EQUIPMENT, "cam001"));
+        assertEquals(saved, new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
+
+        logic.execute("clear");
+        assertEquals(List.of(), equipment);
+        assertEquals(new ClubLogisticsData(), new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
+    }
+
+    @Test
+    public void execute_contactAddSyntax_preservesModelAndDoesNotSave() {
+        model.addPerson(AMY);
+        assertParseException("add n/John Doe p/98765432 e/john@example.com a/Main Street",
+                EquipmentId.MESSAGE_CONSTRAINTS);
+        assertEquals(List.of(AMY), model.getClubLogisticsData().getPersonList());
+        assertEquals(List.of(), model.getEquipmentList());
+        assertFalse(java.nio.file.Files.exists(temporaryFolder.resolve("clubLogisticsData.json")));
     }
 
     @Test
@@ -123,7 +160,7 @@ public class LogicManagerTest {
      */
     private void assertCommandFailure(String inputCommand, Class<? extends Throwable> expectedException,
             String expectedMessage) {
-        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        Model expectedModel = new ModelManager(model.getClubLogisticsData(), new UserPrefs());
         assertCommandFailure(inputCommand, expectedException, expectedMessage, expectedModel);
     }
 
@@ -149,26 +186,25 @@ public class LogicManagerTest {
     private void assertCommandFailureForExceptionFromStorage(IOException e, String expectedMessage) {
         Path prefPath = temporaryFolder.resolve("ExceptionUserPrefs.json");
 
-        // Inject LogicManager with a JsonAddressBookStorage that throws the IOException e when saving
-        JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(prefPath) {
+        // Inject LogicManager with a JsonClubLogisticsStorage that throws the IOException e when saving
+        JsonClubLogisticsStorage clubLogisticsStorage = new JsonClubLogisticsStorage(prefPath) {
             @Override
-            public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+            public void saveClubLogisticsData(ReadOnlyClubLogisticsData clubLogisticsData) throws IOException {
                 throw e;
             }
         };
 
         JsonUserPrefsStorage userPrefsStorage =
                 new JsonUserPrefsStorage(temporaryFolder.resolve("ExceptionUserPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        StorageManager storage = new StorageManager(clubLogisticsStorage, userPrefsStorage);
 
         logic = new LogicManager(model, storage);
 
-        // Triggers the saveAddressBook method by executing an add command
-        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
-        Person expectedPerson = new PersonBuilder(AMY).withTags().build();
+        // Triggers the saveClubLogisticsData method by executing an add command
+        String addCommand = "add CAM001 Sony Camera";
+        Equipment expectedEquipment = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
         ModelManager expectedModel = new ModelManager();
-        expectedModel.addPerson(expectedPerson);
+        expectedModel.addEquipment(expectedEquipment);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
     }
 }

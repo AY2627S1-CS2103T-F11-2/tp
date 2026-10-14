@@ -3,7 +3,7 @@ layout: page
 title: User Guide
 ---
 
-AddressBook Level 3 (AB3) is a **desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)** while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, AB3 can help you manage contacts faster than traditional GUI applications.
+ClubLogistics Level 3 (AB3) is a **desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)** while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, AB3 can help you manage contacts faster than traditional GUI applications.
 
 * Table of Contents
 {:toc}
@@ -17,7 +17,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
 1. Download the latest `.jar` file from [here](https://github.com/se-edu/addressbook-level3/releases).
 
-1. Copy the file to the folder you want to use as the _home folder_ for your AddressBook.
+1. Copy the file to the folder you want to use as the _home folder_ for your ClubLogistics.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
@@ -28,7 +28,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `list` : Lists all registered equipment.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
+   * `add CAM001 Sony Camera` : Registers a Sony Camera with equipment ID `CAM001`.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -47,7 +47,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 **:information_source: Notes about the command format:**<br>
 
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
-  For example, in `add n/NAME`, replace `NAME` with a value such as `John Doe`.
+  For example, in `add EQUIPMENT_ID EQUIPMENT_NAME`, use `add CAM001 Sony Camera`.
 
 * Items in square brackets are optional.<br>
   For example, `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
@@ -73,19 +73,20 @@ Shows a message explaining how to access the help page.
 Format: `help`
 
 
-### Adding a person: `add`
+### Adding equipment: `add`
 
-Adds a person to the address book.
+Registers an equipment item and displays it immediately in the Equipment panel.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
+Format: `add EQUIPMENT_ID EQUIPMENT_NAME`
 
-<div markdown="span" class="alert alert-primary">:bulb: **Tip:**
-A person can have any number of tags, including zero.
-</div>
+* IDs contain 1–20 letters or digits. IDs are unique regardless of case:
+  `CAM001` and `cam001` refer to the same equipment.
+* Names contain 1–50 characters after whitespace is normalised. Names can
+  contain spaces, and different items may share a name.
+* New equipment has the status `Available` and is saved automatically alongside contacts.
+* Contact-style input such as `add n/NAME p/PHONE_NUMBER` is not supported.
 
-Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+Example: `add CAM001 Sony Camera`
 
 ### Issuing equipment: `issue`
 
@@ -111,12 +112,12 @@ CAM001 | Sony Camera | Issued to: John Tan
 ```
 
 On a fresh installation without a saved data file, `CAM001`, `MIC001`, and `PROJ001` are available sample equipment.
-The existing `add` and `list` commands still operate on contacts; equipment add, list, remove, and return commands
-are separate features. To try issuing equipment with an existing data file, see [Editing the data file](#editing-the-data-file).
+Use `add` to register equipment and `list` to show all equipment.
+To try issuing equipment with an existing data file, see [Editing the data file](#editing-the-data-file).
 
 ### Listing all equipment: `list`
 
-Shows the ID and name of every equipment item in the equipment register.
+Shows the ID, name and status of every equipment item in the equipment register.
 
 Format: `list`
 
@@ -169,7 +170,7 @@ Examples:
 
 ### Clearing all entries: `clear`
 
-Clears all entries from the address book.
+Clears all contacts and equipment from the address book.
 
 Format: `clear`
 
@@ -181,11 +182,11 @@ Format: `exit`
 
 ### Saving the data
 
-AddressBook automatically saves data after every command. You do not need to save manually.
+ClubLogistics automatically saves data after every command. You do not need to save manually.
 
 ### Editing the data file
 
-AddressBook data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+ClubLogistics data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
 
 Equipment is stored in the top-level `equipment` array. Existing files without this array are supported and have no
 equipment records. To add a test item, close the application and add the following field to the existing JSON object,
@@ -200,8 +201,8 @@ separated from other fields by a comma:
 An empty or null `issuedTo` value means the item is available. A valid person's name means it is already issued.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If your changes make the data file invalid, AddressBook starts with an empty address book at the next run. The invalid file remains on disk until you run a command (AddressBook saves after every command). Still, we recommend backing up the file before editing it.<br>
-Furthermore, certain edits can cause the AddressBook to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+If your changes make the data file invalid, ClubLogistics starts with an empty address book at the next run. The invalid file remains on disk until you run a command (ClubLogistics saves after every command). Still, we recommend backing up the file before editing it.<br>
+Furthermore, certain edits can cause the ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
 ### Archiving data files `[coming in v2.0]`
@@ -213,7 +214,7 @@ _Details coming soon ..._
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous AddressBook home folder.
+**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous ClubLogistics home folder.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -228,7 +229,7 @@ _Details coming soon ..._
 
 Action | Format, Examples
 --------|------------------
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add equipment** | `add EQUIPMENT_ID EQUIPMENT_NAME` <br> e.g., `add CAM001 Sony Camera`
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`

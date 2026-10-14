@@ -16,32 +16,32 @@ import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.person.Person;
 
 /**
- * Represents the in-memory model of the address book data.
+ * Represents the in-memory model of the ClubLogistics data.
  */
 public class ModelManager implements Model {
     private static final Logger logger = LogsCenter.getLogger(ModelManager.class);
 
-    private final AddressBook addressBook;
+    private final ClubLogisticsData clubLogisticsData;
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
     private final FilteredList<Equipment> filteredEquipment;
 
     /**
-     * Initializes a ModelManager with the given addressBook and userPrefs.
+     * Initializes a ModelManager with the given clubLogisticsData and userPrefs.
      */
-    public ModelManager(ReadOnlyAddressBook addressBook, ReadOnlyUserPrefs userPrefs) {
-        requireAllNonNull(addressBook, userPrefs);
+    public ModelManager(ReadOnlyClubLogisticsData clubLogisticsData, ReadOnlyUserPrefs userPrefs) {
+        requireAllNonNull(clubLogisticsData, userPrefs);
 
-        logger.fine("Initializing with address book: " + addressBook + " and user prefs " + userPrefs);
+        logger.fine("Initializing with ClubLogistics data: " + clubLogisticsData + " and user prefs " + userPrefs);
 
-        this.addressBook = new AddressBook(addressBook);
+        this.clubLogisticsData = new ClubLogisticsData(clubLogisticsData);
         this.userPrefs = new UserPrefs(userPrefs);
-        filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
-        filteredEquipment = new FilteredList<>(this.addressBook.getEquipmentList());
+        filteredPersons = new FilteredList<>(this.clubLogisticsData.getPersonList());
+        filteredEquipment = new FilteredList<>(this.clubLogisticsData.getEquipmentList());
     }
 
     public ModelManager() {
-        this(new AddressBook(), new UserPrefs());
+        this(new ClubLogisticsData(), new UserPrefs());
     }
 
     //=========== UserPrefs ==================================================================================
@@ -49,6 +49,11 @@ public class ModelManager implements Model {
     @Override
     public ReadOnlyUserPrefs getUserPrefs() {
         return userPrefs;
+    }
+
+    @Override
+    public ObservableList<Equipment> getEquipmentList() {
+        return clubLogisticsData.getEquipmentList();
     }
 
     @Override
@@ -62,44 +67,46 @@ public class ModelManager implements Model {
         userPrefs.setGuiSettings(guiSettings);
     }
 
-    //=========== AddressBook ================================================================================
+    //=========== ClubLogisticsData ================================================================================
 
+    /** {@inheritDoc} */
     @Override
-    public void setAddressBook(ReadOnlyAddressBook addressBook) {
-        this.addressBook.resetData(addressBook);
+    public void setClubLogisticsData(ReadOnlyClubLogisticsData clubLogisticsData) {
+        this.clubLogisticsData.resetData(clubLogisticsData);
     }
 
+    /** {@inheritDoc} */
     @Override
-    public ReadOnlyAddressBook getAddressBook() {
-        return addressBook;
+    public ReadOnlyClubLogisticsData getClubLogisticsData() {
+        return clubLogisticsData;
     }
 
     @Override
     public boolean hasPerson(Person person) {
         requireNonNull(person);
-        return addressBook.hasPerson(person);
+        return clubLogisticsData.hasPerson(person);
     }
 
     @Override
     public void deletePerson(Person target) {
-        addressBook.removePerson(target);
+        clubLogisticsData.removePerson(target);
     }
 
     @Override
     public void addPerson(Person person) {
-        addressBook.addPerson(person);
+        clubLogisticsData.addPerson(person);
         updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 
     @Override
     public boolean hasEquipment(Equipment equipment) {
         requireNonNull(equipment);
-        return addressBook.hasEquipment(equipment);
+        return clubLogisticsData.hasEquipment(equipment);
     }
 
     @Override
     public void addEquipment(Equipment equipment) {
-        addressBook.addEquipment(equipment);
+        clubLogisticsData.addEquipment(equipment);
         updateFilteredEquipmentList(PREDICATE_SHOW_ALL_EQUIPMENT);
     }
 
@@ -118,30 +125,30 @@ public class ModelManager implements Model {
     public void setPerson(Person target, Person editedPerson) {
         requireAllNonNull(target, editedPerson);
 
-        addressBook.setPerson(target, editedPerson);
+        clubLogisticsData.setPerson(target, editedPerson);
     }
 
     @Override
     public Optional<Equipment> findEquipment(EquipmentId id) {
-        return addressBook.findEquipment(id);
+        return clubLogisticsData.findEquipment(id);
     }
 
     @Override
     public void setEquipment(Equipment target, Equipment replacement) {
-        addressBook.setEquipment(target, replacement);
+        clubLogisticsData.setEquipment(target, replacement);
     }
 
     @Override
     public void removeEquipment(Equipment equipment) {
         requireNonNull(equipment);
-        addressBook.removeEquipment(equipment);
+        clubLogisticsData.removeEquipment(equipment);
     }
 
     //=========== Filtered Person List Accessors =============================================================
 
     /**
      * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
-     * {@code addressBook}
+     * {@code clubLogisticsData}
      */
     @Override
     public ObservableList<Person> getFilteredPersonList() {
@@ -165,7 +172,7 @@ public class ModelManager implements Model {
             return false;
         }
 
-        return addressBook.equals(otherModelManager.addressBook)
+        return clubLogisticsData.equals(otherModelManager.clubLogisticsData)
                 && userPrefs.equals(otherModelManager.userPrefs)
                 && filteredPersons.equals(otherModelManager.filteredPersons)
                 && filteredEquipment.equals(otherModelManager.filteredEquipment);

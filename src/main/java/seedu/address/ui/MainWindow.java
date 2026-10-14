@@ -167,6 +167,7 @@ public class MainWindow extends UiPart<Stage> {
         primaryStage.hide();
     }
 
+    /** Returns the equipment panel displayed in this window. */
     public EquipmentListPanel getEquipmentListPanel() {
         return equipmentListPanel;
     }

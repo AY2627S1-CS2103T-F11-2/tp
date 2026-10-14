@@ -5,14 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.ReadOnlyClubLogisticsData;
 import seedu.address.model.equipment.EquipmentId;
 
 public class SampleDataUtilTest {
 
     @Test
-    public void getSampleAddressBook_containsAvailableEquipment() {
-        ReadOnlyAddressBook sample = SampleDataUtil.getSampleAddressBook();
+    public void getSampleClubLogisticsData_containsAvailableEquipment() {
+        ReadOnlyClubLogisticsData sample = SampleDataUtil.getSampleClubLogisticsData();
 
         assertEquals(3, sample.getEquipmentList().size());
         assertTrue(sample.getEquipmentList().stream().noneMatch(equipment -> equipment.isIssued()));

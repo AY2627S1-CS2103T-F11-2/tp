@@ -33,48 +33,50 @@ public interface Model {
     void setGuiSettings(GuiSettings guiSettings);
 
     /**
-     * Replaces address book data with the data in {@code addressBook}.
+     * Replaces ClubLogistics data with the data in {@code clubLogisticsData}.
      */
-    void setAddressBook(ReadOnlyAddressBook addressBook);
+    void setClubLogisticsData(ReadOnlyClubLogisticsData clubLogisticsData);
 
-    /** Returns the AddressBook */
-    ReadOnlyAddressBook getAddressBook();
+    /** Returns the ClubLogisticsData */
+    ReadOnlyClubLogisticsData getClubLogisticsData();
 
     /**
-     * Returns true if a person with the same identity as {@code person} exists in the address book.
+     * Returns true if a person with the same identity as {@code person} exists in ClubLogistics data.
      */
     boolean hasPerson(Person person);
 
     /**
      * Deletes the given person.
-     * The person must exist in the address book.
+     * The person must exist in ClubLogistics data.
      */
     void deletePerson(Person target);
 
     /**
      * Adds the given person.
-     * {@code person} must not already exist in the address book.
+     * {@code person} must not already exist in ClubLogistics data.
      */
     void addPerson(Person person);
 
     /**
      * Replaces the given person {@code target} with {@code editedPerson}.
-     * {@code target} must exist in the address book.
-     * The person identity of {@code editedPerson} must not be the same as another existing person in the address book.
+     * {@code target} must exist in ClubLogistics data.
+     * The person identity of {@code editedPerson} must not be the same as another existing person in
+     * ClubLogistics data.
      */
     void setPerson(Person target, Person editedPerson);
 
     /** Returns true if equipment with the same ID exists in the equipment register. */
-    default boolean hasEquipment(Equipment equipment) {
-        throw new UnsupportedOperationException("Equipment is not supported by this model");
-    }
+    boolean hasEquipment(Equipment equipment);
 
     /** Adds the given equipment to the equipment register. */
     void addEquipment(Equipment equipment);
 
+    /** Returns an unmodifiable observable view of all registered equipment. */
+    ObservableList<Equipment> getEquipmentList();
+
     /** Returns the equipment currently shown to the user. */
     default ObservableList<Equipment> getFilteredEquipmentList() {
-        return getAddressBook().getEquipmentList();
+        return getClubLogisticsData().getEquipmentList();
     }
 
     /** Updates which equipment is shown to the user. */
@@ -89,9 +91,7 @@ public interface Model {
     void setEquipment(Equipment target, Equipment replacement);
 
     /** Removes the given equipment from the equipment register. {@code equipment} must exist. */
-    default void removeEquipment(Equipment equipment) {
-        throw new UnsupportedOperationException("Equipment removal is not supported by this model");
-    }
+    void removeEquipment(Equipment equipment);
 
     /** Returns an unmodifiable view of the filtered person list */
     ObservableList<Person> getFilteredPersonList();
