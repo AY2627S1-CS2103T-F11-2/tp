@@ -2,6 +2,7 @@ package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import javafx.collections.ListChangeListener;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -104,5 +106,52 @@ public class IssueCommandIntegrationTest {
         assertEquals(List.of(CAMERA, MICROPHONE), model.getAddressBook().getEquipmentList());
         assertEquals(savedData, Files.readString(addressBookStorage.getAddressBookFilePath()));
         assertEquals(1, saveCount);
+    }
+
+    @Test
+    public void execute_addIssueListAndRestart_preservesBorrowerAndObservableUpdates() throws Exception {
+        boolean[] listUpdated = {false};
+        model.getFilteredEquipmentList().addListener((ListChangeListener<Equipment>) change -> listUpdated[0] = true);
+        assertEquals("Equipment NEW001 added successfully.",
+                logic.execute("add NEW001 Club Camera").getFeedbackToUser());
+        listUpdated[0] = false;
+        assertEquals("Equipment NEW001 issued to John Tan.\nNEW001 | Club Camera | Issued to: John Tan",
+                logic.execute("issue new001 John   Tan").getFeedbackToUser());
+        assertTrue(listUpdated[0]);
+        model.updateFilteredEquipmentList(equipment -> !equipment.isIssued());
+        assertFalse(model.getFilteredEquipmentList().stream().anyMatch(Equipment::isIssued));
+        logic.execute("list");
+        assertEquals(3, logic.getFilteredEquipmentList().size());
+        Equipment issued = model.findEquipment(new EquipmentId("new001")).orElseThrow();
+        assertEquals("Issued to: John Tan", issued.getDisplayStatus());
+
+        ModelManager restarted = new ModelManager(addressBookStorage.readAddressBook().orElseThrow(),
+                model.getUserPrefs());
+        Logic restartedLogic = new LogicManager(restarted,
+                new StorageManager(addressBookStorage,
+                        new JsonUserPrefsStorage(temporaryFolder.resolve("prefs.json"))));
+        assertEquals(issued, restarted.findEquipment(new EquipmentId("NEW001")).orElseThrow());
+        assertThrows(CommandException.class, "Error: Equipment NEW001 is already issued to John Tan.", ()
+                -> restartedLogic.execute("issue new001 Alice Lim"));
+    }
+
+    @Test
+    public void execute_removeIssuedItem_rejectsWithoutLosingBorrower() throws Exception {
+        logic.execute("issue CAM001 John Tan");
+        String savedData = Files.readString(addressBookStorage.getAddressBookFilePath());
+        assertThrows(CommandException.class, "Error: Equipment CAM001 is issued to John Tan and cannot be removed.", ()
+                -> logic.execute("remove cam001"));
+        assertEquals(new BorrowerName("John Tan"), model.findEquipment(CAMERA.getId()).orElseThrow()
+                .getIssuedTo().orElseThrow());
+        assertEquals(savedData, Files.readString(addressBookStorage.getAddressBookFilePath()));
+    }
+
+    @Test
+    public void execute_sameBorrowerForDifferentItems_persistsIndependentAssignments() throws Exception {
+        logic.execute("issue CAM001 John Tan");
+        logic.execute("issue MIC001 John Tan");
+        BorrowerName john = new BorrowerName("John Tan");
+        assertEquals(2, addressBookStorage.readAddressBook().orElseThrow().getEquipmentList().stream()
+                .filter(equipment -> equipment.getIssuedTo().orElseThrow().equals(john)).count());
     }
 }

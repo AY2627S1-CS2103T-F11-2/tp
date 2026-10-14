@@ -12,12 +12,37 @@ import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.EquipmentName;
+import seedu.address.model.equipment.EquipmentStatus;
 
 public class JsonAdaptedEquipmentTest {
 
     private static final String VALID_ID = "CAM001";
     private static final String VALID_NAME = "Sony Camera";
     private static final String VALID_BORROWER = "John Tan";
+
+    @Test
+    public void toModelType_legacyStatusOnlyAvailableRecord_success() throws Exception {
+        Equipment expected = new Equipment(new EquipmentId(VALID_ID), new EquipmentName(VALID_NAME),
+                EquipmentStatus.AVAILABLE);
+        assertEquals(expected, new JsonAdaptedEquipment(VALID_ID, VALID_NAME, "AVAILABLE").toModelType());
+    }
+
+    @Test
+    public void toModelType_invalidStatus_rejectsRecord() {
+        assertThrows(IllegalValueException.class, "Equipment status is invalid.", ()
+                -> new JsonAdaptedEquipment(VALID_ID, VALID_NAME, "UNKNOWN", null).toModelType());
+    }
+
+    @Test
+    public void toModelType_statusBorrowerMismatch_rejectsRecord() {
+        String message = "Equipment status and borrower do not match.";
+        assertThrows(IllegalValueException.class, message, ()
+                -> new JsonAdaptedEquipment(VALID_ID, VALID_NAME, "ISSUED", null).toModelType());
+        assertThrows(IllegalValueException.class, message, ()
+                -> new JsonAdaptedEquipment(VALID_ID, VALID_NAME, "ISSUED", "").toModelType());
+        assertThrows(IllegalValueException.class, message, ()
+                -> new JsonAdaptedEquipment(VALID_ID, VALID_NAME, "AVAILABLE", VALID_BORROWER).toModelType());
+    }
 
     @Test
     public void toModelType_availableEquipment_returnsEquipment() throws Exception {

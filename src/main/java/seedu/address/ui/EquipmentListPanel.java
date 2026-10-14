@@ -13,7 +13,7 @@ import javafx.scene.layout.VBox;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.equipment.Equipment;
 
-/** Panel displaying equipment IDs and names. */
+/** Panel displaying equipment IDs, names, availability, and current borrowers. */
 public class EquipmentListPanel extends UiPart<Region> {
     private static final String FXML = "EquipmentListPanel.fxml";
     private final Logger logger = LogsCenter.getLogger(EquipmentListPanel.class);
@@ -38,15 +38,25 @@ public class EquipmentListPanel extends UiPart<Region> {
                 return;
             }
 
-            Label id = new Label(equipment.getId().value);
-            id.getStyleClass().add("cell_small_label");
-            Label name = new Label(equipment.getName().value);
-            name.getStyleClass().add("cell_big_label");
-            VBox details = new VBox(4, id, name);
+            setGraphic(createEquipmentCard(equipment));
+        }
+
+        private HBox createEquipmentCard(Equipment equipment) {
+            Label id = createLabel(equipment.getId().value, "cell_small_label");
+            Label name = createLabel(equipment.getName().value, "cell_big_label");
+            Label status = createLabel(equipment.getDisplayStatus(), "cell_small_label");
+            status.setWrapText(true);
+            VBox details = new VBox(4, id, name, status);
             details.setMinHeight(64);
             HBox card = new HBox(details);
             card.setStyle("-fx-padding: 8 12 8 12;");
-            setGraphic(card);
+            return card;
+        }
+
+        private Label createLabel(String text, String styleClass) {
+            Label label = new Label(text);
+            label.getStyleClass().add(styleClass);
+            return label;
         }
     }
 }

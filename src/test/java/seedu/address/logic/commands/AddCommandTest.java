@@ -141,6 +141,26 @@ public class AddCommandTest {
         }
 
         @Override
+        public boolean hasEquipment(Equipment equipment) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public ObservableList<Equipment> getFilteredEquipmentList() {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void updateFilteredEquipmentList(Predicate<Equipment> predicate) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
+        public void removeEquipment(Equipment equipment) {
+            throw new AssertionError("This method should not be called.");
+        }
+
+        @Override
         public Optional<Equipment> findEquipment(EquipmentId equipmentId) {
             throw new AssertionError("This method should not be called.");
         }

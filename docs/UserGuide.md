@@ -100,6 +100,7 @@ Format: `issue <equipment-id> <person-name>`
 * An item must exist and be available. Issuing an item that is already issued is rejected, preserving its current holder.
 * Different items can be issued to the same person. You do not need to add the person as a contact first.
 * The current holder is saved automatically and retained when the application restarts.
+* Equipment cards show `Available` or `Issued to: PERSON`. The status updates immediately after issuing equipment.
 
 Example: `issue cam001 John Tan`
 
@@ -111,12 +112,12 @@ CAM001 | Sony Camera | Issued to: John Tan
 ```
 
 On a fresh installation without a saved data file, `CAM001`, `MIC001`, and `PROJ001` are available sample equipment.
-The existing `add` and `list` commands still operate on contacts; equipment add, list, remove, and return commands
-are separate features. To try issuing equipment with an existing data file, see [Editing the data file](#editing-the-data-file).
+Use `add CAM001 Sony Camera` to register equipment and `list` to show every equipment item and its current holder.
+To try issuing equipment with an existing data file, see [Editing the data file](#editing-the-data-file).
 
 ### Listing all equipment: `list`
 
-Shows the ID and name of every equipment item in the equipment register.
+Shows the ID, name, and availability or current borrower of every equipment item in the equipment register.
 
 Format: `list`
 

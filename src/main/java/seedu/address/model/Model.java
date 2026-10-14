@@ -65,22 +65,16 @@ public interface Model {
     void setPerson(Person target, Person editedPerson);
 
     /** Returns true if equipment with the same ID exists in the equipment register. */
-    default boolean hasEquipment(Equipment equipment) {
-        throw new UnsupportedOperationException("Equipment is not supported by this model");
-    }
+    boolean hasEquipment(Equipment equipment);
 
     /** Adds the given equipment to the equipment register. */
     void addEquipment(Equipment equipment);
 
     /** Returns the equipment currently shown to the user. */
-    default ObservableList<Equipment> getFilteredEquipmentList() {
-        return getAddressBook().getEquipmentList();
-    }
+    ObservableList<Equipment> getFilteredEquipmentList();
 
     /** Updates which equipment is shown to the user. */
-    default void updateFilteredEquipmentList(Predicate<Equipment> predicate) {
-        throw new UnsupportedOperationException("Equipment filtering is not supported by this model");
-    }
+    void updateFilteredEquipmentList(Predicate<Equipment> predicate);
 
     /** Returns the equipment with the given case-insensitive ID, if present. */
     Optional<Equipment> findEquipment(EquipmentId id);
@@ -89,9 +83,7 @@ public interface Model {
     void setEquipment(Equipment target, Equipment replacement);
 
     /** Removes the given equipment from the equipment register. {@code equipment} must exist. */
-    default void removeEquipment(Equipment equipment) {
-        throw new UnsupportedOperationException("Equipment removal is not supported by this model");
-    }
+    void removeEquipment(Equipment equipment);
 
     /** Returns an unmodifiable view of the filtered person list */
     ObservableList<Person> getFilteredPersonList();
