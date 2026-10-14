@@ -45,6 +45,22 @@ public class UniqueEquipmentList {
         }
     }
 
+    /** Replaces an item while preserving case-insensitive ID uniqueness. */
+    public void set(Equipment target, Equipment replacement) {
+        requireNonNull(target);
+        requireNonNull(replacement);
+        int index = internalList.indexOf(target);
+        if (index < 0) {
+            throw new IllegalArgumentException("Equipment does not exist: " + target.getId());
+        }
+        for (int i = 0; i < internalList.size(); i++) {
+            if (i != index && internalList.get(i).isSameEquipment(replacement)) {
+                throw new IllegalArgumentException("Duplicate equipment ID: " + replacement.getId());
+            }
+        }
+        internalList.set(index, replacement);
+    }
+
     /** Replaces the register contents after checking IDs for uniqueness. */
     public void setEquipment(java.util.List<Equipment> equipment) {
         requireNonNull(equipment);

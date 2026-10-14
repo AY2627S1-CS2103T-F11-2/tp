@@ -21,6 +21,8 @@ public class RemoveCommand extends Command {
             "Error: Invalid command format. Usage: " + MESSAGE_USAGE;
     public static final String MESSAGE_SUCCESS = "Equipment %1$s removed successfully.";
     public static final String MESSAGE_EQUIPMENT_NOT_FOUND = "Error: Equipment with ID %1$s does not exist.";
+    public static final String MESSAGE_EQUIPMENT_ISSUED =
+            "Error: Equipment %1$s is issued to %2$s and cannot be removed.";
 
     private final EquipmentId equipmentId;
 
@@ -37,7 +39,10 @@ public class RemoveCommand extends Command {
         Equipment equipment = model.findEquipment(equipmentId)
                 .orElseThrow(() -> new CommandException(String.format(MESSAGE_EQUIPMENT_NOT_FOUND, equipmentId)));
 
-        // TODO: reject removal of issued equipment once the borrower field from the issue command is on master.
+        if (equipment.isIssued()) {
+            throw new CommandException(String.format(MESSAGE_EQUIPMENT_ISSUED,
+                    equipment.getId(), equipment.getIssuedTo().orElseThrow()));
+        }
         model.removeEquipment(equipment);
         return new CommandResult(String.format(MESSAGE_SUCCESS, equipment.getId()));
     }

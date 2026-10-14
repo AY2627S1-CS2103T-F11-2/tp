@@ -27,6 +27,9 @@ public interface Logic {
     /** Returns an unmodifiable observable view of all registered equipment. */
     ObservableList<Equipment> getEquipmentList();
 
+    /** Returns the equipment currently shown to the user. */
+    ObservableList<Equipment> getFilteredEquipmentList();
+
     /**
      * Returns the user prefs' GUI settings.
      */

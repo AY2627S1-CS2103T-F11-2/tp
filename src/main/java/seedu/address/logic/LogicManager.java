@@ -71,6 +71,11 @@ public class LogicManager implements Logic {
     }
 
     @Override
+    public ObservableList<Equipment> getFilteredEquipmentList() {
+        return model.getFilteredEquipmentList();
+    }
+
+    @Override
     public GuiSettings getGuiSettings() {
         return model.getGuiSettings();
     }

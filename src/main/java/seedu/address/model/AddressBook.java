@@ -42,14 +42,24 @@ public class AddressBook implements ReadOnlyAddressBook {
         this.persons.setPersons(persons);
     }
 
+    /** Replaces the equipment register after checking for duplicate IDs. */
+    public void setEquipments(List<Equipment> equipment) {
+        this.equipment.setEquipment(equipment);
+    }
+
     /**
      * Resets the existing data of this {@code AddressBook} with {@code newData}.
      */
     public void resetData(ReadOnlyAddressBook newData) {
         requireNonNull(newData);
 
-        setPersons(newData.getPersonList());
-        equipment.setEquipment(newData.getEquipmentList());
+        UniquePersonList replacementPersons = new UniquePersonList();
+        replacementPersons.setPersons(newData.getPersonList());
+        UniqueEquipmentList replacementEquipment = new UniqueEquipmentList();
+        replacementEquipment.setEquipment(newData.getEquipmentList());
+
+        setPersons(replacementPersons.asUnmodifiableObservableList());
+        equipment.setEquipment(replacementEquipment.asUnmodifiableObservableList());
     }
 
     //// person-level operations
@@ -97,9 +107,20 @@ public class AddressBook implements ReadOnlyAddressBook {
         return equipment.contains(item);
     }
 
+    /** Returns whether an equipment ID is present, ignoring letter case. */
+    public boolean hasEquipment(EquipmentId id) {
+        requireNonNull(id);
+        return equipment.find(id).isPresent();
+    }
+
     /** Adds an equipment item to the register. */
     public void addEquipment(Equipment item) {
         equipment.add(item);
+    }
+
+    /** Replaces an existing equipment record. */
+    public void setEquipment(Equipment target, Equipment replacement) {
+        equipment.set(target, replacement);
     }
 
     /** Returns the equipment item with the given case-insensitive ID, if present. */

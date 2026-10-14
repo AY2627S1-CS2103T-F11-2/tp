@@ -33,7 +33,6 @@ public class MainWindow extends UiPart<Stage> {
     private Path dataFilePath;
 
     // Independent Ui parts residing in this Ui container
-    private PersonListPanel personListPanel;
     private EquipmentListPanel equipmentListPanel;
     private ResultDisplay resultDisplay;
     private HelpWindow helpWindow;
@@ -43,9 +42,6 @@ public class MainWindow extends UiPart<Stage> {
 
     @FXML
     private MenuItem helpMenuItem;
-
-    @FXML
-    private StackPane personListPanelPlaceholder;
 
     @FXML
     private StackPane equipmentListPanelPlaceholder;
@@ -118,10 +114,7 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
-        personListPanel = new PersonListPanel(logic.getFilteredPersonList());
-        personListPanelPlaceholder.getChildren().add(personListPanel.getRoot());
-
-        equipmentListPanel = new EquipmentListPanel(logic.getEquipmentList());
+        equipmentListPanel = new EquipmentListPanel(logic.getFilteredEquipmentList());
         equipmentListPanelPlaceholder.getChildren().add(equipmentListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
@@ -174,8 +167,9 @@ public class MainWindow extends UiPart<Stage> {
         primaryStage.hide();
     }
 
-    public PersonListPanel getPersonListPanel() {
-        return personListPanel;
+    /** Returns the equipment panel displayed in this window. */
+    public EquipmentListPanel getEquipmentListPanel() {
+        return equipmentListPanel;
     }
 
     /**

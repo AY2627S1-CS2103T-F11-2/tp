@@ -2,6 +2,7 @@ package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -38,7 +39,7 @@ public class MainWindowTest extends JavaFxTest {
                 window.fillInnerParts();
                 stage.show();
                 Parent root = stage.getScene().getRoot();
-                assertNotNull(root.lookup("#personListView"));
+                assertNull(root.lookup("#personListView"));
                 ListView<?> equipment = (ListView<?>) root.lookup("#equipmentListView");
                 assertNotNull(equipment);
                 logic.execute("add-equipment CAM001 Sony Camera");
@@ -50,6 +51,18 @@ public class MainWindowTest extends JavaFxTest {
                             .anyMatch(node -> node instanceof Label label && text.equals(label.getText())),
                             "Missing equipment label: " + text);
                 }
+                model.updateFilteredEquipmentList(item -> false);
+                assertTrue(equipment.getItems().isEmpty());
+                logic.execute("list");
+                assertEquals(model.getEquipmentList(), equipment.getItems());
+                logic.execute("issue CAM001 John Tan");
+                root.applyCss();
+                root.layout();
+                assertTrue(equipment.lookupAll(".label").stream()
+                        .anyMatch(node -> node instanceof Label label && "Status: Issued".equals(label.getText())));
+                logic.execute("clear");
+                assertTrue(equipment.getItems().isEmpty());
+                logic.execute("add-equipment CAM001 Sony Camera");
                 logic.execute("remove cam001");
                 assertTrue(equipment.getItems().isEmpty());
                 logic.execute("add-equipment MIC001 Microphone");

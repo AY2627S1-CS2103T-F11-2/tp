@@ -24,6 +24,7 @@ public class ModelManager implements Model {
     private final AddressBook addressBook;
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
+    private final FilteredList<Equipment> filteredEquipment;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -36,6 +37,7 @@ public class ModelManager implements Model {
         this.addressBook = new AddressBook(addressBook);
         this.userPrefs = new UserPrefs(userPrefs);
         filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
+        filteredEquipment = new FilteredList<>(this.addressBook.getEquipmentList());
     }
 
     public ModelManager() {
@@ -103,6 +105,25 @@ public class ModelManager implements Model {
     @Override
     public void addEquipment(Equipment equipment) {
         addressBook.addEquipment(equipment);
+        updateFilteredEquipmentList(PREDICATE_SHOW_ALL_EQUIPMENT);
+    }
+
+    @Override
+    public ObservableList<Equipment> getFilteredEquipmentList() {
+        return filteredEquipment;
+    }
+
+    @Override
+    public void updateFilteredEquipmentList(Predicate<Equipment> predicate) {
+        requireNonNull(predicate);
+        filteredEquipment.setPredicate(predicate);
+    }
+
+    @Override
+    public void setPerson(Person target, Person editedPerson) {
+        requireAllNonNull(target, editedPerson);
+
+        addressBook.setPerson(target, editedPerson);
     }
 
     @Override
@@ -111,16 +132,14 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public void removeEquipment(Equipment equipment) {
-        requireNonNull(equipment);
-        addressBook.removeEquipment(equipment);
+    public void setEquipment(Equipment target, Equipment replacement) {
+        addressBook.setEquipment(target, replacement);
     }
 
     @Override
-    public void setPerson(Person target, Person editedPerson) {
-        requireAllNonNull(target, editedPerson);
-
-        addressBook.setPerson(target, editedPerson);
+    public void removeEquipment(Equipment equipment) {
+        requireNonNull(equipment);
+        addressBook.removeEquipment(equipment);
     }
 
     //=========== Filtered Person List Accessors =============================================================
@@ -153,7 +172,8 @@ public class ModelManager implements Model {
 
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredPersons.equals(otherModelManager.filteredPersons);
+                && filteredPersons.equals(otherModelManager.filteredPersons)
+                && filteredEquipment.equals(otherModelManager.filteredEquipment);
     }
 
 }
