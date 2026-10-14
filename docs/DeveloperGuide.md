@@ -111,8 +111,8 @@ Here are the other classes in `Logic` (omitted from the class diagram above) tha
 <img src="images/ParserClasses.png" width="600"/>
 
 How the parsing works:
-* When called upon to parse a user command, the `ClubLogisticsParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddCommand`). The `ClubLogisticsParser` returns that object as a `Command` object.
-* All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
+* When called upon to parse a user command, the `ClubLogisticsParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddEquipmentCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddEquipmentCommand`). The `ClubLogisticsParser` returns that object as a `Command` object.
+* All `XYZCommandParser` classes, such as `AddEquipmentCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
 ### Model component
 **API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
@@ -177,7 +177,7 @@ Step 2. The user executes `delete 5` command to delete the 5th person in the add
 
 ![UndoRedoState1](images/UndoRedoState1.png)
 
-Step 3. The user executes `add n/David …​` to add a new person. The `add` command also calls `Model#commitClubLogisticsData()`, causing another modified address book state to be saved into the `clubLogisticsDataStateList`.
+Step 3. The user executes `add CAM002 Sony Camera` to register equipment. The `add` command also calls `Model#commitClubLogisticsData()`, causing another modified address book state to be saved into the `clubLogisticsDataStateList`.
 
 ![UndoRedoState2](images/UndoRedoState2.png)
 
@@ -216,7 +216,7 @@ Step 5. The user then decides to execute the command `list`. Commands that do no
 
 ![UndoRedoState4](images/UndoRedoState4.png)
 
-Step 6. The user executes `clear`, which calls `Model#commitClubLogisticsData()`. Since the `currentStatePointer` is not pointing at the end of the `clubLogisticsDataStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …​` command. This is the behavior that most modern desktop applications follow.
+Step 6. The user executes `clear`, which calls `Model#commitClubLogisticsData()`. Since the `currentStatePointer` is not pointing at the end of the `clubLogisticsDataStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add CAM002 Sony Camera` command. This is the behavior that most modern desktop applications follow.
 
 ![UndoRedoState5](images/UndoRedoState5.png)
 

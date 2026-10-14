@@ -28,7 +28,7 @@ ClubLogistics Level 3 (AB3) is a **desktop application for managing contacts, op
 
    * `list` : Lists all registered equipment.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
+   * `add CAM001 Sony Camera` : Registers a Sony Camera with equipment ID `CAM001`.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -47,7 +47,7 @@ ClubLogistics Level 3 (AB3) is a **desktop application for managing contacts, op
 **:information_source: Notes about the command format:**<br>
 
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
-  For example, in `add n/NAME`, replace `NAME` with a value such as `John Doe`.
+  For example, in `add EQUIPMENT_ID EQUIPMENT_NAME`, use `add CAM001 Sony Camera`.
 
 * Items in square brackets are optional.<br>
   For example, `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
@@ -73,34 +73,20 @@ Shows a message explaining how to access the help page.
 Format: `help`
 
 
-### Adding a person: `add`
-
-Adds a person to the address book.
-
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​`
-
-<div markdown="span" class="alert alert-primary">:bulb: **Tip:**
-A person can have any number of tags, including zero.
-</div>
-
-Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
-
-### Adding equipment: `add-equipment`
+### Adding equipment: `add`
 
 Registers an equipment item and displays it immediately in the Equipment panel.
 
-Format: `add-equipment EQUIPMENT_ID EQUIPMENT_NAME`
+Format: `add EQUIPMENT_ID EQUIPMENT_NAME`
 
 * IDs contain 1–20 letters or digits. IDs are unique regardless of case:
   `CAM001` and `cam001` refer to the same equipment.
 * Names contain 1–50 characters after whitespace is normalised. Names can
   contain spaces, and different items may share a name.
 * New equipment has the status `Available` and is saved automatically alongside contacts.
-* Use `add` for contacts and `add-equipment` for equipment.
+* Contact-style input such as `add n/NAME p/PHONE_NUMBER` is not supported.
 
-Example: `add-equipment CAM001 Sony Camera`
+Example: `add CAM001 Sony Camera`
 
 ### Issuing equipment: `issue`
 
@@ -126,7 +112,7 @@ CAM001 | Sony Camera | Issued to: John Tan
 ```
 
 On a fresh installation without a saved data file, `CAM001`, `MIC001`, and `PROJ001` are available sample equipment.
-Use `add-equipment` to register equipment and `list` to show all equipment. The `add` command registers contacts.
+Use `add` to register equipment and `list` to show all equipment.
 To try issuing equipment with an existing data file, see [Editing the data file](#editing-the-data-file).
 
 ### Listing all equipment: `list`
@@ -243,8 +229,7 @@ _Details coming soon ..._
 
 Action | Format, Examples
 --------|------------------
-**Add equipment** | `add-equipment EQUIPMENT_ID EQUIPMENT_NAME` <br> e.g., `add-equipment CAM001 Sony Camera`
-**Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add equipment** | `add EQUIPMENT_ID EQUIPMENT_NAME` <br> e.g., `add CAM001 Sony Camera`
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`

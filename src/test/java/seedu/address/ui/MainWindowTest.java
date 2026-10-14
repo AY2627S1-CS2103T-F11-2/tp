@@ -42,7 +42,7 @@ public class MainWindowTest extends JavaFxTest {
                 assertNull(root.lookup("#personListView"));
                 ListView<?> equipment = (ListView<?>) root.lookup("#equipmentListView");
                 assertNotNull(equipment);
-                logic.execute("add-equipment CAM001 Sony Camera");
+                logic.execute("add CAM001 Sony Camera");
                 root.applyCss();
                 root.layout();
                 assertEquals(model.getEquipmentList(), equipment.getItems());
@@ -62,10 +62,10 @@ public class MainWindowTest extends JavaFxTest {
                         .anyMatch(node -> node instanceof Label label && "Status: Issued".equals(label.getText())));
                 logic.execute("clear");
                 assertTrue(equipment.getItems().isEmpty());
-                logic.execute("add-equipment CAM001 Sony Camera");
+                logic.execute("add CAM001 Sony Camera");
                 logic.execute("remove cam001");
                 assertTrue(equipment.getItems().isEmpty());
-                logic.execute("add-equipment MIC001 Microphone");
+                logic.execute("add MIC001 Microphone");
                 logic.execute("clear");
                 assertTrue(equipment.getItems().isEmpty());
             } finally {

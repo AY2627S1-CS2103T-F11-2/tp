@@ -1,12 +1,9 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
-import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
-import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.AMY;
 
@@ -20,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import javafx.collections.ObservableList;
-import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.AddEquipmentCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.ListCommand;
@@ -35,11 +31,9 @@ import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.EquipmentName;
 import seedu.address.model.equipment.EquipmentStatus;
-import seedu.address.model.person.Person;
 import seedu.address.storage.JsonClubLogisticsStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
-import seedu.address.testutil.PersonBuilder;
 
 public class LogicManagerTest {
     private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");
@@ -82,7 +76,7 @@ public class LogicManagerTest {
     public void execute_addEquipment_updatesViewAndPersistsWithContacts() throws Exception {
         model.addPerson(AMY);
         ObservableList<Equipment> equipment = logic.getEquipmentList();
-        CommandResult result = logic.execute("add-equipment CAM001 Sony Camera");
+        CommandResult result = logic.execute("add CAM001 Sony Camera");
         Equipment camera = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
         assertEquals("Equipment CAM001 added successfully.", result.getFeedbackToUser());
         assertEquals(List.of(camera), equipment);
@@ -94,13 +88,23 @@ public class LogicManagerTest {
         ClubLogisticsData saved = new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow());
         assertEquals(model.getClubLogisticsData(), saved);
 
-        assertCommandException("add-equipment cam001 Other Camera",
+        assertCommandException("add cam001 Other Camera",
                 String.format(AddEquipmentCommand.MESSAGE_DUPLICATE_EQUIPMENT, "cam001"));
         assertEquals(saved, new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
 
         logic.execute("clear");
         assertEquals(List.of(), equipment);
         assertEquals(new ClubLogisticsData(), new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
+    }
+
+    @Test
+    public void execute_contactAddSyntax_preservesModelAndDoesNotSave() {
+        model.addPerson(AMY);
+        assertParseException("add n/John Doe p/98765432 e/john@example.com a/Main Street",
+                EquipmentId.MESSAGE_CONSTRAINTS);
+        assertEquals(List.of(AMY), model.getClubLogisticsData().getPersonList());
+        assertEquals(List.of(), model.getEquipmentList());
+        assertFalse(java.nio.file.Files.exists(temporaryFolder.resolve("clubLogisticsData.json")));
     }
 
     @Test
@@ -197,11 +201,10 @@ public class LogicManagerTest {
         logic = new LogicManager(model, storage);
 
         // Triggers the saveClubLogisticsData method by executing an add command
-        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
-        Person expectedPerson = new PersonBuilder(AMY).withTags().build();
+        String addCommand = "add CAM001 Sony Camera";
+        Equipment expectedEquipment = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
         ModelManager expectedModel = new ModelManager();
-        expectedModel.addPerson(expectedPerson);
+        expectedModel.addEquipment(expectedEquipment);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
     }
 }
