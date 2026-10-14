@@ -115,6 +115,26 @@ On a fresh installation without a saved data file, `CAM001`, `MIC001`, and `PROJ
 Use `add` to register equipment and `list` to show all equipment.
 To try issuing equipment with an existing data file, see [Editing the data file](#editing-the-data-file).
 
+### Returning equipment: `return`
+
+Records that an issued equipment item has been returned, making it available again.
+
+Format: `return <equipment-id>`
+
+* Equipment IDs contain 1–20 letters or digits and are matched without regard to capitalization.
+* The item must exist and be currently issued. Returning an item that is already available is rejected.
+* After a successful return, the item is no longer associated with its previous holder.
+* The updated status is saved automatically and retained when the application restarts.
+
+Example: `return cam001`
+
+Successful output:
+
+```text
+Equipment CAM001 returned successfully.
+CAM001 | Sony Camera | Available
+```
+
 ### Listing all equipment: `list`
 
 Shows the ID, name and status of every equipment item in the equipment register.
@@ -235,5 +255,6 @@ Action | Format, Examples
 **Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
 **Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **Issue equipment** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
+**Return equipment** | `return <equipment-id>`<br> e.g., `return CAM001`
 **List** | `list`
 **Help** | `help`

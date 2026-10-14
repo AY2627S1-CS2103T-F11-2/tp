@@ -83,6 +83,18 @@ public class Equipment {
         return new Equipment(id, name, EquipmentStatus.ISSUED, borrower);
     }
 
+    /**
+     * Returns an available copy with no borrower, leaving this record unchanged.
+     *
+     * @throws IllegalStateException if this equipment is not currently issued.
+     */
+    public Equipment markReturned() {
+        if (!isIssued()) {
+            throw new IllegalStateException("Equipment " + id + " is not currently issued.");
+        }
+        return new Equipment(id, name);
+    }
+
     @Override
     public String toString() {
         String displayStatus = isIssued() ? "Issued to: " + issuedTo : "Available";

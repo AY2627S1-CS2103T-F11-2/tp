@@ -71,6 +71,25 @@ public class EquipmentTest {
     }
 
     @Test
+    public void markReturned_issuedEquipment_returnsAvailableCopy() {
+        Equipment issued = new Equipment(cameraId, "Sony Camera", borrower);
+        Equipment returned = issued.markReturned();
+        assertTrue(issued.isIssued());
+        assertEquals(Optional.of(borrower), issued.getIssuedTo());
+        assertFalse(returned.isIssued());
+        assertEquals(Optional.empty(), returned.getIssuedTo());
+        assertEquals(new Equipment(cameraId, "Sony Camera"), returned);
+        assertEquals("CAM001 | Sony Camera | Available", returned.toString());
+    }
+
+    @Test
+    public void markReturned_availableEquipment_throwsIllegalStateException() {
+        Equipment available = new Equipment(cameraId, "Sony Camera");
+        assertThrows(IllegalStateException.class, available::markReturned);
+        assertFalse(available.isIssued());
+    }
+
+    @Test
     public void equals_allFields_comparesIdNameAndBorrower() {
         Equipment equipment = new Equipment(cameraId, "Sony Camera", borrower);
         Equipment sameEquipment = new Equipment(new EquipmentId("cam001"), "Sony Camera", borrower);
