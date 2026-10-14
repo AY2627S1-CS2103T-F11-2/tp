@@ -6,11 +6,12 @@ import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.EquipmentName;
 
-/** Parses arguments for the equipment form of the add command. */
+/** Parses arguments for the add-equipment command. */
 public class AddEquipmentCommandParser implements Parser<AddEquipmentCommand> {
 
     public static final String MESSAGE_USAGE =
-            "Error: Invalid command format. Usage: add <equipment-id> <equipment-name>";
+            "Error: Invalid command format. Usage: " + AddEquipmentCommand.COMMAND_WORD
+                    + " <equipment-id> <equipment-name>";
 
     @Override
     public AddEquipmentCommand parse(String args) throws ParseException {

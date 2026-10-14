@@ -50,6 +50,11 @@ public class ModelManager implements Model {
     }
 
     @Override
+    public ObservableList<Equipment> getEquipmentList() {
+        return addressBook.getEquipmentList();
+    }
+
+    @Override
     public GuiSettings getGuiSettings() {
         return userPrefs.getGuiSettings();
     }

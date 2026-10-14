@@ -57,24 +57,19 @@ public interface Model {
     void addPerson(Person person);
 
     /** Returns true if equipment with the same ID exists in the equipment register. */
-    default boolean hasEquipment(Equipment equipment) {
-        throw new UnsupportedOperationException("Equipment is not supported by this model");
-    }
+    boolean hasEquipment(Equipment equipment);
 
     /** Adds the given equipment to the equipment register. */
-    default void addEquipment(Equipment equipment) {
-        throw new UnsupportedOperationException("Equipment is not supported by this model");
-    }
+    void addEquipment(Equipment equipment);
 
     /** Returns the equipment with the given case-insensitive ID, if present. */
-    default Optional<Equipment> findEquipment(EquipmentId id) {
-        throw new UnsupportedOperationException("Equipment is not supported by this model");
-    }
+    Optional<Equipment> findEquipment(EquipmentId id);
 
     /** Removes the given equipment from the equipment register. {@code equipment} must exist. */
-    default void removeEquipment(Equipment equipment) {
-        throw new UnsupportedOperationException("Equipment is not supported by this model");
-    }
+    void removeEquipment(Equipment equipment);
+
+    /** Returns an unmodifiable observable view of all registered equipment. */
+    ObservableList<Equipment> getEquipmentList();
 
     /**
      * Replaces the given person {@code target} with {@code editedPerson}.

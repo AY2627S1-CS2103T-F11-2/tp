@@ -12,7 +12,11 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
+import seedu.address.model.equipment.EquipmentName;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.testutil.AddressBookBuilder;
 
@@ -71,6 +75,20 @@ public class ModelManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void getEquipmentList_modelChanges_updatesExistingView() {
+        ObservableList<Equipment> equipment = modelManager.getEquipmentList();
+        Equipment camera = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
+        modelManager.addEquipment(camera);
+        assertEquals(List.of(camera), equipment);
+        assertThrows(UnsupportedOperationException.class, () -> equipment.remove(camera));
+        modelManager.removeEquipment(camera);
+        assertTrue(equipment.isEmpty());
+        modelManager.addEquipment(camera);
+        modelManager.setAddressBook(new AddressBook());
+        assertTrue(equipment.isEmpty());
     }
 
     @Test

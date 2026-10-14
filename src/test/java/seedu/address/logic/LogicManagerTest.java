@@ -13,20 +13,28 @@ import static seedu.address.testutil.TypicalPersons.AMY;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import javafx.collections.ObservableList;
 import seedu.address.logic.commands.AddCommand;
+import seedu.address.logic.commands.AddEquipmentCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.equipment.Equipment;
+import seedu.address.model.equipment.EquipmentId;
+import seedu.address.model.equipment.EquipmentName;
+import seedu.address.model.equipment.EquipmentStatus;
 import seedu.address.model.person.Person;
 import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
@@ -68,6 +76,30 @@ public class LogicManagerTest {
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_SUCCESS, model);
+    }
+
+    @Test
+    public void execute_addEquipment_updatesViewAndPersistsWithContacts() throws Exception {
+        model.addPerson(AMY);
+        ObservableList<Equipment> equipment = logic.getEquipmentList();
+        CommandResult result = logic.execute("add-equipment CAM001 Sony Camera");
+        Equipment camera = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
+        assertEquals("Equipment CAM001 added successfully.", result.getFeedbackToUser());
+        assertEquals(List.of(camera), equipment);
+        assertEquals(EquipmentStatus.AVAILABLE, equipment.get(0).getStatus());
+        assertThrows(UnsupportedOperationException.class, () -> equipment.remove(camera));
+
+        JsonAddressBookStorage storage = new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
+        AddressBook saved = new AddressBook(storage.readAddressBook().orElseThrow());
+        assertEquals(model.getAddressBook(), saved);
+
+        assertCommandException("add-equipment cam001 Other Camera",
+                String.format(AddEquipmentCommand.MESSAGE_DUPLICATE_EQUIPMENT, "cam001"));
+        assertEquals(saved, new AddressBook(storage.readAddressBook().orElseThrow()));
+
+        logic.execute("clear");
+        assertEquals(List.of(), equipment);
+        assertEquals(new AddressBook(), new AddressBook(storage.readAddressBook().orElseThrow()));
     }
 
     @Test

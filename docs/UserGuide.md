@@ -87,6 +87,21 @@ Examples:
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
 
+### Adding equipment: `add-equipment`
+
+Registers an equipment item and displays it immediately in the Equipment panel.
+
+Format: `add-equipment EQUIPMENT_ID EQUIPMENT_NAME`
+
+* IDs contain 1–20 letters or digits. IDs are unique regardless of case:
+  `CAM001` and `cam001` refer to the same equipment.
+* Names contain 1–50 characters after whitespace is normalised. Names can
+  contain spaces, and different items may share a name.
+* New equipment has the status `Available` and is saved automatically alongside contacts.
+* Use `add` for contacts and `add-equipment` for equipment.
+
+Example: `add-equipment CAM001 Sony Camera`
+
 ### Listing all persons: `list`
 
 Shows a list of all persons in the address book.
@@ -142,7 +157,7 @@ Examples:
 
 ### Clearing all entries: `clear`
 
-Clears all entries from the address book.
+Clears all contacts and equipment from the address book.
 
 Format: `clear`
 
@@ -189,6 +204,7 @@ _Details coming soon ..._
 
 Action | Format, Examples
 --------|------------------
+**Add equipment** | `add-equipment EQUIPMENT_ID EQUIPMENT_NAME` <br> e.g., `add-equipment CAM001 Sony Camera`
 **Add** | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]…​` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear** | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`

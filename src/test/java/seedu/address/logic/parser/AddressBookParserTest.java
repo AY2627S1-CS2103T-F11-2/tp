@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.AddCommand;
+import seedu.address.logic.commands.AddEquipmentCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
@@ -23,7 +24,9 @@ import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RemoveCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
+import seedu.address.model.equipment.EquipmentName;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
@@ -39,6 +42,29 @@ public class AddressBookParserTest {
         Person person = new PersonBuilder().build();
         AddCommand command = (AddCommand) parser.parseCommand(PersonUtil.getAddCommand(person));
         assertEquals(new AddCommand(person), command);
+    }
+
+    @Test
+    public void parseCommand_addContactWithNameLast_success() throws Exception {
+        assertEquals(parser.parseCommand("add n/John Doe p/98765432 e/john@example.com a/Main Street"),
+                parser.parseCommand("add p/98765432 e/john@example.com a/Main Street n/John Doe"));
+    }
+
+    @Test
+    public void parseCommand_addEquipment_success() throws Exception {
+        Equipment camera = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
+        assertEquals(new AddEquipmentCommand(camera), parser.parseCommand("add-equipment CAM001 Sony Camera"));
+    }
+
+    @Test
+    public void parseCommand_addEquipmentMissingArguments_throwsParseException() {
+        assertThrows(ParseException.class, AddEquipmentCommandParser.MESSAGE_USAGE, ()
+                -> parser.parseCommand("add-equipment"));
+    }
+
+    @Test
+    public void parseCommand_equipmentWithContactCommand_throwsParseException() {
+        assertThrows(ParseException.class, () -> parser.parseCommand("add CAM001 Sony Camera"));
     }
 
     @Test
