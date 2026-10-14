@@ -3,7 +3,9 @@ layout: page
 title: User Guide
 ---
 
-ClubLogistics Level 3 (AB3) is a **desktop application for managing contacts, optimized for use through a Command Line Interface (CLI)** while retaining the benefits of a Graphical User Interface (GUI). If you type quickly, AB3 can help you manage contacts faster than traditional GUI applications.
+ClubLogistics is a **command-line application for student club logistics coordinators** to track the club's reusable
+equipment and see who each item is currently issued to. Every action is performed by typing a command, so if you type
+quickly, ClubLogistics lets you record loans and returns faster than a spreadsheet or a paper log.
 
 * Table of Contents
 {:toc}
@@ -15,28 +17,44 @@ ClubLogistics Level 3 (AB3) is a **desktop application for managing contacts, op
 1. Ensure that Java `25` or later is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. Download the latest `.jar` file from [here](https://github.com/se-edu/addressbook-level3/releases).
+1. Download the latest `.jar` file from [here](https://github.com/AY2627S1-CS2103T-F11-2/tp/releases).
 
-1. Copy the file to the folder you want to use as the _home folder_ for your ClubLogistics.
+1. Copy the file to the folder you want to use as the _home folder_ for ClubLogistics.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
-   A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
-   ![Ui](images/Ui.png)
+   The application window opens in a few seconds. On the first run, it contains three sample equipment items:
+   `CAM001`, `MIC001`, and `PROJ001`.
 
-1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
-   Some example commands you can try:
+1. Type a command in the command box and press Enter to execute it. Some example commands you can try:
 
-   * `list` : Lists all registered equipment.
+   * `list` : Lists all equipment and shows whether each item is available or issued.
 
-   * `add CAM001 Sony Camera` : Registers a Sony Camera with equipment ID `CAM001`.
+   * `add TRI001 Manfrotto Tripod` : Adds a tripod with the ID `TRI001`.
 
-   * `delete 3` : Deletes the 3rd contact shown in the current list.
+   * `issue CAM001 John Tan` : Records that `CAM001` is now held by John Tan.
 
-   * `clear` : Deletes all contacts.
+   * `return CAM001` : Records that `CAM001` has been returned.
+
+   * `remove TRI001` : Removes the tripod from the equipment register.
 
    * `exit` : Exits the app.
 
 1. Refer to the [Features](#features) section below for details of each command.
+
+--------------------------------------------------------------------------------------------------------------------
+
+## Equipment records
+
+Each equipment record contains:
+
+* **Equipment ID**: the unique identifier of the item, such as `CAM001`.
+* **Equipment name**: a human-readable name, such as `Sony Camera`.
+* **Issued to**: the person currently holding the item. This is empty when the item is available.
+
+Every item has one of two statuses:
+
+* **Available**: the item is not issued to anyone. Newly added items start as available.
+* **Issued**: the item is held by the person recorded in its _Issued to_ field.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -46,64 +64,132 @@ ClubLogistics Level 3 (AB3) is a **desktop application for managing contacts, op
 
 **:information_source: Notes about the command format:**<br>
 
-* Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
-  For example, in `add EQUIPMENT_ID EQUIPMENT_NAME`, use `add CAM001 Sony Camera`.
+* Words in angle brackets are parameters to be supplied by you.<br>
+  For example, in `return <equipment-id>`, replace `<equipment-id>` with a value such as `CAM001`.
 
-* Items in square brackets are optional.<br>
-  For example, `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
+* Parameters must be given in the order shown in the command format.
 
-* Items followed by `…`​ can appear zero or more times.<br>
-  For example, `[t/TAG]…​` may be omitted, or written as `t/friend` or `t/friend t/family`.
-
-* Prefixed parameters can be in any order.<br>
-  For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
-
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
-  For example, `help 123` is interpreted as `help`.
+* Every parameter is required. A missing or extra parameter is rejected with an error showing the correct usage,
+  such as `Error: Invalid command format. Usage: return <equipment-id>`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </div>
 
-### Viewing help: `help`
+<div markdown="block" class="alert alert-info">
 
-Shows a message explaining how to access the help page.
+**:information_source: Equipment ID rules (shared by all commands):**<br>
 
-![help message](images/helpMessage.png)
-
-Format: `help`
-
+* An equipment ID has 1–20 characters, consisting only of letters (A–Z, a–z) and digits (0–9).
+  Spaces and special characters are not allowed.
+* Leading and trailing spaces are ignored.
+* IDs are matched without regard to capitalization, so `CAM001` and `cam001` refer to the same item.
+* An invalid ID is rejected with
+  `Error: Equipment ID must contain only letters and numbers and cannot contain spaces.`
+</div>
 
 ### Adding equipment: `add`
 
-Registers an equipment item and displays it immediately in the Equipment panel.
+Adds a new item to the equipment register. The new item is available and is not issued to anyone.
 
-Format: `add EQUIPMENT_ID EQUIPMENT_NAME`
+Format: `add <equipment-id> <equipment-name>`
 
-* IDs contain 1–20 letters or digits. IDs are unique regardless of case:
-  `CAM001` and `cam001` refer to the same equipment.
-* Names contain 1–50 characters after whitespace is normalised. Names can
-  contain spaces, and different items may share a name.
-* New equipment has the status `Available` and is saved automatically alongside contacts.
-* Contact-style input such as `add n/NAME p/PHONE_NUMBER` is not supported.
+* The equipment ID must follow the [equipment ID rules](#features) and must not already be in use.
+* The equipment name has 1–50 characters. Letters, digits, spaces, and common punctuation such as `-`, `/`, and `'`
+  are allowed. All text after the ID is treated as the name.
+* Leading and trailing spaces are removed from the name, and consecutive spaces are combined into one.
+  The name is displayed with the capitalization you entered.
+* Several items may share a name as long as their IDs differ, since the club may own several identical items.
 
-Example: `add CAM001 Sony Camera`
+Examples:
+* `add CAM001 Sony Camera`
+* `add MIC001 Wireless Microphone`
+* `add PROJ001 Epson Projector`
+
+Successful output:
+
+```text
+Equipment CAM001 added successfully.
+```
+
+Possible errors:
+
+Situation | Error message
+----------|--------------
+The ID is already in use (ignoring capitalization) | `Error: Equipment with ID CAM001 already exists.`
+The ID is invalid | `Error: Equipment ID must contain only letters and numbers and cannot contain spaces.`
+The name is empty or too long | `Error: Equipment name cannot be empty and must be 1–50 characters long.`
+A parameter is missing | `Error: Invalid command format. Usage: add <equipment-id> <equipment-name>`
+
+### Removing equipment: `remove`
+
+Removes an item from the equipment register. Use this to correct an item that was added by mistake, or to stop
+tracking an item the club no longer owns.
+
+Format: `remove <equipment-id>`
+
+* The equipment ID must follow the [equipment ID rules](#features).
+* The item must exist and be available. An issued item cannot be removed, so that its current holder is not lost.
+  [Return](#returning-equipment-return) the item first.
+
+Example: `remove CAM001`
+
+Successful output:
+
+```text
+Equipment CAM001 removed successfully.
+```
+
+Possible errors:
+
+Situation | Error message
+----------|--------------
+No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
+The item is currently issued | `Error: Equipment CAM001 is currently issued to John Tan and cannot be removed.`
+A parameter is missing or extra | `Error: Invalid command format. Usage: remove <equipment-id>`
+
+### Listing all equipment: `list`
+
+Shows every item in the equipment register and whether it is available or issued. For an issued item, the person
+currently holding it is shown.
+
+The equipment panel in the application window always shows each item as `Available` or `Issued to: <person-name>`,
+and updates immediately after an item is added, removed, issued, or returned.
+
+Format: `list`
+
+Example output:
+
+ID | Name | Status
+---|------|-------
+CAM001 | Sony Camera | Available
+MIC001 | Wireless Microphone | Issued to: John Tan
+PROJ001 | Epson Projector | Available
+
+Possible errors:
+
+Situation | Message
+----------|--------
+The register is empty | `No equipment found.`
+A parameter is supplied | `Error: Invalid command format. Usage: list`
 
 ### Issuing equipment: `issue`
 
-Records who currently holds an available equipment item.
+Records that an item has been issued to a person. The item is no longer available, and the person is recorded as
+its current holder.
 
 Format: `issue <equipment-id> <person-name>`
 
-* Supply the equipment ID first. All text after the ID is treated as the person's name, including spaces.
-* Equipment IDs contain 1–20 letters or digits and are matched without regard to capitalization.
-* Person names contain 1–50 letters or spaces. Leading and trailing spaces are removed, and consecutive spaces
-  are combined. Digits and punctuation are rejected.
-* An item must exist and be available. Issuing an item that is already issued is rejected, preserving its current holder.
-* Different items can be issued to the same person. You do not need to add the person as a contact first.
-* The current holder is saved automatically and retained when the application restarts.
-* Equipment cards show `Available` or `Issued to: PERSON`. The status updates immediately after issuing equipment.
+* The equipment ID must follow the [equipment ID rules](#features).
+* All text after the ID is treated as the person's name, including spaces.
+* The person's name has 1–50 characters and contains only letters and spaces. Digits and punctuation are rejected.
+  Leading and trailing spaces are removed, and consecutive spaces are combined into one.
+* The item must exist and be available. Each item can have only one holder at a time, so issuing an item that is
+  already issued is rejected and its current holder is kept.
+* Different items can be issued to the same person.
 
-Example: `issue cam001 John Tan`
+Examples:
+* `issue CAM001 John Tan`
+* `issue PROJ001 Alice Lim`
 
 Successful output:
 
@@ -112,68 +198,41 @@ Equipment CAM001 issued to John Tan.
 CAM001 | Sony Camera | Issued to: John Tan
 ```
 
-On a fresh installation without a saved data file, `CAM001`, `MIC001`, and `PROJ001` are available sample equipment.
-Use `add CAM002 Sony Camera` to register another equipment item and `list` to show every equipment item and its current holder.
-To try issuing equipment with an existing data file, see [Editing the data file](#editing-the-data-file).
+Possible errors:
 
-### Listing all equipment: `list`
+Situation | Error message
+----------|--------------
+No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
+The item is already issued | `Error: Equipment CAM001 is already issued to John Tan.`
+The person's name is invalid | `Error: Person name must contain only letters and spaces and be 1–50 characters long.`
+A parameter is missing | `Error: Invalid command format. Usage: issue <equipment-id> <person-name>`
 
-Shows the ID, name, and availability or current borrower of every equipment item in the equipment register.
+### Returning equipment: `return`
 
-Format: `list`
+Records that an issued item has been returned. The item becomes available and is no longer associated with any
+person.
 
-### Editing a person: `edit`
+Format: `return <equipment-id>`
 
-Edits an existing person in the address book.
+* The equipment ID must follow the [equipment ID rules](#features).
+* The item must exist and be currently issued.
 
-Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`
+Example: `return CAM001`
 
-* Edits the person at the specified `INDEX`. The index refers to the index number shown in the displayed person list. The index **must be a positive integer** 1, 2, 3, …​
-* At least one of the optional fields must be provided.
-* Existing values will be updated to the input values.
-* When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
-* To remove all of a person's tags, enter `t/` without a tag after it.
+Successful output:
 
-Examples:
-*  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+```text
+Equipment CAM001 returned successfully.
+CAM001 | Sony Camera | Available
+```
 
-### Locating persons by name: `find`
+Possible errors:
 
-Finds persons whose names contain any of the given keywords.
-
-Format: `find KEYWORD [MORE_KEYWORDS]`
-
-* The search is case-insensitive; for example, `hans` matches `Hans`.
-* Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
-* The search considers only names.
-* Only full words match; for example, `Han` does not match `Hans`.
-* Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
-
-Examples:
-* `find John` returns `john` and `John Doe`
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
-
-### Deleting a person: `delete`
-
-Deletes the specified person from the address book.
-
-Format: `delete INDEX`
-
-* Deletes the person at the specified `INDEX`.
-* The index refers to the index number shown in the displayed person list.
-* The index **must be a positive integer** 1, 2, 3, …​
-
-Examples:
-* `list` followed by `delete 2` deletes the 2nd person in the address book.
-* `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
-
-### Clearing all entries: `clear`
-
-Clears all contacts and equipment from the address book.
-
-Format: `clear`
+Situation | Error message
+----------|--------------
+No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
+The item is already available | `Error: Equipment CAM001 is not currently issued.`
+A parameter is missing or extra | `Error: Invalid command format. Usage: return <equipment-id>`
 
 ### Exiting the program: `exit`
 
@@ -183,32 +242,29 @@ Format: `exit`
 
 ### Saving the data
 
-ClubLogistics automatically saves data after every command. You do not need to save manually.
+ClubLogistics saves the equipment register automatically after every successful command. You do not need to
+save manually, and the data is retained when you restart the application.
 
 ### Editing the data file
 
-ClubLogistics data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+The equipment register is saved as a JSON file at `[JAR file location]/data/addressbook.json`. Advanced users are
+welcome to update the data directly by editing that file.
 
-Equipment is stored in the top-level `equipment` array. Existing files without this array are supported and have no
-equipment records. To add a test item, close the application and add the following field to the existing JSON object,
-separated from other fields by a comma:
+Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, and an `issuedTo` value:
 
 ```json
 "equipment": [
-  { "id": "CAM001", "name": "Sony Camera", "issuedTo": null }
+  { "id": "CAM001", "name": "Sony Camera", "issuedTo": null },
+  { "id": "MIC001", "name": "Wireless Microphone", "issuedTo": "John Tan" }
 ]
 ```
 
-An empty or null `issuedTo` value means the item is available. A valid person's name means it is already issued.
+An empty or null `issuedTo` value means the item is available. A valid person's name means it is issued to that person.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If your changes make the data file invalid, ClubLogistics starts with an empty address book at the next run. The invalid file remains on disk until you run a command (ClubLogistics saves after every command). Still, we recommend backing up the file before editing it.<br>
-Furthermore, certain edits can cause the ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. The invalid file remains on disk until you run a command (ClubLogistics saves after every command). We recommend backing up the file before editing it.<br>
+Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
-
-### Archiving data files `[coming in v2.0]`
-
-_Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -217,12 +273,14 @@ _Details coming soon ..._
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous ClubLogistics home folder.
 
+**Q**: Do I need to register a person before issuing equipment to them?<br>
+**A**: No. ClubLogistics only records the name of the person currently holding each item, so you can issue equipment to anyone by name.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## Known issues
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
-2. **If you minimize the Help Window** and then run the `help` command (or use the `Help` menu, or the keyboard shortcut `F1`) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -230,11 +288,9 @@ _Details coming soon ..._
 
 Action | Format, Examples
 --------|------------------
-**Add equipment** | `add EQUIPMENT_ID EQUIPMENT_NAME` <br> e.g., `add CAM001 Sony Camera`
-**Clear** | `clear`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
-**Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
-**Issue equipment** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
+**Add** | `add <equipment-id> <equipment-name>`<br> e.g., `add CAM001 Sony Camera`
+**Remove** | `remove <equipment-id>`<br> e.g., `remove CAM001`
 **List** | `list`
-**Help** | `help`
+**Issue** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
+**Return** | `return <equipment-id>`<br> e.g., `return CAM001`
+**Exit** | `exit`
