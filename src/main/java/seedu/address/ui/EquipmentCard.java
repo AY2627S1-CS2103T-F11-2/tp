@@ -26,7 +26,5 @@ public class EquipmentCard extends UiPart<Region> {
         name.setText(equipment.getName().toString());
         status.setText("Status: " + equipment.getStatus());
         borrower.setText(equipment.getDisplayStatus());
-        borrower.setVisible(equipment.isIssued());
-        borrower.setManaged(equipment.isIssued());
     }
 }

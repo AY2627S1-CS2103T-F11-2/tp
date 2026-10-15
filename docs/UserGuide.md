@@ -113,7 +113,7 @@ CAM001 | Sony Camera | Issued to: John Tan
 ```
 
 On a fresh installation without a saved data file, `CAM001`, `MIC001`, and `PROJ001` are available sample equipment.
-Use `add CAM001 Sony Camera` to register equipment and `list` to show every equipment item and its current holder.
+Use `add CAM002 Sony Camera` to register another equipment item and `list` to show every equipment item and its current holder.
 To try issuing equipment with an existing data file, see [Editing the data file](#editing-the-data-file).
 
 ### Listing all equipment: `list`
