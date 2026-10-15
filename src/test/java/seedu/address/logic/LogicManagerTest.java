@@ -69,7 +69,12 @@ public class LogicManagerTest {
     @Test
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
-        assertCommandSuccess(listCommand, ListCommand.MESSAGE_SUCCESS, model);
+        assertCommandSuccess(listCommand, ListCommand.MESSAGE_EMPTY_REGISTER, model);
+    }
+
+    @Test
+    public void execute_listWithExtraArguments_throwsParseException() {
+        assertParseException(ListCommand.COMMAND_WORD + " 3", ListCommand.MESSAGE_INVALID_COMMAND_FORMAT);
     }
 
     @Test
