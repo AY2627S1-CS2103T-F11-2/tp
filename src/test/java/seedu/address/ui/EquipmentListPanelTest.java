@@ -10,8 +10,10 @@ import org.junit.jupiter.api.Test;
 
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import seedu.address.logic.commands.IssueCommand;
 import seedu.address.model.ClubLogisticsData;
 import seedu.address.model.ModelManager;
+import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.EquipmentName;
@@ -57,4 +59,22 @@ public class EquipmentListPanelTest extends JavaFxTest {
             assertNull(cell.getText());
         });
     }
+
+    /** Verifies issuing equipment refreshes the current borrower in an existing cell. */
+    @Test
+    public void issueCommand_updatesRenderedBorrower() throws Exception {
+        runOnFxThread(() -> {
+            ModelManager model = new ModelManager();
+            model.addEquipment(CAMERA);
+            EquipmentListPanel panel = new EquipmentListPanel(model.getFilteredEquipmentList());
+            @SuppressWarnings("unchecked")
+            ListView<Equipment> list = (ListView<Equipment>) panel.getRoot().lookup("#equipmentListView");
+            javafx.scene.control.ListCell<Equipment> cell = list.getCellFactory().call(list);
+            cell.updateListView(list);
+            cell.updateIndex(0);
+            new IssueCommand(new EquipmentId("cam001"), new BorrowerName("John Tan")).execute(model);
+            assertEquals("Issued to: John Tan", ((Label) cell.getGraphic().lookup("#borrower")).getText());
+        });
+    }
+
 }

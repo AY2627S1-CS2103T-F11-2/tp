@@ -16,6 +16,34 @@ public class EquipmentTest {
     private final BorrowerName borrower = new BorrowerName("John Tan");
 
     @Test
+    public void constructor_statusAndBorrower_mustAgree() {
+        EquipmentName name = new EquipmentName("Sony Camera");
+        Equipment available = new Equipment(cameraId, name, EquipmentStatus.AVAILABLE);
+        assertFalse(available.isIssued());
+        assertEquals(Optional.empty(), available.getIssuedTo());
+        assertThrows(IllegalArgumentException.class, ()
+                -> new Equipment(cameraId, name, EquipmentStatus.ISSUED));
+        assertThrows(IllegalArgumentException.class, ()
+                -> new Equipment(cameraId, name, EquipmentStatus.AVAILABLE, borrower));
+    }
+
+    @Test
+    public void getDisplayStatus_availableAndIssued_showsCurrentHolder() {
+        Equipment available = new Equipment(cameraId, "Sony Camera");
+        assertEquals("Available", available.getDisplayStatus());
+        assertEquals("Issued to: John Tan", available.issueTo(borrower).getDisplayStatus());
+    }
+
+    @Test
+    public void isSameEquipment_comparesOnlyCaseInsensitiveIdentity() {
+        Equipment available = new Equipment(cameraId, "Sony Camera");
+        Equipment sameId = new Equipment(new EquipmentId("cam001"), "Different name", borrower);
+        assertTrue(available.isSameEquipment(sameId));
+        assertFalse(available.isSameEquipment(new Equipment(new EquipmentId("MIC001"), "Sony Camera")));
+        assertFalse(available.isSameEquipment(null));
+    }
+
+    @Test
     public void constructor_nullFields_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Equipment(null, "Sony Camera"));
         assertThrows(NullPointerException.class, () -> new Equipment(cameraId, (String) null));
