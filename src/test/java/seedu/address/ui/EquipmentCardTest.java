@@ -20,7 +20,7 @@ public class EquipmentCardTest extends JavaFxTest {
             EquipmentCard card = new EquipmentCard(equipment);
             assertEquals("CAM001", ((Label) card.getRoot().lookup("#equipmentId")).getText());
             assertEquals("Sony Camera", ((Label) card.getRoot().lookup("#name")).getText());
-            assertEquals("Status: Available", ((Label) card.getRoot().lookup("#status")).getText());
+            assertEquals(3, card.getRoot().lookupAll(".label").size());
             Label borrower = (Label) card.getRoot().lookup("#borrower");
             assertEquals("Available", borrower.getText());
             assertTrue(borrower.isVisible());
@@ -33,7 +33,7 @@ public class EquipmentCardTest extends JavaFxTest {
         runOnFxThread(() -> {
             Equipment camera = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
             EquipmentCard card = new EquipmentCard(camera.issueTo(new BorrowerName("John Tan")));
-            assertEquals("Status: Issued", ((Label) card.getRoot().lookup("#status")).getText());
+            assertEquals(3, card.getRoot().lookupAll(".label").size());
             Label borrower = (Label) card.getRoot().lookup("#borrower");
             assertEquals("Issued to: John Tan", borrower.getText());
             assertTrue(borrower.isVisible());

@@ -46,7 +46,7 @@ public class MainWindowTest extends JavaFxTest {
                 root.applyCss();
                 root.layout();
                 assertEquals(model.getEquipmentList(), equipment.getItems());
-                for (String text : List.of("CAM001", "Sony Camera", "Status: Available")) {
+                for (String text : List.of("CAM001", "Sony Camera", "Available")) {
                     assertTrue(equipment.lookupAll(".label").stream()
                             .anyMatch(node -> node instanceof Label label && text.equals(label.getText())),
                             "Missing equipment label: " + text);
@@ -59,7 +59,8 @@ public class MainWindowTest extends JavaFxTest {
                 root.applyCss();
                 root.layout();
                 assertTrue(equipment.lookupAll(".label").stream()
-                        .anyMatch(node -> node instanceof Label label && "Status: Issued".equals(label.getText())));
+                        .anyMatch(node -> node instanceof Label label
+                                && "Issued to: John Tan".equals(label.getText())));
                 logic.execute("clear");
                 assertTrue(equipment.getItems().isEmpty());
                 logic.execute("add CAM001 Sony Camera");

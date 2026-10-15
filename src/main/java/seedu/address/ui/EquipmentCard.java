@@ -14,9 +14,6 @@ public class EquipmentCard extends UiPart<Region> {
     @FXML
     private Label name;
     @FXML
-    private Label status;
-
-    @FXML
     private Label borrower;
 
     /** Creates a card for the given equipment item. */
@@ -24,7 +21,6 @@ public class EquipmentCard extends UiPart<Region> {
         super(FXML);
         equipmentId.setText(equipment.getId().toString());
         name.setText(equipment.getName().toString());
-        status.setText("Status: " + equipment.getStatus());
         borrower.setText(equipment.getDisplayStatus());
     }
 }
