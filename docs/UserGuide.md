@@ -147,6 +147,26 @@ No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
 The item is currently issued | `Error: Equipment CAM001 is currently issued to John Tan and cannot be removed.`
 A parameter is missing or extra | `Error: Invalid command format. Usage: remove <equipment-id>`
 
+### Returning equipment: `return`
+
+Records that an issued equipment item has been returned, making it available again.
+
+Format: `return <equipment-id>`
+
+* Equipment IDs contain 1–20 letters or digits and are matched without regard to capitalization.
+* The item must exist and be currently issued. Returning an item that is already available is rejected.
+* After a successful return, the item is no longer associated with its previous holder.
+* The updated status is saved automatically and retained when the application restarts.
+
+Example: `return cam001`
+
+Successful output:
+
+```text
+Equipment CAM001 returned successfully.
+CAM001 | Sony Camera | Available
+```
+
 ### Listing all equipment: `list`
 
 Shows every item in the equipment register and whether it is available or issued. For an issued item, the person
@@ -288,8 +308,13 @@ Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways 
 
 Action | Format, Examples
 --------|------------------
-**Add** | `add <equipment-id> <equipment-name>`<br> e.g., `add CAM001 Sony Camera`
-**Remove** | `remove <equipment-id>`<br> e.g., `remove CAM001`
+**Add equipment** | `add EQUIPMENT_ID EQUIPMENT_NAME` <br> e.g., `add CAM001 Sony Camera`
+**Clear** | `clear`
+**Delete** | `delete INDEX`<br> e.g., `delete 3`
+**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
+**Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Issue equipment** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
+**Return equipment** | `return <equipment-id>`<br> e.g., `return CAM001`
 **List** | `list`
 **Issue** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
 **Return** | `return <equipment-id>`<br> e.g., `return CAM001`
