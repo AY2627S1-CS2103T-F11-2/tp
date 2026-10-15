@@ -69,6 +69,11 @@ public class Equipment {
         return status == EquipmentStatus.ISSUED;
     }
 
+    /** Returns the availability or current borrower shown in command output and equipment cards. */
+    public String getDisplayStatus() {
+        return isIssued() ? "Issued to: " + issuedTo : "Available";
+    }
+
     /** Returns whether this equipment has the same ID as {@code other}. */
     public boolean isSameEquipment(Equipment other) {
         return other != null && id.isSameId(other.id);
@@ -97,8 +102,7 @@ public class Equipment {
 
     @Override
     public String toString() {
-        String displayStatus = isIssued() ? "Issued to: " + issuedTo : "Available";
-        return id + " | " + name + " | " + displayStatus;
+        return id + " | " + name + " | " + getDisplayStatus();
     }
 
     @Override
