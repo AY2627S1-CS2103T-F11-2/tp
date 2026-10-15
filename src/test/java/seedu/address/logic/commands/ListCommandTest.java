@@ -27,7 +27,7 @@ public class ListCommandTest {
 
     @Test
     public void execute_emptyRegister_showsEmptyList() {
-        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_EMPTY_REGISTER, expectedModel);
         assertEquals(0, model.getFilteredEquipmentList().size());
     }
 
