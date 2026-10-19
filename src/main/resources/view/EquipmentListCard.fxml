@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Circle?>
 
 <HBox id="cardPane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
   <VBox alignment="CENTER_LEFT" spacing="4" HBox.hgrow="ALWAYS">
@@ -12,6 +13,9 @@
     </padding>
     <Label fx:id="equipmentId" styleClass="cell_big_label" />
     <Label fx:id="name" styleClass="cell_small_label" wrapText="true" />
-    <Label fx:id="borrower" styleClass="cell_small_label" wrapText="true" />
+    <HBox alignment="CENTER_LEFT" spacing="8">
+      <Label fx:id="borrower" styleClass="cell_small_label" wrapText="true" />
+      <Circle fx:id="statusIndicator" radius="6" styleClass="status-indicator" />
+    </HBox>
   </VBox>
 </HBox>

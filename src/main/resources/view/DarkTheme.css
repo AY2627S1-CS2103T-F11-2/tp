@@ -132,6 +132,14 @@
     -fx-text-fill: #010504;
 }
 
+.status-available {
+    -fx-fill: #34c759;
+}
+
+.status-issued {
+    -fx-fill: #ff9500;
+}
+
 .stack-pane {
      -fx-background-color: derive(#1d1d1d, 20%);
 }
