@@ -104,10 +104,10 @@ public class ModelManager implements Model {
         return clubLogisticsData.hasEquipment(equipment);
     }
 
+    /** Adds equipment while preserving the currently selected equipment filter. */
     @Override
     public void addEquipment(Equipment equipment) {
         clubLogisticsData.addEquipment(equipment);
-        updateFilteredEquipmentList(PREDICATE_SHOW_ALL_EQUIPMENT);
     }
 
     @Override
