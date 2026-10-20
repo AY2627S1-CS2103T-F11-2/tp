@@ -18,6 +18,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.FilterCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.IssueCommand;
@@ -28,6 +29,7 @@ import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.EquipmentName;
+import seedu.address.model.equipment.EquipmentStatus;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
@@ -145,5 +147,17 @@ public class ClubLogisticsParserTest {
     public void parseCommand_returnMissingId_throwsParseException() {
         assertThrows(ParseException.class, ReturnCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
                 -> parser.parseCommand("return"));
+    }
+
+    @Test
+    public void parseCommand_filter() throws Exception {
+        assertEquals(new FilterCommand(EquipmentStatus.AVAILABLE), parser.parseCommand("filter AVAILABLE"));
+        assertEquals(new FilterCommand(EquipmentStatus.ISSUED), parser.parseCommand("filter issued"));
+    }
+
+    @Test
+    public void parseCommand_filterMissingStatus_throwsParseException() {
+        assertThrows(ParseException.class, FilterCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
+                -> parser.parseCommand("filter"));
     }
 }
