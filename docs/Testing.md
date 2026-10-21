@@ -32,7 +32,7 @@ Run tests with Java 25. On macOS, select it with
 To run only the UI tests:
 
 ```sh
-./gradlew test --tests 'seedu.address.ui.*'
+./gradlew test --tests 'seedu.clublogistics.ui.*'
 ```
 
 The UI tests require a graphical display. On Linux without a display,
@@ -57,8 +57,8 @@ cells, and the main window's connection to the command and model layers.
 This project has three types of tests:
 
 1. *Unit tests* target the lowest-level methods and classes.<br>
-   For example: `seedu.address.commons.StringUtilTest`
+   For example: `seedu.clublogistics.commons.util.StringUtilTest`
 1. *Integration tests* check how multiple code units work together; the individual units are assumed to work.<br>
-   For example: `seedu.address.storage.StorageManagerTest`
+   For example: `seedu.clublogistics.storage.StorageManagerTest`
 1. *Hybrid tests* combine unit and integration testing. These tests check both the individual units and how they work together.<br>
-   For example: `seedu.address.logic.LogicManagerTest`
+   For example: `seedu.clublogistics.logic.LogicManagerTest`
