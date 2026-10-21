@@ -82,8 +82,9 @@ The filter is a view preference for the running session and is not saved in the 
 
 ### Existing diagrams
 
-The diagrams below and their sources in `docs/diagrams` are retained unchanged. They have not yet been adapted
-to the equipment-only implementation; use the descriptions above and the source code for the current design.
+The diagrams below and their sources in `docs/diagrams` are retained unchanged, except for the Logic class diagram,
+which has been updated to the current design. The others have not yet been adapted to the equipment-only
+implementation; use the descriptions above and the source code for the current design.
 
 <img src="images/ArchitectureDiagram.png" width="280" />
 
@@ -93,7 +94,12 @@ to the equipment-only implementation; use the descriptions above and the source 
 
 ![Structure of the UI Component](images/UiClassDiagram.png)
 
-<img src="images/LogicClassDiagram.png" width="550"/>
+<img src="images/LogicClassDiagram.png" width="600"/>
+
+*Structure of the Logic component. `LogicManager` owns one `ClubLogisticsParser` (solid arrow), which creates command
+parsers (`XYZCommandParser`, such as `FilterCommandParser`), which in turn create concrete `Command` objects
+(dashed `<<create>>` arrows). `LogicManager` calls the resulting `Command`, which uses the `Model` and returns a
+`CommandResult`. The commands shown are a representative subset.*
 
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
 
