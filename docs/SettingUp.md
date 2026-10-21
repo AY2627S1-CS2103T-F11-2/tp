@@ -23,7 +23,7 @@ If you plan to use IntelliJ IDEA (highly recommended):
 1. **Import the project as a Gradle project**: Follow the guide [_[se-edu/guides] IDEA: Importing a Gradle project_](https://se-education.org/guides/tutorials/intellijImportGradleProject.html) to import the project into IDEA.<br>
   :exclamation: Note: Importing a Gradle project is slightly different from importing a normal Java project.
 1. **Verify the setup**:
-   1. Run `seedu.address.Main` and try a few commands.
+   1. Run `seedu.clublogistics.Main` and try a few commands.
    1. [Run the tests](Testing.md) to ensure they all pass.
 
 --------------------------------------------------------------------------------------------------------------------
@@ -45,11 +45,9 @@ If you plan to use IntelliJ IDEA (highly recommended):
 
 1. **Learn the design**
 
-   When you are ready to start coding, we recommend that you get some sense of the overall design by reading about [AddressBook’s architecture](DeveloperGuide.md#architecture).
+   When you are ready to start coding, we recommend that you get some sense of the overall design by reading about [ClubLogistics architecture](DeveloperGuide.md#architecture).
 
-1. **Do the tutorials**
-   These tutorials will help you get acquainted with the codebase.
+1. **Trace an equipment command**
 
-   * [Tracing code](https://se-education.org/guides/tutorials/ab3TracingCode.html)
-   * [Adding a new command](https://se-education.org/guides/tutorials/ab3AddRemark.html)
-   * [Removing fields](https://se-education.org/guides/tutorials/ab3RemovingFields.html)
+   Follow `ClubLogisticsParser` through `IssueCommand` to `ModelManager` and `JsonClubLogisticsStorage`.
+   Use the issue and return integration tests as examples when adding equipment behavior.

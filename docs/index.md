@@ -1,19 +1,16 @@
 ---
 layout: page
-title: AddressBook Level 3
+title: ClubLogistics
 ---
 
-[![CI Status](https://github.com/se-edu/addressbook-level3/workflows/Java%20CI/badge.svg)](https://github.com/se-edu/addressbook-level3/actions)
-[![codecov](https://codecov.io/gh/se-edu/addressbook-level3/branch/master/graph/badge.svg)](https://codecov.io/gh/se-edu/addressbook-level3)
+[![CI Status](https://github.com/AY2627S1-CS2103T-F11-2/tp/workflows/Java%20CI/badge.svg)](https://github.com/AY2627S1-CS2103T-F11-2/tp/actions)
 
-![Ui](images/Ui.png)
+![ClubLogistics equipment register](images/Ui.png)
 
-**AddressBook is a desktop application for managing your contact details.** While it has a GUI, most of the user interactions happen using a CLI (Command Line Interface).
+ClubLogistics is a desktop application for student-club logistics coordinators to manage reusable equipment. It keeps the club's equipment register and loan information in one place, helping coordinators identify available equipment, current borrowers, and outstanding returns quickly.
 
-* If you are interested in using AddressBook, head over to the [_Quick Start_ section of the **User Guide**](UserGuide.html#quick-start).
-* If you are interested in developing AddressBook, the [**Developer Guide**](DeveloperGuide.html) is a good place to start.
+The application is designed for a single coordinator who prefers a fast, keyboard-driven workflow. Its command-line interface supports short, repeatable updates while the graphical interface provides an overview of the club's records.
 
-
-**Acknowledgements**
-
-* Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5)
+* Start with the [User Guide](UserGuide.html#quick-start) to manage equipment and loans.
+* Read the [Developer Guide](DeveloperGuide.html) to understand the implementation and requirements.
+* Meet the [project team](AboutUs.html).

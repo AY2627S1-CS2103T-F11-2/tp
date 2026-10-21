@@ -1,5 +1,5 @@
 [![CI Status](https://github.com/AY2627S1-CS2103T-F11-2/tp/workflows/Java%20CI/badge.svg)](https://github.com/AY2627S1-CS2103T-F11-2/tp/actions)
-[![codecov](https://codecov.io/gh/NUS-CS2103-AY2627-S1/tp/graph/badge.svg?token=XHP1DHZ63B)](https://codecov.io/gh/NUS-CS2103-AY2627-S1/tp)
+[![codecov](https://codecov.io/gh/AY2627S1-CS2103T-F11-2/tp/graph/badge.svg)](https://codecov.io/gh/AY2627S1-CS2103T-F11-2/tp)
 
 ![Ui](docs/images/Ui.png)
 
@@ -12,7 +12,7 @@ The application is designed for a single coordinator who prefers a fast, keyboar
 ## Key capabilities
 
 * Record individual equipment using unique equipment IDs.
-* View and find equipment without searching through spreadsheets or messages.
+* List equipment and filter it by availability or issued status.
 * Track whether equipment is available or currently issued.
 * Record who is responsible for issued equipment.
 * Record equipment returns so that availability remains accurate.
