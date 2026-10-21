@@ -237,8 +237,36 @@ A parameter is missing or extra | `Error: Invalid command format. Usage: return 
 
 ### Filtering equipment: `filter`
 
-Shows equipment with the selected status. Use `filter available` or `filter issued` (case-insensitive).
-The filter remains active as equipment changes. Run `list` to show all equipment again.
+Shows only equipment with the selected status. The status argument is case-insensitive.
+
+Format: `filter <available|issued>`
+
+Examples:
+* `filter available` shows equipment that can be issued.
+* `filter issued` shows equipment currently held by borrowers.
+* `filter AVAILABLE` has the same effect as `filter available`.
+
+The command reports one of the following results:
+
+Selected status | Matching equipment exists | No equipment matches
+----------------|---------------------------|---------------------
+`available` | `Showing available equipment.` | `No available equipment found.`
+`issued` | `Showing issued equipment.` | `No issued equipment found.`
+
+An empty result means no equipment matches the selected status; it does not necessarily mean
+that the whole register is empty. Filtering changes only the displayed list, not the equipment records.
+
+The selected filter remains active as equipment is added, issued, returned, or removed, and the
+visible list updates to reflect each item's current status. Run `list` to clear the filter and
+show all equipment again. The filter is not saved between application sessions.
+
+Possible errors:
+
+Situation | Error message
+----------|--------------
+Status is missing, e.g., `filter` | `Error: Invalid command format. Usage: filter <available|issued>`
+Extra arguments, e.g., `filter available extra` | `Error: Invalid command format. Usage: filter <available|issued>`
+Unsupported status, e.g., `filter damaged` | `Error: Invalid command format. Usage: filter <available|issued>`
 
 ### Clearing the register: `clear`
 
