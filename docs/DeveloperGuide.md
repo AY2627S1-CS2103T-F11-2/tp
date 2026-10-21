@@ -53,6 +53,10 @@ the item, so observers receive the updated record without losing the selected fi
 
 ### Storage component
 
+<img src="images/StorageClassDiagram.png" width="390" alt="Storage class diagram" />
+
+*Structure of the Storage component*
+
 `StorageManager` delegates to `JsonUserPrefsStorage` and `JsonClubLogisticsStorage`. The latter reads and writes
 `JsonSerializableClubLogisticsData`, whose top-level `equipment` array contains `JsonAdaptedEquipment` records.
 Each record stores `id`, `name`, and `issuedTo`; status is derived from the borrower. Invalid IDs, names,
@@ -102,8 +106,6 @@ to the equipment-only implementation; use the descriptions above and the source 
 <img src="images/ModelClassDiagram.png" width="450" />
 
 <img src="images/BetterModelClassDiagram.png" width="450" />
-
-<img src="images/StorageClassDiagram.png" width="550" />
 
 ![UndoRedoState0](images/UndoRedoState0.png)
 
