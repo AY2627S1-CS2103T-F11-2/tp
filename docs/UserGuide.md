@@ -181,7 +181,8 @@ Format: `issue <equipment-id> <person-name>`
 
 * The equipment ID must follow the [equipment ID rules](#features).
 * All text after the ID is treated as the person's name, including spaces.
-* The person's name has 1–50 characters and contains only letters and spaces. Digits and punctuation are rejected.
+* The person's name has 1–50 characters and contains only the English letters `A–Z` and `a–z` and spaces. Digits,
+  punctuation, and accented or non-English letters such as `é` are rejected.
   Leading and trailing spaces are removed, and consecutive spaces are combined into one.
 * The item must exist and be available. Each item can have only one holder at a time, so issuing an item that is
   already issued is rejected and its current holder is kept.
