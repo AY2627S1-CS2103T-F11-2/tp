@@ -85,8 +85,9 @@ The filter is a view preference for the running session and is not saved in the 
 
 ### Existing diagrams
 
-The diagrams below and their sources in `docs/diagrams` are retained unchanged. They have not yet been adapted
-to the equipment-only implementation; use the descriptions above and the source code for the current design.
+Several diagrams below and their sources in `docs/diagrams` are retained unchanged. Use the descriptions above
+and the source code when a retained diagram does not describe the equipment-only implementation. The model class
+diagram below documents the implemented equipment model.
 
 <img src="images/ArchitectureDiagram.png" width="280" />
 
@@ -102,7 +103,11 @@ to the equipment-only implementation; use the descriptions above and the source 
 
 <img src="images/ParserClasses.png" width="600"/>
 
-<img src="images/ModelClassDiagram.png" width="450" />
+**Model component: implemented equipment register.** `ModelManager` owns the register and its filtered view.
+`ClubLogisticsData` stores uniquely identified equipment records; an issued record has exactly one borrower, while
+an available record has none.
+
+<img src="images/ModelClassDiagram.png" width="700" />
 
 <img src="images/BetterModelClassDiagram.png" width="450" />
 
