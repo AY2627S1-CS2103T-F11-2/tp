@@ -67,6 +67,9 @@ Every item has one of two statuses:
 * Words in angle brackets are parameters to be supplied by you.<br>
   For example, in `return <equipment-id>`, replace `<equipment-id>` with a value such as `CAM001`.
 
+* Command words are case-sensitive and must be typed in lowercase, such as `filter`, `list`, and `issue`.
+  The status value for `filter` is case-insensitive.
+
 * Parameters must be given in the order shown in the command format.
 
 * Every parameter is required. A missing or extra parameter is rejected with an error showing the correct usage,
@@ -144,7 +147,7 @@ Possible errors:
 Situation | Error message
 ----------|--------------
 No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
-The item is currently issued | `Error: Equipment CAM001 is currently issued to John Tan and cannot be removed.`
+The item is currently issued | `Error: Equipment CAM001 is issued to John Tan and cannot be removed.`
 A parameter is missing or extra | `Error: Invalid command format. Usage: remove <equipment-id>`
 
 ### Listing all equipment: `list`
@@ -237,7 +240,9 @@ A parameter is missing or extra | `Error: Invalid command format. Usage: return 
 
 ### Filtering equipment: `filter`
 
-Shows equipment with the selected status. Use `filter available` or `filter issued` (case-insensitive).
+Shows equipment with the selected status. Type the command word `filter` in lowercase.
+The status value, `available` or `issued`, is case-insensitive. For example, `filter available`,
+`filter AVAILABLE`, and `filter Available` are accepted, while `FILTER AVAILABLE` returns the error `Unknown command.`
 The filter remains active as equipment changes. Run `list` to show all equipment again.
 
 ### Clearing the register: `clear`

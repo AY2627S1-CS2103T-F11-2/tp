@@ -20,9 +20,38 @@ Refer to [Setting up and getting started](SettingUp.md). Build and run the proje
 
 ### Architecture
 
-`Main` launches `MainApp`, which creates the storage, model, logic, and UI components. `MainApp` reads
-`preferences.json` and `data/clublogistics.json`. A missing data file starts the app with sample equipment;
-an invalid data file starts it with an empty register. Shutdown saves the window preferences.
+**Main components**
+
+`Main` launches `MainApp`, which manages application startup and shutdown:
+
+* On startup, it creates and connects the storage, model, logic, and UI components and loads preferences
+  and equipment data. Missing equipment data uses sample data; invalid equipment data uses an empty register.
+* On shutdown, it saves the user preferences, including window settings.
+
+The four main components are:
+
+* [**`UI`**](#ui-component): Displays equipment and handles user input.
+* [**`Logic`**](#logic-component): Parses and executes commands.
+* [**`Model`**](#model-component): Holds equipment data and user preferences in memory.
+* [**`Storage`**](#storage-component): Reads and writes equipment data and preferences.
+
+[**`Commons`**](#common-classes) contains utilities shared by multiple components.
+
+**Component interactions**
+
+The sequence diagram below shows the interactions for a successful `remove CAM001` command, assuming
+`CAM001` is registered and available. Parsing, equipment lookup, and availability checks are omitted.
+
+![Successful remove CAM001 interactions between UI, Logic, Model, and Storage](images/ArchitectureSequenceDiagram.png)
+
+Each component exposes its API through an interface (`Ui`, `Logic`, `Model`, or `Storage`) and implements it
+in a corresponding manager class (`UiManager`, `LogicManager`, `ModelManager`, or `StorageManager`).
+
+For example, `Logic.java` declares the command API and `LogicManager.java` implements it. Components depend
+on these interfaces rather than specific implementations. The partial class diagram below shows this
+relationship for `LogicManager`, `Model`, and `Storage`.
+
+![Component interfaces and their manager implementations](images/ComponentManagers.png)
 
 ### UI component
 
@@ -85,15 +114,10 @@ The filter is a view preference for the running session and is not saved in the 
 
 ### Existing diagrams
 
-Several diagrams below and their sources in `docs/diagrams` are retained unchanged. Use the descriptions above
-and the source code when a retained diagram does not describe the equipment-only implementation. The model class
-diagram below documents the implemented equipment model.
+The remaining diagrams below and their sources in `docs/diagrams` have not yet been adapted to the
+equipment-only implementation; use the descriptions above and the source code for the current design.
 
 <img src="images/ArchitectureDiagram.png" width="280" />
-
-<img src="images/ArchitectureSequenceDiagram.png" width="574" />
-
-<img src="images/ComponentManagers.png" width="300" />
 
 ![Structure of the UI Component](images/UiClassDiagram.png)
 
