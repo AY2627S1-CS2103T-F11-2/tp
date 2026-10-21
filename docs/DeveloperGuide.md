@@ -80,9 +80,32 @@ available item and records its borrower. `ReturnCommand` requires an issued item
 as items are added, removed, issued, or returned. `ListCommand` restores the predicate that shows every item.
 The filter is a view preference for the running session and is not saved in the equipment file.
 
+### Equipment UI class diagram
+
+<img src="images/UiClassDiagram.png" width="1000" alt="UI class diagram showing equipment panels and cards, UiPart inheritance, and Logic dependencies" />
+
+*Equipment UI classes and their relationships. Solid arrows represent stored references,
+dashed arrows represent dependencies, and hollow triangles represent inheritance or interface realization.*
+
+`UiManager` holds a `Logic` reference and creates `MainWindow` during `start`. Its window reference
+is initially absent. Every successfully constructed `MainWindow` creates one `HelpWindow`, whether
+or not that help window is visible. `fillInnerParts()` initializes the equipment panel and result
+display, which are stored in fields; both are absent before that method runs.
+
+`MainWindow` passes `logic.getFilteredEquipmentList()` to
+`EquipmentListPanel(ObservableList<Equipment>)`. The panel observes the list and creates an
+`EquipmentCard` for each non-empty cell. Cards read equipment data, including the borrower and status;
+they do not mutate the model. `CommandBox` receives the window's command-execution callback.
+
+The window attaches the root nodes of `CommandBox`, `ResultDisplay`, `EquipmentListPanel`, and
+`StatusBarFooter` to its JavaFX placeholders. This scene-graph containment is distinct from Java
+object fields: `CommandBox` and `StatusBarFooter` are local variables in `fillInnerParts()`, so the
+diagram shows creation dependencies rather than stored associations for these two wrappers.
+All seven UI part classes inherit from `UiPart`; `UiManager` implements `Ui`.
+
 ### Existing diagrams
 
-The diagrams below and their sources in `docs/diagrams` are retained unchanged. They have not yet been adapted
+The remaining diagrams below and their sources in `docs/diagrams` have not yet been adapted
 to the equipment-only implementation; use the descriptions above and the source code for the current design.
 
 <img src="images/ArchitectureDiagram.png" width="280" />
@@ -91,7 +114,6 @@ to the equipment-only implementation; use the descriptions above and the source 
 
 <img src="images/ComponentManagers.png" width="300" />
 
-![Structure of the UI Component](images/UiClassDiagram.png)
 
 <img src="images/LogicClassDiagram.png" width="550"/>
 
