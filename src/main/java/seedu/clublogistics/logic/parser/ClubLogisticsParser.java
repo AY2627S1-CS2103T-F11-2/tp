@@ -54,7 +54,7 @@ public class ClubLogisticsParser {
 
         return switch (commandWord) {
             case AddEquipmentCommand.COMMAND_WORD -> new AddEquipmentCommandParser().parse(arguments);
-            case ClearCommand.COMMAND_WORD -> new ClearCommand();
+            case ClearCommand.COMMAND_WORD -> new ClearCommandParser().parse(arguments);
             case FilterCommand.COMMAND_WORD -> new FilterCommandParser().parse(arguments);
             case RemoveCommand.COMMAND_WORD -> new RemoveCommandParser().parse(arguments);
             case ReturnCommand.COMMAND_WORD -> new ReturnCommandParser().parse(arguments);
