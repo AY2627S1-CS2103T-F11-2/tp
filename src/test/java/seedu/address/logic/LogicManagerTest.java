@@ -1,11 +1,8 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.testutil.Assert.assertThrows;
-import static seedu.address.testutil.TypicalPersons.AMY;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
@@ -45,6 +42,7 @@ public class LogicManagerTest {
     private Model model = new ModelManager();
     private Logic logic;
 
+    /** Creates isolated storage for each test. */
     @BeforeEach
     public void setUp() {
         JsonClubLogisticsStorage clubLogisticsStorage =
@@ -54,32 +52,35 @@ public class LogicManagerTest {
         logic = new LogicManager(model, storage);
     }
 
+    /** Rejects unknown commands without changing model state. */
     @Test
     public void execute_invalidCommandFormat_throwsParseException() {
         String invalidCommand = "uicfhmowqewca";
         assertParseException(invalidCommand, MESSAGE_UNKNOWN_COMMAND);
     }
 
+    /** Reports failure when removing unregistered equipment. */
     @Test
     public void execute_commandExecutionError_throwsCommandException() {
-        String deleteCommand = "delete 9";
-        assertCommandException(deleteCommand, MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        assertCommandException("remove CAM999", "Error: Equipment with ID CAM999 does not exist.");
     }
 
+    /** Executes a valid list command. */
     @Test
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_EMPTY_REGISTER, model);
     }
 
+    /** Rejects extra list arguments. */
     @Test
     public void execute_listWithExtraArguments_throwsParseException() {
         assertParseException(ListCommand.COMMAND_WORD + " 3", ListCommand.MESSAGE_INVALID_COMMAND_FORMAT);
     }
 
+    /** Verifies observable updates, persistence, duplicate rejection, and clearing. */
     @Test
-    public void execute_addEquipment_updatesViewAndPersistsWithContacts() throws Exception {
-        model.addPerson(AMY);
+    public void execute_addEquipment_updatesViewAndPersists() throws Exception {
         ObservableList<Equipment> equipment = logic.getEquipmentList();
         CommandResult result = logic.execute("add CAM001 Sony Camera");
         Equipment camera = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
@@ -102,31 +103,18 @@ public class LogicManagerTest {
         assertEquals(new ClubLogisticsData(), new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
     }
 
-    @Test
-    public void execute_contactAddSyntax_preservesModelAndDoesNotSave() {
-        model.addPerson(AMY);
-        assertParseException("add n/John Doe p/98765432 e/john@example.com a/Main Street",
-                EquipmentId.MESSAGE_CONSTRAINTS);
-        assertEquals(List.of(AMY), model.getClubLogisticsData().getPersonList());
-        assertEquals(List.of(), model.getEquipmentList());
-        assertFalse(java.nio.file.Files.exists(temporaryFolder.resolve("clubLogisticsData.json")));
-    }
-
+    /** Reports a storage failure as a command error. */
     @Test
     public void execute_storageThrowsIoException_throwsCommandException() {
         assertCommandFailureForExceptionFromStorage(DUMMY_IO_EXCEPTION, String.format(
                 LogicManager.FILE_OPS_ERROR_FORMAT, DUMMY_IO_EXCEPTION.getMessage()));
     }
 
+    /** Reports a storage permission failure as a command error. */
     @Test
     public void execute_storageThrowsAdException_throwsCommandException() {
         assertCommandFailureForExceptionFromStorage(DUMMY_AD_EXCEPTION, String.format(
                 LogicManager.FILE_OPS_PERMISSION_ERROR_FORMAT, DUMMY_AD_EXCEPTION.getMessage()));
-    }
-
-    @Test
-    public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
     }
 
     /**

@@ -3,10 +3,8 @@ package seedu.address.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 import static seedu.address.testutil.Assert.assertThrows;
-import static seedu.address.testutil.TypicalPersons.ALICE;
-import static seedu.address.testutil.TypicalPersons.BENSON;
+import static seedu.address.testutil.TypicalEquipment.getTypicalClubLogisticsData;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,13 +17,12 @@ import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.EquipmentName;
-import seedu.address.model.person.NameContainsKeywordsPredicate;
-import seedu.address.testutil.ClubLogisticsDataBuilder;
 
 public class ModelManagerTest {
 
     private ModelManager modelManager = new ModelManager();
 
+    /** Verifies the default register and preferences. */
     @Test
     public void constructor() {
         assertEquals(new UserPrefs(), modelManager.getUserPrefs());
@@ -33,6 +30,7 @@ public class ModelManagerTest {
         assertEquals(new ClubLogisticsData(), new ClubLogisticsData(modelManager.getClubLogisticsData()));
     }
 
+    /** Verifies that model preferences are copied defensively. */
     @Test
     public void constructor_validUserPrefs_copiesUserPrefs() {
         UserPrefs userPrefs = new UserPrefs();
@@ -46,11 +44,13 @@ public class ModelManagerTest {
         assertEquals(oldUserPrefs, modelManager.getUserPrefs());
     }
 
+    /** Rejects null window settings. */
     @Test
     public void setGuiSettings_nullGuiSettings_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> modelManager.setGuiSettings(null));
     }
 
+    /** Retains updated window settings. */
     @Test
     public void setGuiSettings_validGuiSettings_setsGuiSettings() {
         GuiSettings guiSettings = new GuiSettings(1, 2, 3, 4);
@@ -58,27 +58,7 @@ public class ModelManagerTest {
         assertEquals(guiSettings, modelManager.getGuiSettings());
     }
 
-    @Test
-    public void hasPerson_nullPerson_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> modelManager.hasPerson(null));
-    }
-
-    @Test
-    public void hasPerson_personNotInClubLogisticsData_returnsFalse() {
-        assertFalse(modelManager.hasPerson(ALICE));
-    }
-
-    @Test
-    public void hasPerson_personInClubLogisticsData_returnsTrue() {
-        modelManager.addPerson(ALICE);
-        assertTrue(modelManager.hasPerson(ALICE));
-    }
-
-    @Test
-    public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredPersonList().remove(0));
-    }
-
+    /** Verifies that issuing updates only the selected equipment. */
     @Test
     public void equipmentOperations_issueEquipment_updatesModelAndPreservesOtherItems() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
@@ -92,6 +72,7 @@ public class ModelManagerTest {
         assertEquals(List.of(issuedCamera, microphone), modelManager.getClubLogisticsData().getEquipmentList());
     }
 
+    /** Verifies defensive copying when creating or resetting the model. */
     @Test
     public void constructorAndSetClubLogisticsData_equipment_copiesDataWithoutSharingLists() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera", new BorrowerName("John Tan"));
@@ -108,6 +89,7 @@ public class ModelManagerTest {
         assertEquals(Optional.of(camera), modelManager.findEquipment(camera.getId()));
     }
 
+    /** Verifies that the read-only equipment view tracks model changes. */
     @Test
     public void getEquipmentList_modelChanges_updatesExistingView() {
         ObservableList<Equipment> equipment = modelManager.getEquipmentList();
@@ -122,10 +104,11 @@ public class ModelManagerTest {
         assertTrue(equipment.isEmpty());
     }
 
+    /** Compares model data, preferences, and the filtered view. */
     @Test
     public void equals() {
         ClubLogisticsData clubLogisticsData =
-                new ClubLogisticsDataBuilder().withPerson(ALICE).withPerson(BENSON).build();
+                getTypicalClubLogisticsData();
         ClubLogisticsData differentClubLogisticsData = new ClubLogisticsData();
         UserPrefs userPrefs = new UserPrefs();
 
@@ -147,12 +130,11 @@ public class ModelManagerTest {
         assertFalse(modelManager.equals(new ModelManager(differentClubLogisticsData, userPrefs)));
 
         // different filteredList -> returns false
-        String[] keywords = ALICE.getName().fullName.split("\\s+");
-        modelManager.updateFilteredPersonList(new NameContainsKeywordsPredicate(List.of(keywords)));
+        modelManager.updateFilteredEquipmentList(item -> !item.isIssued());
         assertFalse(modelManager.equals(new ModelManager(clubLogisticsData, userPrefs)));
 
         // resets modelManager to initial state for upcoming tests
-        modelManager.updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        modelManager.updateFilteredEquipmentList(Model.PREDICATE_SHOW_ALL_EQUIPMENT);
 
         // different userPrefs -> returns false
         UserPrefs differentUserPrefs = new UserPrefs();

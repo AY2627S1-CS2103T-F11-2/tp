@@ -13,7 +13,6 @@ import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
-import seedu.address.model.person.Person;
 
 /**
  * Represents the in-memory model of the ClubLogistics data.
@@ -23,7 +22,6 @@ public class ModelManager implements Model {
 
     private final ClubLogisticsData clubLogisticsData;
     private final UserPrefs userPrefs;
-    private final FilteredList<Person> filteredPersons;
     private final FilteredList<Equipment> filteredEquipment;
 
     /**
@@ -36,31 +34,35 @@ public class ModelManager implements Model {
 
         this.clubLogisticsData = new ClubLogisticsData(clubLogisticsData);
         this.userPrefs = new UserPrefs(userPrefs);
-        filteredPersons = new FilteredList<>(this.clubLogisticsData.getPersonList());
         filteredEquipment = new FilteredList<>(this.clubLogisticsData.getEquipmentList());
     }
 
+    /** Creates a model with an empty register and default preferences. */
     public ModelManager() {
         this(new ClubLogisticsData(), new UserPrefs());
     }
 
     //=========== UserPrefs ==================================================================================
 
+    /** {@inheritDoc} */
     @Override
     public ReadOnlyUserPrefs getUserPrefs() {
         return userPrefs;
     }
 
+    /** {@inheritDoc} */
     @Override
     public ObservableList<Equipment> getEquipmentList() {
         return clubLogisticsData.getEquipmentList();
     }
 
+    /** {@inheritDoc} */
     @Override
     public GuiSettings getGuiSettings() {
         return userPrefs.getGuiSettings();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setGuiSettings(GuiSettings guiSettings) {
         requireNonNull(guiSettings);
@@ -81,23 +83,7 @@ public class ModelManager implements Model {
         return clubLogisticsData;
     }
 
-    @Override
-    public boolean hasPerson(Person person) {
-        requireNonNull(person);
-        return clubLogisticsData.hasPerson(person);
-    }
-
-    @Override
-    public void deletePerson(Person target) {
-        clubLogisticsData.removePerson(target);
-    }
-
-    @Override
-    public void addPerson(Person person) {
-        clubLogisticsData.addPerson(person);
-        updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
-    }
-
+    /** {@inheritDoc} */
     @Override
     public boolean hasEquipment(Equipment equipment) {
         requireNonNull(equipment);
@@ -110,57 +96,39 @@ public class ModelManager implements Model {
         clubLogisticsData.addEquipment(equipment);
     }
 
+    /** {@inheritDoc} */
     @Override
     public ObservableList<Equipment> getFilteredEquipmentList() {
         return filteredEquipment;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void updateFilteredEquipmentList(Predicate<Equipment> predicate) {
         requireNonNull(predicate);
         filteredEquipment.setPredicate(predicate);
     }
 
-    @Override
-    public void setPerson(Person target, Person editedPerson) {
-        requireAllNonNull(target, editedPerson);
-
-        clubLogisticsData.setPerson(target, editedPerson);
-    }
-
+    /** {@inheritDoc} */
     @Override
     public Optional<Equipment> findEquipment(EquipmentId id) {
         return clubLogisticsData.findEquipment(id);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setEquipment(Equipment target, Equipment replacement) {
         clubLogisticsData.setEquipment(target, replacement);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void removeEquipment(Equipment equipment) {
         requireNonNull(equipment);
         clubLogisticsData.removeEquipment(equipment);
     }
 
-    //=========== Filtered Person List Accessors =============================================================
-
-    /**
-     * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
-     * {@code clubLogisticsData}
-     */
-    @Override
-    public ObservableList<Person> getFilteredPersonList() {
-        return filteredPersons;
-    }
-
-    @Override
-    public void updateFilteredPersonList(Predicate<Person> predicate) {
-        requireNonNull(predicate);
-        filteredPersons.setPredicate(predicate);
-    }
-
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -174,7 +142,6 @@ public class ModelManager implements Model {
 
         return clubLogisticsData.equals(otherModelManager.clubLogisticsData)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredPersons.equals(otherModelManager.filteredPersons)
                 && filteredEquipment.equals(otherModelManager.filteredEquipment);
     }
 

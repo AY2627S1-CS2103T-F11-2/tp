@@ -1,8 +1,6 @@
-# Issue-equipment v1.3 verification
+# Equipment lifecycle verification
 
-This follow-up is based on team master commit `d001563d`. The issue command
-is already merged; this work verifies its integration with the current
-equipment model, register display, and storage.
+This plan verifies equipment registration, issuing, returning, filtering, removal, and persistence.
 
 ## Automated checks
 
@@ -14,12 +12,8 @@ sdk use java 25.0.3.fx-zulu
 ./.github/run-checks.sh
 ```
 
-The verified run passes 336 JUnit tests, Checkstyle, the repository-wide
-checks, and the JAR build. JaCoCo reports no missing or partial executable
-lines in `Equipment.java`, `JsonAdaptedEquipment.java`, or `Model.java`.
-Real JavaFX card tests also execute the equipment panel's card-building
-code and verify live updates and cell recycling. Linux CI uses Xvfb to
-provide the virtual display required to initialize JavaFX.
+The automated suite covers command validation, JSON storage, equipment model updates, and real JavaFX cards.
+Linux CI uses Xvfb to provide the virtual display required to initialize JavaFX.
 
 On a Linux machine without a desktop display, run the Gradle command as
 `xvfb-run -a ./gradlew clean check coverage shadowJar` with Xvfb installed.
@@ -49,7 +43,7 @@ saved equipment. After building the JAR, run from the project directory:
 test_project_dir="$PWD"
 test_data_dir=$(mktemp -d)
 cd "$test_data_dir"
-java -jar "$test_project_dir/build/libs/addressbook.jar"
+java -jar "$test_project_dir/build/libs/clublogistics.jar"
 ```
 
 In the application's command box:
@@ -71,15 +65,10 @@ the final visual checks should be completed by the release tester.
 The packaged application has also been launched successfully with isolated
 temporary data. This startup check does not replace the visual checks above.
 
-## Return dependency
-
-On the checked team master, `return` still throws a not-supported error.
-The full MVP lifecycle cannot be verified until Jason's implementation
-is integrated. After that merge, verify:
+## Return and reissue checks
 
 1. `return qa001` makes the card Available and clears the holder.
 2. `issue QA001 Alice Lim` succeeds and saves Alice as the new holder.
-3. `return QA001`, then `remove qa001`, removes the available item.
-4. Restarting retains the final register state.
-
-Do not mark return/reissue or the complete MVP lifecycle as verified yet.
+3. `filter issued` shows the item with Alice as its holder.
+4. `return QA001`, then `remove qa001`, removes the available item.
+5. Restarting retains the final register state in `data/clublogistics.json`.

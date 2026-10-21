@@ -7,14 +7,12 @@ import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
-import seedu.address.model.person.Person;
 
 /**
  * The API of the Model component.
  */
 public interface Model {
-    /** {@code Predicate} that always evaluates to true */
-    Predicate<Person> PREDICATE_SHOW_ALL_PERSONS = unused -> true;
+    /** Predicate that shows every equipment item. */
     Predicate<Equipment> PREDICATE_SHOW_ALL_EQUIPMENT = unused -> true;
 
     /**
@@ -39,31 +37,6 @@ public interface Model {
 
     /** Returns the ClubLogisticsData */
     ReadOnlyClubLogisticsData getClubLogisticsData();
-
-    /**
-     * Returns true if a person with the same identity as {@code person} exists in ClubLogistics data.
-     */
-    boolean hasPerson(Person person);
-
-    /**
-     * Deletes the given person.
-     * The person must exist in ClubLogistics data.
-     */
-    void deletePerson(Person target);
-
-    /**
-     * Adds the given person.
-     * {@code person} must not already exist in ClubLogistics data.
-     */
-    void addPerson(Person person);
-
-    /**
-     * Replaces the given person {@code target} with {@code editedPerson}.
-     * {@code target} must exist in ClubLogistics data.
-     * The person identity of {@code editedPerson} must not be the same as another existing person in
-     * ClubLogistics data.
-     */
-    void setPerson(Person target, Person editedPerson);
 
     /** Returns true if equipment with the same ID exists in the equipment register. */
     boolean hasEquipment(Equipment equipment);
@@ -93,12 +66,4 @@ public interface Model {
     /** Removes the given equipment from the equipment register. {@code equipment} must exist. */
     void removeEquipment(Equipment equipment);
 
-    /** Returns an unmodifiable view of the filtered person list */
-    ObservableList<Person> getFilteredPersonList();
-
-    /**
-     * Updates the filter of the filtered person list to filter by the given {@code predicate}.
-     * @throws NullPointerException if {@code predicate} is null.
-     */
-    void updateFilteredPersonList(Predicate<Person> predicate);
 }

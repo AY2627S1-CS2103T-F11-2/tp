@@ -2,249 +2,126 @@
 layout: page
 title: Developer Guide
 ---
+
 * Table of Contents
 {:toc}
 
---------------------------------------------------------------------------------------------------------------------
-
 ## **Acknowledgements**
 
-* _{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}_
-
---------------------------------------------------------------------------------------------------------------------
+ClubLogistics builds on the [SE-EDU AddressBook Level 3](https://github.com/se-edu/addressbook-level3)
+application framework. It uses JavaFX for the desktop interface, Jackson for JSON storage, JUnit 5 for tests,
+and Gradle for builds.
 
 ## **Setting up, getting started**
 
-Refer to the guide [_Setting up and getting started_](SettingUp.md).
-
---------------------------------------------------------------------------------------------------------------------
+Refer to [Setting up and getting started](SettingUp.md). Build and run the project with Java 25.
 
 ## **Design**
 
-<div markdown="span" class="alert alert-primary">
-
-:bulb: **Tip:** The `.puml` files used to create diagrams are in `docs/diagrams`. Refer to the [_PlantUML Tutorial_ at se-edu/guides](https://se-education.org/guides/tutorials/plantUml.html) to learn how to create and edit diagrams.
-</div>
-
 ### Architecture
 
-<img src="images/ArchitectureDiagram.png" width="280" />
-
-The ***Architecture Diagram*** given above explains the high-level design of the App.
-
-The following provides a quick overview of the main components and their interactions.
-
-**Main components of the architecture**
-
-**`Main`** (consisting of classes [`Main`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
-* At app launch, it initializes the other components in the correct sequence, and connects them up with each other.
-* At shut down, it shuts down the other components and invokes cleanup methods where necessary.
-
-The bulk of the app's work is done by the following four components:
-
-* [**`UI`**](#ui-component): The UI of the App.
-* [**`Logic`**](#logic-component): The command executor.
-* [**`Model`**](#model-component): Holds the data of the App in memory.
-* [**`Storage`**](#storage-component): Reads data from, and writes data to, the hard disk.
-
-[**`Commons`**](#common-classes) represents a collection of classes used by multiple other components.
-
-**How the architecture components interact with each other**
-
-The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1`.
-
-<img src="images/ArchitectureSequenceDiagram.png" width="574" />
-
-Each of the four main components (also shown in the diagram above),
-
-* defines its *API* in an `interface` with the same name as the Component.
-* provides its functionality through a concrete `{Component Name}Manager` class that implements the corresponding API interface.
-
-For example, the `Logic` component defines its API in `Logic.java` and implements it in `LogicManager.java`. Other components interact with a component through its interface rather than its concrete class, preventing them from coupling to that component's implementation, as illustrated in the following partial class diagram.
-
-<img src="images/ComponentManagers.png" width="300" />
-
-The sections below give more details of each component.
+`Main` launches `MainApp`, which creates the storage, model, logic, and UI components. `MainApp` reads
+`preferences.json` and `data/clublogistics.json`. A missing data file starts the app with sample equipment;
+an invalid data file starts it with an empty register. Shutdown saves the window preferences.
 
 ### UI component
 
-The **API** of this component is specified in [`Ui.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/Ui.java)
-
-![Structure of the UI Component](images/UiClassDiagram.png)
-
-The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
-
-The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
-
-The `UI` component,
-
-* executes user commands using the `Logic` component.
-* listens for changes to `Model` data so that the UI can be updated with the modified data.
-* keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
-* depends on some classes in the `Model` component because it displays `Person` objects from the model.
+`UiManager` creates `MainWindow`. The window contains `CommandBox`, `ResultDisplay`, `EquipmentListPanel`,
+and `StatusBarFooter`. `EquipmentListPanel` displays `EquipmentCard` instances bound to the model's filtered
+observable equipment list. Cards show each item's ID, name, and availability or borrower. `HelpWindow`
+displays the ClubLogistics User Guide link. Visible components inherit from `UiPart` and use matching FXML layouts.
 
 ### Logic component
 
-**API** : [`Logic.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/logic/Logic.java)
+`LogicManager.execute` passes input to `ClubLogisticsParser`, executes the resulting command against `Model`,
+and saves the register after successful execution. Parse and command errors are reported to the user.
+Storage errors are converted to command errors, with a separate message for permission failures.
 
-Here's a (partial) class diagram of the `Logic` component:
-
-<img src="images/LogicClassDiagram.png" width="550"/>
-
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
-
-![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
-</div>
-
-How the `Logic` component works:
-
-1. When `Logic` is called upon to execute a command, the command is passed to an `ClubLogisticsParser` object, which in turn creates a parser that matches the command (e.g., `DeleteCommandParser`) and uses it to parse the command.
-1. This results in a `Command` object (more precisely, an object of one of its subclasses e.g., `DeleteCommand`) which is executed by the `LogicManager`.
-1. The command can communicate with the `Model` when it is executed (e.g. to delete a person).<br>
-   Note that although this is shown as a single step in the diagram above for simplicity, the code can require several interactions between the command object and the `Model` to complete the operation.
-1. The result of the command execution is encapsulated as a `CommandResult` object which is returned from `Logic`.
-
-Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
-
-<img src="images/ParserClasses.png" width="600"/>
-
-How the parsing works:
-* When called upon to parse a user command, the `ClubLogisticsParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name, e.g., `AddEquipmentCommandParser`). The parser uses the other classes shown above to parse the user command and create an `XYZCommand` object (e.g., `AddEquipmentCommand`). The `ClubLogisticsParser` returns that object as a `Command` object.
-* All `XYZCommandParser` classes, such as `AddEquipmentCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
+The supported commands are `add`, `remove`, `list`, `filter`, `issue`, `return`, `clear`, `help`, and `exit`.
+Each equipment command parser validates its own positional arguments. For example, `issue CAM001 John Tan`
+creates an `IssueCommand` containing an `EquipmentId` and a `BorrowerName`.
 
 ### Model component
-**API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
 
-<img src="images/ModelClassDiagram.png" width="450" />
+`ModelManager` owns a copy of `ClubLogisticsData`, user preferences, and a `FilteredList<Equipment>`.
+`ClubLogisticsData` uses `UniqueEquipmentList` to enforce case-insensitive ID uniqueness and exposes an
+unmodifiable observable equipment list. Replacing the register validates all records before changing the live list.
 
-
-The `Model` component,
-
-* stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
-* stores the `Person` objects selected by the current filter, such as search results, in a separate _filtered_ list. It exposes this list as an unmodifiable `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when the list changes.
-* stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
-* does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The alternative, arguably more object-oriented, design below keeps a unique list of tags in `ClubLogisticsData`, and each `Person` references tags from that list. This lets `ClubLogisticsData` maintain one `Tag` object per unique tag instead of each `Person` holding its own `Tag` objects.<br>
-
-<img src="images/BetterModelClassDiagram.png" width="450" />
-
-</div>
-
+`Equipment` is immutable. Its `EquipmentId`, `EquipmentName`, and optional `BorrowerName` describe one physical
+item. Equipment is available when no borrower is recorded and issued otherwise. Issuing and returning replace
+the item, so observers receive the updated record without losing the selected filter.
 
 ### Storage component
 
-**API** : [`Storage.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java)
+`StorageManager` delegates to `JsonUserPrefsStorage` and `JsonClubLogisticsStorage`. The latter reads and writes
+`JsonSerializableClubLogisticsData`, whose top-level `equipment` array contains `JsonAdaptedEquipment` records.
+Each record stores `id`, `name`, and `issuedTo`; status is derived from the borrower. Invalid IDs, names,
+borrowers, duplicate IDs, and null records cause loading to fail. No contact register is stored.
 
-<img src="images/StorageClassDiagram.png" width="550" />
-
-The `Storage` component,
-* can save both address book data and user preference data in JSON format, and read them back into corresponding objects.
-* is implemented by `StorageManager`, which delegates the actual JSON file access to `JsonClubLogisticsStorage` and `JsonUserPrefsStorage` (one class per data file).
-* depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
+The application uses `data/clublogistics.json` exclusively. No data migration is performed.
 
 ### Common classes
 
-Classes used by multiple components are in the `seedu.address.commons` package.
-
---------------------------------------------------------------------------------------------------------------------
+The `commons` package provides logging, file and JSON utilities, argument checks, and window settings.
+`LogsCenter` writes `clublogistics.log` files and uses the `clublogistics` logger hierarchy.
 
 ## **Implementation**
 
-This section describes some noteworthy details on how certain features are implemented.
+### Equipment lifecycle
 
-### \[Proposed\] Undo/redo feature
+`AddEquipmentCommand` rejects duplicate IDs and creates available equipment. `IssueCommand` requires an
+available item and records its borrower. `ReturnCommand` requires an issued item and clears the borrower.
+`RemoveCommand` rejects issued equipment. Each command validates its preconditions before changing the model.
+`ClearCommand` resets the entire register.
 
-#### Proposed Implementation
+### Filtering
 
-The proposed undo/redo mechanism is facilitated by `VersionedClubLogisticsData`. It extends `ClubLogisticsData` with an undo/redo history, stored internally as an `clubLogisticsDataStateList` and `currentStatePointer`. Additionally, it implements the following operations:
+`FilterCommand` selects available or issued equipment. The same observable filtered list stays bound to the UI
+as items are added, removed, issued, or returned. `ListCommand` restores the predicate that shows every item.
+The filter is a view preference for the running session and is not saved in the equipment file.
 
-* `VersionedClubLogisticsData#commit()` — Saves the current address book state in its history.
-* `VersionedClubLogisticsData#undo()` — Restores the previous address book state from its history.
-* `VersionedClubLogisticsData#redo()` — Restores a previously undone address book state from its history.
+### Existing diagrams
 
-These operations are exposed in the `Model` interface as `Model#commitClubLogisticsData()`, `Model#undoClubLogisticsData()` and `Model#redoClubLogisticsData()` respectively.
+The diagrams below and their sources in `docs/diagrams` are retained unchanged. They have not yet been adapted
+to the equipment-only implementation; use the descriptions above and the source code for the current design.
 
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
+<img src="images/ArchitectureDiagram.png" width="280" />
 
-Step 1. The user launches the application for the first time. The `VersionedClubLogisticsData` will be initialized with the initial address book state, and the `currentStatePointer` pointing to that single address book state.
+<img src="images/ArchitectureSequenceDiagram.png" width="574" />
+
+<img src="images/ComponentManagers.png" width="300" />
+
+![Structure of the UI Component](images/UiClassDiagram.png)
+
+<img src="images/LogicClassDiagram.png" width="550"/>
+
+![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
+
+<img src="images/ParserClasses.png" width="600"/>
+
+<img src="images/ModelClassDiagram.png" width="450" />
+
+<img src="images/BetterModelClassDiagram.png" width="450" />
+
+<img src="images/StorageClassDiagram.png" width="550" />
 
 ![UndoRedoState0](images/UndoRedoState0.png)
 
-Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls `Model#commitClubLogisticsData()`, causing the modified state of the address book after the `delete 5` command executes to be saved in the `clubLogisticsDataStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
-
 ![UndoRedoState1](images/UndoRedoState1.png)
-
-Step 3. The user executes `add CAM002 Sony Camera` to register equipment. The `add` command also calls `Model#commitClubLogisticsData()`, causing another modified address book state to be saved into the `clubLogisticsDataStateList`.
 
 ![UndoRedoState2](images/UndoRedoState2.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If a command fails its execution, it will not call `Model#commitClubLogisticsData()`, so the address book state will not be saved into the `clubLogisticsDataStateList`.
-
-</div>
-
-Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoClubLogisticsData()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous address book state, and restores the address book to that state.
-
 ![UndoRedoState3](images/UndoRedoState3.png)
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index 0, pointing to the initial ClubLogisticsData state, then there are no previous ClubLogisticsData states to restore. The `undo` command uses `Model#canUndoClubLogisticsData()` to check if this is the case. If so, it will return an error to the user rather
-than attempting to perform the undo.
-
-</div>
-
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
 
 ![UndoSequenceDiagram](images/UndoSequenceDiagram-Logic.png)
 
-<div markdown="span" class="alert alert-info">:information_source: **Note:** The lifeline for `UndoCommand` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
-
-</div>
-
-Similarly, how an undo operation goes through the `Model` component is shown below:
-
 ![UndoSequenceDiagram](images/UndoSequenceDiagram-Model.png)
-
-The `redo` command does the opposite — it calls `Model#redoClubLogisticsData()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** If the `currentStatePointer` is at index `clubLogisticsDataStateList.size() - 1`, pointing to the latest address book state, then there are no undone ClubLogisticsData states to restore. The `redo` command uses `Model#canRedoClubLogisticsData()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-
-</div>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as `list`, will usually not call `Model#commitClubLogisticsData()`, `Model#undoClubLogisticsData()` or `Model#redoClubLogisticsData()`. Thus, the `clubLogisticsDataStateList` remains unchanged.
 
 ![UndoRedoState4](images/UndoRedoState4.png)
 
-Step 6. The user executes `clear`, which calls `Model#commitClubLogisticsData()`. Since the `currentStatePointer` is not pointing at the end of the `clubLogisticsDataStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add CAM002 Sony Camera` command. This is the behavior that most modern desktop applications follow.
-
 ![UndoRedoState5](images/UndoRedoState5.png)
 
-The following activity diagram summarizes what happens when a user executes a new command:
-
 <img src="images/CommitActivityDiagram.png" width="250" />
-
-#### Design considerations:
-
-**Aspect: How undo & redo execute:**
-
-* **Alternative 1 (current choice):** Saves the entire address book.
-  * Pros: Easy to implement.
-  * Cons: May have performance issues in terms of memory usage.
-
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
-  * Cons: We must ensure that the implementation of each individual command is correct.
-
-_{more aspects and alternatives to be added}_
-
-### \[Proposed\] Data archiving
-
-_{Explain here how the data archiving feature will be implemented}_
-
-
---------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, dev-ops**
 
@@ -252,8 +129,6 @@ _{Explain here how the data archiving feature will be implemented}_
 * [Testing guide](Testing.md)
 * [Logging guide](Logging.md)
 * [DevOps guide](DevOps.md)
-
---------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Requirements**
 
@@ -487,52 +362,27 @@ The stories below describe the full product vision. They include deferred capabi
 
 ## **Appendix: Instructions for manual testing**
 
-Given below are instructions to test the app manually.
-
-<div markdown="span" class="alert alert-info">:information_source: **Note:** These instructions only provide a starting point for testers to work on;
-testers are expected to do more *exploratory* testing.
-
-</div>
-
 ### Launch and shutdown
 
-1. Initial launch
+1. Build `clublogistics.jar` with `./gradlew shadowJar` using Java 25 and copy it into an empty folder.
+2. Run `java -jar clublogistics.jar`. Expect available sample equipment `CAM001`, `MIC001`, and `PROJ001`.
+3. Resize and move the window, exit, and relaunch. Expect the window size and position to be retained.
 
-   1. Download the JAR file and copy it into an empty folder.
+### Equipment lifecycle and filtering
 
-   1. Double-click the JAR file.<br>
-      Expected: The GUI opens with a set of sample contacts. The window size may not be optimal.
+1. Run `add TRI001 Tripod`, then `filter available`. Expect the tripod to appear as available.
+2. Run `issue TRI001 John Tan`. Expect it to disappear from the available view.
+3. Run `filter issued`. Expect the tripod to show `Issued to: John Tan`.
+4. Run `remove TRI001`. Expect an error and no changes because the item is issued.
+5. Run `return TRI001`, then `list`. Expect the tripod to be available.
+6. Run `remove tri001`. Expect only the tripod to be removed, regardless of ID capitalization.
+7. Run `clear`. Expect an empty equipment register.
 
-1. Saving window preferences
+### Saving data and reporting errors
 
-   1. Resize the window to an optimal size. Move the window to a different location. Close the window.
-
-   1. Relaunch the app by double-clicking the JAR file.<br>
-       Expected: The most recent window size and location are retained.
-
-1. _{ more test cases …​ }_
-
-### Deleting a person
-
-1. Deleting a person while all persons are being shown
-
-   1. Prerequisites: List all persons using the `list` command, with multiple persons in the list.
-
-   1. Test case: `delete 1`<br>
-      Expected: The first contact is deleted from the list. The status message shows the deleted contact's details.
-
-   1. Test case: `delete 0`<br>
-      Expected: No person is deleted. The status message shows error details.
-
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
-      Expected: Similar to previous.
-
-1. _{ more test cases …​ }_
-
-### Saving data
-
-1. Dealing with missing/corrupted data files
-
-   1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
-
-1. _{ more test cases …​ }_
+1. Add equipment, issue it, exit, and relaunch. Expect the item and borrower to be retained.
+2. With the app closed, check `data/clublogistics.json`. Expect only an `equipment` array at the top level.
+3. In a disposable test folder, replace the data file with invalid JSON and launch the app. Expect an empty register.
+   The invalid file is left on disk until a successful command saves the current register.
+4. Run `help`. Expect the ClubLogistics User Guide link.
+5. Try an invalid equipment ID or an unknown command. Expect an error without changing any records.

@@ -10,23 +10,20 @@ import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
 import seedu.address.model.equipment.UniqueEquipmentList;
-import seedu.address.model.person.Person;
-import seedu.address.model.person.UniquePersonList;
 
 /**
- * Stores contacts and equipment for ClubLogistics.
- * Duplicate contacts and equipment IDs are not allowed.
+ * Stores the equipment register for ClubLogistics.
+ * Duplicate equipment IDs are not allowed.
  */
 public class ClubLogisticsData implements ReadOnlyClubLogisticsData {
 
-    private final UniquePersonList persons = new UniquePersonList();
     private final UniqueEquipmentList equipment = new UniqueEquipmentList();
 
     /** Creates an empty ClubLogistics data set. */
     public ClubLogisticsData() {}
 
     /**
-     * Copies the contacts and equipment from the {@code toBeCopied}
+     * Copies the equipment from the {@code toBeCopied}
      */
     public ClubLogisticsData(ReadOnlyClubLogisticsData toBeCopied) {
         this();
@@ -34,14 +31,6 @@ public class ClubLogisticsData implements ReadOnlyClubLogisticsData {
     }
 
     //// list overwrite operations
-
-    /**
-     * Replaces the contents of the person list with {@code persons}.
-     * {@code persons} must not contain duplicate persons.
-     */
-    public void setPersons(List<Person> persons) {
-        this.persons.setPersons(persons);
-    }
 
     /** Replaces the equipment register after checking for duplicate IDs. */
     public void setEquipments(List<Equipment> equipment) {
@@ -54,51 +43,7 @@ public class ClubLogisticsData implements ReadOnlyClubLogisticsData {
     public void resetData(ReadOnlyClubLogisticsData newData) {
         requireNonNull(newData);
 
-        UniquePersonList replacementPersons = new UniquePersonList();
-        replacementPersons.setPersons(newData.getPersonList());
-        UniqueEquipmentList replacementEquipment = new UniqueEquipmentList();
-        replacementEquipment.setEquipment(newData.getEquipmentList());
-
-        setPersons(replacementPersons.asUnmodifiableObservableList());
-        equipment.setEquipment(replacementEquipment.asUnmodifiableObservableList());
-    }
-
-    //// person-level operations
-
-    /**
-     * Returns true if a person with the same identity as {@code person} exists in ClubLogistics data.
-     */
-    public boolean hasPerson(Person person) {
-        requireNonNull(person);
-        return persons.contains(person);
-    }
-
-    /**
-     * Adds a person to the ClubLogistics data.
-     * The person must not already exist in ClubLogistics data.
-     */
-    public void addPerson(Person p) {
-        persons.add(p);
-    }
-
-    /**
-     * Replaces the given person {@code target} in the list with {@code editedPerson}.
-     * {@code target} must exist in ClubLogistics data.
-     * The person identity of {@code editedPerson} must not be the same as another existing person in
-     * ClubLogistics data.
-     */
-    public void setPerson(Person target, Person editedPerson) {
-        requireNonNull(editedPerson);
-
-        persons.setPerson(target, editedPerson);
-    }
-
-    /**
-     * Removes {@code key} from this {@code ClubLogisticsData}.
-     * {@code key} must exist in ClubLogistics data.
-     */
-    public void removePerson(Person key) {
-        persons.remove(key);
+        setEquipments(newData.getEquipmentList());
     }
 
     //// equipment-level operations
@@ -140,24 +85,21 @@ public class ClubLogisticsData implements ReadOnlyClubLogisticsData {
 
     //// util methods
 
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("persons", persons)
                 .add("equipment", equipment)
                 .toString();
     }
 
-    @Override
-    public ObservableList<Person> getPersonList() {
-        return persons.asUnmodifiableObservableList();
-    }
-
+    /** {@inheritDoc} */
     @Override
     public ObservableList<Equipment> getEquipmentList() {
         return equipment.asUnmodifiableObservableList();
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -169,11 +111,12 @@ public class ClubLogisticsData implements ReadOnlyClubLogisticsData {
             return false;
         }
 
-        return persons.equals(otherClubLogisticsData.persons) && equipment.equals(otherClubLogisticsData.equipment);
+        return equipment.equals(otherClubLogisticsData.equipment);
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(persons, equipment);
+        return equipment.hashCode();
     }
 }

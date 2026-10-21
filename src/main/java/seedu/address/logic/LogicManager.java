@@ -14,7 +14,6 @@ import seedu.address.logic.parser.ClubLogisticsParser;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
 import seedu.address.model.equipment.Equipment;
-import seedu.address.model.person.Person;
 import seedu.address.storage.Storage;
 
 /**
@@ -41,6 +40,7 @@ public class LogicManager implements Logic {
         clubLogisticsParser = new ClubLogisticsParser();
     }
 
+    /** {@inheritDoc} */
     @Override
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
@@ -60,26 +60,25 @@ public class LogicManager implements Logic {
         return commandResult;
     }
 
-    @Override
-    public ObservableList<Person> getFilteredPersonList() {
-        return model.getFilteredPersonList();
-    }
-
+    /** {@inheritDoc} */
     @Override
     public ObservableList<Equipment> getEquipmentList() {
         return model.getEquipmentList();
     }
 
+    /** {@inheritDoc} */
     @Override
     public ObservableList<Equipment> getFilteredEquipmentList() {
         return model.getFilteredEquipmentList();
     }
 
+    /** {@inheritDoc} */
     @Override
     public GuiSettings getGuiSettings() {
         return model.getGuiSettings();
     }
 
+    /** {@inheritDoc} */
     @Override
     public void setGuiSettings(GuiSettings guiSettings) {
         model.setGuiSettings(guiSettings);

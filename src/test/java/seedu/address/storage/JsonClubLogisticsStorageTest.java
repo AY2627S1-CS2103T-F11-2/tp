@@ -4,10 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
-import static seedu.address.testutil.TypicalPersons.ALICE;
-import static seedu.address.testutil.TypicalPersons.HOON;
-import static seedu.address.testutil.TypicalPersons.IDA;
-import static seedu.address.testutil.TypicalPersons.getTypicalClubLogisticsData;
+import static seedu.address.testutil.TypicalEquipment.CAMERA;
+import static seedu.address.testutil.TypicalEquipment.PROJECTOR;
+import static seedu.address.testutil.TypicalEquipment.getTypicalClubLogisticsData;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,6 +29,7 @@ public class JsonClubLogisticsStorageTest {
     @TempDir
     public Path testFolder;
 
+    /** Rejects a null storage path. */
     @Test
     public void readClubLogisticsData_nullFilePath_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> readClubLogisticsData(null));
@@ -46,27 +46,19 @@ public class JsonClubLogisticsStorageTest {
                 : null;
     }
 
+    /** Returns an empty result for a missing data file. */
     @Test
     public void read_missingFile_emptyResult() throws Exception {
         assertFalse(readClubLogisticsData("NonExistentFile.json").isPresent());
     }
 
+    /** Reports malformed JSON as a loading error. */
     @Test
     public void read_notJsonFormat_exceptionThrown() {
         assertThrows(DataLoadingException.class, () -> readClubLogisticsData("notJsonFormatClubLogisticsData.json"));
     }
 
-    @Test
-    public void readClubLogisticsData_invalidPersonClubLogisticsData_throwDataLoadingException() {
-        assertThrows(DataLoadingException.class, () -> readClubLogisticsData("invalidPersonClubLogisticsData.json"));
-    }
-
-    @Test
-    public void readClubLogisticsData_invalidAndValidPersonClubLogisticsData_throwDataLoadingException() {
-        assertThrows(DataLoadingException.class, ()
-                -> readClubLogisticsData("invalidAndValidPersonClubLogisticsData.json"));
-    }
-
+    /** Verifies saving, updating, and reloading the equipment register. */
     @Test
     public void readAndSaveClubLogisticsData_allInOrder_success() throws Exception {
         Path filePath = testFolder.resolve("TempClubLogisticsData.json");
@@ -79,25 +71,26 @@ public class JsonClubLogisticsStorageTest {
         assertEquals(original, new ClubLogisticsData(readBack));
 
         // Modify data, overwrite existing file, and read back
-        original.addPerson(HOON);
-        original.removePerson(ALICE);
+        original.addEquipment(PROJECTOR);
+        original.removeEquipment(CAMERA);
         jsonClubLogisticsStorage.saveClubLogisticsData(original, filePath);
         readBack = jsonClubLogisticsStorage.readClubLogisticsData(filePath).get();
         assertEquals(original, new ClubLogisticsData(readBack));
 
         // Save and read without specifying file path
-        original.addPerson(IDA);
+        original.addEquipment(CAMERA);
         jsonClubLogisticsStorage.saveClubLogisticsData(original); // file path not specified
         readBack = jsonClubLogisticsStorage.readClubLogisticsData().get(); // file path not specified
         assertEquals(original, new ClubLogisticsData(readBack));
 
     }
 
+    /** Preserves equipment availability and borrowers across saves. */
     @Test
     public void readAndSaveClubLogisticsData_availableAndIssuedEquipment_success() throws Exception {
         Path filePath = testFolder.resolve("EquipmentClubLogisticsData.json");
         JsonClubLogisticsStorage storage = new JsonClubLogisticsStorage(filePath);
-        ClubLogisticsData original = getTypicalClubLogisticsData();
+        ClubLogisticsData original = new ClubLogisticsData();
         original.addEquipment(new Equipment(new EquipmentId("CAM001"), "Sony Camera"));
         original.addEquipment(new Equipment(new EquipmentId("MIC001"), "Wireless Microphone",
                 new BorrowerName("John Tan")));
@@ -114,8 +107,9 @@ public class JsonClubLogisticsStorageTest {
         assertEquals(returnedEquipment, new ClubLogisticsData(storage.readClubLogisticsData().get()));
     }
 
+    /** Loads available equipment from the equipment-only JSON schema. */
     @Test
-    public void readClubLogisticsData_equipmentWithoutPersons_success() throws Exception {
+    public void readClubLogisticsData_equipmentOnly_success() throws Exception {
         Path filePath = testFolder.resolve("EquipmentOnly.json");
         Files.writeString(filePath, """
                 {"equipment": [
@@ -124,12 +118,12 @@ public class JsonClubLogisticsStorageTest {
                 ]}
                 """);
         ReadOnlyClubLogisticsData readBack = new JsonClubLogisticsStorage(filePath).readClubLogisticsData().get();
-        assertTrue(readBack.getPersonList().isEmpty());
         assertEquals(2, readBack.getEquipmentList().size());
         assertEquals(new EquipmentId("CAM001"), readBack.getEquipmentList().get(0).getId());
         assertTrue(readBack.getEquipmentList().stream().noneMatch(Equipment::isIssued));
     }
 
+    /** Rejects invalid records even when valid records precede them. */
     @Test
     public void readClubLogisticsData_invalidEquipmentAfterValidRecord_throwsDataLoadingException() throws Exception {
         Path filePath = testFolder.resolve("InvalidEquipment.json");
@@ -151,6 +145,7 @@ public class JsonClubLogisticsStorageTest {
         }
     }
 
+    /** Rejects a null register when saving. */
     @Test
     public void saveClubLogisticsData_nullClubLogisticsData_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> saveClubLogisticsData(null, "SomeFile.json"));
@@ -168,6 +163,7 @@ public class JsonClubLogisticsStorageTest {
         }
     }
 
+    /** Rejects a null save path. */
     @Test
     public void saveClubLogisticsData_nullFilePath_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> saveClubLogisticsData(new ClubLogisticsData(), null));

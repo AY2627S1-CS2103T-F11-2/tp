@@ -12,7 +12,6 @@ import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.ClubLogisticsData;
 import seedu.address.model.ReadOnlyClubLogisticsData;
 import seedu.address.model.equipment.Equipment;
-import seedu.address.model.person.Person;
 
 /**
  * An immutable snapshot of ClubLogistics data that is serializable to JSON.
@@ -20,22 +19,14 @@ import seedu.address.model.person.Person;
 @JsonRootName(value = "clublogistics")
 class JsonSerializableClubLogisticsData {
 
-    public static final String MESSAGE_DUPLICATE_PERSON = "Persons list contains duplicate person(s).";
     public static final String MESSAGE_DUPLICATE_EQUIPMENT = "Equipment list contains duplicate equipment ID(s).";
     public static final String MESSAGE_NULL_EQUIPMENT = "Equipment list contains a missing equipment record.";
 
-    private final List<JsonAdaptedPerson> persons = new ArrayList<>();
     private final List<JsonAdaptedEquipment> equipment = new ArrayList<>();
 
-    /**
-     * Constructs a {@code JsonSerializableClubLogisticsData} with the given people and equipment.
-     */
+    /** Constructs a snapshot containing the given equipment records. */
     @JsonCreator
-    public JsonSerializableClubLogisticsData(@JsonProperty("persons") List<JsonAdaptedPerson> persons,
-            @JsonProperty("equipment") List<JsonAdaptedEquipment> equipment) {
-        if (persons != null) {
-            this.persons.addAll(persons);
-        }
+    public JsonSerializableClubLogisticsData(@JsonProperty("equipment") List<JsonAdaptedEquipment> equipment) {
         if (equipment != null) {
             this.equipment.addAll(equipment);
         }
@@ -47,7 +38,6 @@ class JsonSerializableClubLogisticsData {
      * @param source future changes to this will not affect the created {@code JsonSerializableClubLogisticsData}.
      */
     public JsonSerializableClubLogisticsData(ReadOnlyClubLogisticsData source) {
-        persons.addAll(source.getPersonList().stream().map(JsonAdaptedPerson::new).collect(Collectors.toList()));
         equipment.addAll(source.getEquipmentList().stream()
                 .map(JsonAdaptedEquipment::new).collect(Collectors.toList()));
     }
@@ -59,13 +49,6 @@ class JsonSerializableClubLogisticsData {
      */
     public ClubLogisticsData toModelType() throws IllegalValueException {
         ClubLogisticsData clubLogisticsData = new ClubLogisticsData();
-        for (JsonAdaptedPerson jsonAdaptedPerson : persons) {
-            Person person = jsonAdaptedPerson.toModelType();
-            if (clubLogisticsData.hasPerson(person)) {
-                throw new IllegalValueException(MESSAGE_DUPLICATE_PERSON);
-            }
-            clubLogisticsData.addPerson(person);
-        }
         for (JsonAdaptedEquipment jsonAdaptedEquipment : equipment) {
             if (jsonAdaptedEquipment == null) {
                 throw new IllegalValueException(MESSAGE_NULL_EQUIPMENT);

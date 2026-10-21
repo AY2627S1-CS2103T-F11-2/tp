@@ -21,7 +21,7 @@ quickly, ClubLogistics lets you record loans and returns faster than a spreadshe
 
 1. Copy the file to the folder you want to use as the _home folder_ for ClubLogistics.
 
-1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar addressbook.jar`.<br>
+1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar clublogistics.jar`.<br>
    The application window opens in a few seconds. On the first run, it contains three sample equipment items:
    `CAM001`, `MIC001`, and `PROJ001`.
 
@@ -147,26 +147,6 @@ No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
 The item is currently issued | `Error: Equipment CAM001 is currently issued to John Tan and cannot be removed.`
 A parameter is missing or extra | `Error: Invalid command format. Usage: remove <equipment-id>`
 
-### Returning equipment: `return`
-
-Records that an issued equipment item has been returned, making it available again.
-
-Format: `return <equipment-id>`
-
-* Equipment IDs contain 1–20 letters or digits and are matched without regard to capitalization.
-* The item must exist and be currently issued. Returning an item that is already available is rejected.
-* After a successful return, the item is no longer associated with its previous holder.
-* The updated status is saved automatically and retained when the application restarts.
-
-Example: `return cam001`
-
-Successful output:
-
-```text
-Equipment CAM001 returned successfully.
-CAM001 | Sony Camera | Available
-```
-
 ### Listing all equipment: `list`
 
 Shows every item in the equipment register and whether it is available or issued. For an issued item, the person
@@ -254,6 +234,23 @@ No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
 The item is already available | `Error: Equipment CAM001 is not currently issued.`
 A parameter is missing or extra | `Error: Invalid command format. Usage: return <equipment-id>`
 
+### Filtering equipment: `filter`
+
+Shows equipment with the selected status. Use `filter available` or `filter issued` (case-insensitive).
+The filter remains active as equipment changes. Run `list` to show all equipment again.
+
+### Clearing the register: `clear`
+
+Removes all equipment records, including issued items, and saves the empty register.
+
+Format: `clear`
+
+### Viewing help: `help`
+
+Opens a window containing the ClubLogistics User Guide link. F1 opens the same help window.
+
+Format: `help`
+
 ### Exiting the program: `exit`
 
 Exits the program.
@@ -273,10 +270,12 @@ welcome to update the data directly by editing that file.
 Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, and an `issuedTo` value:
 
 ```json
-"equipment": [
-  { "id": "CAM001", "name": "Sony Camera", "issuedTo": null },
-  { "id": "MIC001", "name": "Wireless Microphone", "issuedTo": "John Tan" }
-]
+{
+  "equipment": [
+    { "id": "CAM001", "name": "Sony Camera", "issuedTo": null },
+    { "id": "MIC001", "name": "Wireless Microphone", "issuedTo": "John Tan" }
+  ]
+}
 ```
 
 An empty or null `issuedTo` value means the item is available. A valid person's name means it is issued to that person.
@@ -308,14 +307,12 @@ Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways 
 
 Action | Format, Examples
 --------|------------------
-**Add equipment** | `add EQUIPMENT_ID EQUIPMENT_NAME` <br> e.g., `add CAM001 Sony Camera`
-**Clear** | `clear`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit** | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]…​`<br> e.g., `edit 2 n/James Lee e/jameslee@example.com`
-**Find** | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Add equipment** | `add <equipment-id> <equipment-name>`<br> e.g., `add CAM001 Sony Camera`
+**Remove equipment** | `remove <equipment-id>`<br> e.g., `remove CAM001`
 **Issue equipment** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
 **Return equipment** | `return <equipment-id>`<br> e.g., `return CAM001`
-**List** | `list`
-**Issue** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
-**Return** | `return <equipment-id>`<br> e.g., `return CAM001`
+**List all equipment** | `list`
+**Filter by status** | `filter available` or `filter issued`
+**Clear the register** | `clear`
+**Help** | `help`
 **Exit** | `exit`

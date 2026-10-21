@@ -26,8 +26,6 @@ public class ClubLogisticsStorageRoundTripTest {
         Path file = testFolder.resolve("clublogistics.json");
         Files.writeString(file, """
                 {
-                  "persons": [{"name": "John Tan", "phone": "98765432",
-                    "email": "john@example.com", "address": "Main Street", "tags": []}],
                   "equipment": [
                     {"id": "CAM001", "name": "Sony Camera", "status": "AVAILABLE"},
                     {"id": "MIC001", "name": "Microphone", "status": "ISSUED", "issuedTo": "John Tan"}
@@ -36,7 +34,6 @@ public class ClubLogisticsStorageRoundTripTest {
                 """);
         JsonClubLogisticsStorage storage = new JsonClubLogisticsStorage(file);
         ReadOnlyClubLogisticsData loaded = storage.readClubLogisticsData().orElseThrow();
-        assertEquals("John Tan", loaded.getPersonList().get(0).getName().fullName);
         assertEquals(2, loaded.getEquipmentList().size());
         assertFalse(loaded.getEquipmentList().get(0).isIssued());
         assertEquals(new EquipmentId("MIC001"), loaded.getEquipmentList().get(1).getId());
@@ -45,7 +42,7 @@ public class ClubLogisticsStorageRoundTripTest {
         storage.saveClubLogisticsData(loaded);
         assertEquals(new ClubLogisticsData(loaded),
                 new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
-        assertEquals(Set.of("persons", "equipment"), JsonUtil.readJsonFile(file, java.util.Map.class)
+        assertEquals(Set.of("equipment"), JsonUtil.readJsonFile(file, java.util.Map.class)
                 .orElseThrow().keySet());
     }
 }

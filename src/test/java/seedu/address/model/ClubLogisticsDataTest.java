@@ -3,11 +3,8 @@ package seedu.address.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
-import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.testutil.Assert.assertThrows;
-import static seedu.address.testutil.TypicalPersons.ALICE;
-import static seedu.address.testutil.TypicalPersons.getTypicalClubLogisticsData;
+import static seedu.address.testutil.TypicalEquipment.getTypicalClubLogisticsData;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,25 +17,24 @@ import javafx.collections.ObservableList;
 import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.Equipment;
 import seedu.address.model.equipment.EquipmentId;
-import seedu.address.model.person.Person;
-import seedu.address.model.person.exceptions.DuplicatePersonException;
-import seedu.address.testutil.PersonBuilder;
 
 public class ClubLogisticsDataTest {
 
     private final ClubLogisticsData clubLogisticsData = new ClubLogisticsData();
 
+    /** Verifies the default register and preferences. */
     @Test
     public void constructor() {
-        assertEquals(List.of(), clubLogisticsData.getPersonList());
         assertEquals(List.of(), clubLogisticsData.getEquipmentList());
     }
 
+    /** Rejects a null replacement register. */
     @Test
     public void resetData_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> clubLogisticsData.resetData(null));
     }
 
+    /** Replaces the register with valid equipment data. */
     @Test
     public void resetData_withValidReadOnlyClubLogisticsData_replacesData() {
         ClubLogisticsData newData = getTypicalClubLogisticsData();
@@ -46,53 +42,15 @@ public class ClubLogisticsDataTest {
         assertEquals(newData, clubLogisticsData);
     }
 
-    @Test
-    public void resetData_withDuplicatePersons_throwsDuplicatePersonException() {
-        // Two persons with the same identity fields
-        Person editedAlice = new PersonBuilder(ALICE).withAddress(VALID_ADDRESS_BOB).withTags(VALID_TAG_HUSBAND)
-                .build();
-        List<Person> newPersons = List.of(ALICE, editedAlice);
-        ClubLogisticsDataStub newData = new ClubLogisticsDataStub(newPersons);
-
-        assertThrows(DuplicatePersonException.class, () -> clubLogisticsData.resetData(newData));
-    }
-
-    @Test
-    public void hasPerson_nullPerson_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> clubLogisticsData.hasPerson(null));
-    }
-
-    @Test
-    public void hasPerson_personNotInClubLogisticsData_returnsFalse() {
-        assertFalse(clubLogisticsData.hasPerson(ALICE));
-    }
-
-    @Test
-    public void hasPerson_personInClubLogisticsData_returnsTrue() {
-        clubLogisticsData.addPerson(ALICE);
-        assertTrue(clubLogisticsData.hasPerson(ALICE));
-    }
-
-    @Test
-    public void hasPerson_personWithSameIdentityFieldsInClubLogisticsData_returnsTrue() {
-        clubLogisticsData.addPerson(ALICE);
-        Person editedAlice = new PersonBuilder(ALICE).withAddress(VALID_ADDRESS_BOB).withTags(VALID_TAG_HUSBAND)
-                .build();
-        assertTrue(clubLogisticsData.hasPerson(editedAlice));
-    }
-
-    @Test
-    public void getPersonList_modifyList_throwsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> clubLogisticsData.getPersonList().remove(0));
-    }
-
+    /** Verifies the equipment register diagnostic text. */
     @Test
     public void toStringMethod() {
-        String expected = ClubLogisticsData.class.getCanonicalName() + "{persons=" + clubLogisticsData.getPersonList()
-                + ", equipment=" + clubLogisticsData.getEquipmentList() + "}";
+        String expected = ClubLogisticsData.class.getCanonicalName() + "{equipment="
+                + clubLogisticsData.getEquipmentList() + "}";
         assertEquals(expected, clubLogisticsData.toString());
     }
 
+    /** Rejects duplicate IDs without changing the register. */
     @Test
     public void addEquipment_duplicateId_rejectsWithoutMutation() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
@@ -102,6 +60,7 @@ public class ClubLogisticsDataTest {
         assertEquals(List.of(camera), clubLogisticsData.getEquipmentList());
     }
 
+    /** Allows equipment with the same name and different IDs. */
     @Test
     public void addEquipment_sameNameDifferentIds_acceptsBothItems() {
         Equipment firstCamera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
@@ -111,6 +70,7 @@ public class ClubLogisticsDataTest {
         assertEquals(List.of(firstCamera, secondCamera), clubLogisticsData.getEquipmentList());
     }
 
+    /** Verifies case-insensitive lookup and missing-item handling. */
     @Test
     public void findEquipment_caseInsensitiveId_findsOriginalRecord() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
@@ -120,6 +80,7 @@ public class ClubLogisticsDataTest {
         assertEquals(Optional.empty(), clubLogisticsData.findEquipment(new EquipmentId("MIC001")));
     }
 
+    /** Rejects null arguments to equipment operations. */
     @Test
     public void equipmentOperations_nullInputs_throwsNullPointerException() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
@@ -131,6 +92,7 @@ public class ClubLogisticsDataTest {
         assertThrows(NullPointerException.class, () -> clubLogisticsData.setEquipments(null));
     }
 
+    /** Replaces equipment with its issued record. */
     @Test
     public void setEquipment_issuedReplacement_updatesStoredRecord() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
@@ -141,6 +103,7 @@ public class ClubLogisticsDataTest {
         assertFalse(camera.isIssued());
     }
 
+    /** Verifies identity changes without affecting other equipment. */
     @Test
     public void setEquipment_unusedReplacementId_updatesIdentityAndPreservesOtherRecords() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
@@ -156,6 +119,7 @@ public class ClubLogisticsDataTest {
         assertEquals(List.of(replacement, microphone), clubLogisticsData.getEquipmentList());
     }
 
+    /** Rejects invalid replacements without changing the register. */
     @Test
     public void setEquipment_duplicateOrMissingTarget_rejectsWithoutMutation() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
@@ -167,6 +131,7 @@ public class ClubLogisticsDataTest {
         assertEquals(List.of(camera, microphone), clubLogisticsData.getEquipmentList());
     }
 
+    /** Rejects duplicate or null records before replacing the register. */
     @Test
     public void setEquipments_invalidReplacement_rejectsWithoutMutation() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
@@ -178,18 +143,19 @@ public class ClubLogisticsDataTest {
         assertEquals(List.of(camera), clubLogisticsData.getEquipmentList());
     }
 
+    /** Keeps the existing register when replacement data contains duplicates. */
     @Test
-    public void resetData_duplicateEquipment_preservesPersonsAndEquipment() {
+    public void resetData_duplicateEquipment_preservesEquipment() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera");
-        clubLogisticsData.addPerson(ALICE);
         clubLogisticsData.addEquipment(camera);
         ClubLogisticsData original = new ClubLogisticsData(clubLogisticsData);
         Equipment duplicate = new Equipment(new EquipmentId("cam001"), "Different Camera");
-        ClubLogisticsDataStub invalidData = new ClubLogisticsDataStub(List.of(), List.of(camera, duplicate));
+        ClubLogisticsDataStub invalidData = new ClubLogisticsDataStub(List.of(camera, duplicate));
         assertThrows(IllegalArgumentException.class, () -> clubLogisticsData.resetData(invalidData));
         assertEquals(original, clubLogisticsData);
     }
 
+    /** Verifies copying and resetting preserve equipment and borrowers. */
     @Test
     public void constructorAndResetData_equipment_copiesListsAndPreservesBorrower() {
         Equipment camera = new Equipment(new EquipmentId("CAM001"), "Sony Camera", new BorrowerName("John Tan"));
@@ -207,6 +173,7 @@ public class ClubLogisticsDataTest {
         assertEquals(List.of(camera), clubLogisticsData.getEquipmentList());
     }
 
+    /** Verifies an unmodifiable live equipment view. */
     @Test
     public void getEquipmentList_unmodifiableView_reflectsRecordChanges() {
         ObservableList<Equipment> view = clubLogisticsData.getEquipmentList();
@@ -221,31 +188,18 @@ public class ClubLogisticsDataTest {
         assertEquals(List.of(issuedCamera), view);
     }
 
-    /**
-     * A stub ReadOnlyClubLogisticsData whose persons list can violate interface constraints.
-     */
+    /** A data source that can contain duplicate equipment IDs. */
     private static class ClubLogisticsDataStub implements ReadOnlyClubLogisticsData {
-        private final ObservableList<Person> persons = FXCollections.observableArrayList();
         private final ObservableList<Equipment> equipment = FXCollections.observableArrayList();
 
-        ClubLogisticsDataStub(Collection<Person> persons) {
-            this(persons, List.of());
-        }
-
-        ClubLogisticsDataStub(Collection<Person> persons, Collection<Equipment> equipment) {
-            this.persons.setAll(persons);
+        ClubLogisticsDataStub(Collection<Equipment> equipment) {
             this.equipment.setAll(equipment);
         }
 
-        @Override
-        public ObservableList<Person> getPersonList() {
-            return persons;
-        }
-
+        /** {@inheritDoc} */
         @Override
         public ObservableList<Equipment> getEquipmentList() {
             return equipment;
         }
     }
-
 }

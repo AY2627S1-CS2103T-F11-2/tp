@@ -2,7 +2,7 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static seedu.address.testutil.TypicalPersons.getTypicalClubLogisticsData;
+import static seedu.address.testutil.TypicalEquipment.getTypicalClubLogisticsData;
 
 import java.nio.file.Path;
 
@@ -22,6 +22,7 @@ public class StorageManagerTest {
 
     private StorageManager storageManager;
 
+    /** Creates isolated storage for each test. */
     @BeforeEach
     public void setUp() {
         JsonClubLogisticsStorage clubLogisticsStorage =
@@ -34,6 +35,7 @@ public class StorageManagerTest {
         return testFolder.resolve(fileName);
     }
 
+    /** Verifies that the storage manager saves and reloads preferences. */
     @Test
     public void prefsReadSave() throws Exception {
         /*
@@ -48,6 +50,7 @@ public class StorageManagerTest {
         assertEquals(original, retrieved);
     }
 
+    /** Verifies that the storage manager saves and reloads equipment. */
     @Test
     public void clubLogisticsDataReadSave() throws Exception {
         /*
@@ -61,6 +64,7 @@ public class StorageManagerTest {
         assertEquals(original, new ClubLogisticsData(retrieved));
     }
 
+    /** Exposes the configured equipment data path. */
     @Test
     public void getClubLogisticsDataFilePath() {
         assertNotNull(storageManager.getClubLogisticsDataFilePath());
