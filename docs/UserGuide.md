@@ -267,7 +267,7 @@ save manually, and the data is retained when you restart the application.
 
 ### Editing the data file
 
-The equipment register is saved as a JSON file at `[JAR file location]/data/addressbook.json`. Advanced users are
+The equipment register is saved as a JSON file at `[JAR file location]/data/clublogistics.json`. Advanced users are
 welcome to update the data directly by editing that file.
 
 Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, and an `issuedTo` value:

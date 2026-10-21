@@ -36,8 +36,7 @@ public class MainApp extends Application {
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
     private static final Path USER_PREFS_FILE_PATH = Paths.get("preferences.json");
-    // Retain the legacy filename so existing installations continue to load their data.
-    private static final Path CLUB_LOGISTICS_FILE_PATH = Paths.get("data", "addressbook.json");
+    private static final Path CLUB_LOGISTICS_FILE_PATH = Paths.get("data", "clublogistics.json");
 
     protected Ui ui;
     protected Logic logic;

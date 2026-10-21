@@ -16,13 +16,14 @@ import seedu.address.model.ReadOnlyClubLogisticsData;
 import seedu.address.model.equipment.BorrowerName;
 import seedu.address.model.equipment.EquipmentId;
 
-public class ClubLogisticsStorageCompatibilityTest {
+public class ClubLogisticsStorageRoundTripTest {
     @TempDir
     public Path testFolder;
 
+    /** Verifies that ClubLogistics records survive loading and saving its data file. */
     @Test
-    public void readAndSave_legacyFile_preservesRecordsAndJsonFields() throws Exception {
-        Path file = testFolder.resolve("addressbook.json");
+    public void readAndSave_clubLogisticsFile_preservesRecordsAndJsonFields() throws Exception {
+        Path file = testFolder.resolve("clublogistics.json");
         Files.writeString(file, """
                 {
                   "persons": [{"name": "John Tan", "phone": "98765432",

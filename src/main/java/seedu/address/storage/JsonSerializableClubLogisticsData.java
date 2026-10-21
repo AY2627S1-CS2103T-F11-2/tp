@@ -17,8 +17,7 @@ import seedu.address.model.person.Person;
 /**
  * An immutable snapshot of ClubLogistics data that is serializable to JSON.
  */
-// Preserve the legacy JSON root name for compatibility.
-@JsonRootName(value = "addressbook")
+@JsonRootName(value = "clublogistics")
 class JsonSerializableClubLogisticsData {
 
     public static final String MESSAGE_DUPLICATE_PERSON = "Persons list contains duplicate person(s).";
