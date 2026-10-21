@@ -268,18 +268,29 @@ save manually, and the data is retained when you restart the application.
 The equipment register is saved as a JSON file at `[JAR file location]/data/clublogistics.json`. Advanced users are
 welcome to update the data directly by editing that file.
 
-Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, and an `issuedTo` value:
+Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, a `status`, and an
+`issuedTo` value:
 
 ```json
 {
   "equipment": [
-    { "id": "CAM001", "name": "Sony Camera", "issuedTo": null },
-    { "id": "MIC001", "name": "Wireless Microphone", "issuedTo": "John Tan" }
+    { "id": "CAM001", "name": "Sony Camera", "status": "AVAILABLE", "issuedTo": null },
+    { "id": "MIC001", "name": "Wireless Microphone", "status": "ISSUED", "issuedTo": "John Tan" }
   ]
 }
 ```
 
-An empty or null `issuedTo` value means the item is available. A valid person's name means it is issued to that person.
+The `status` and `issuedTo` values must agree with each other. The only valid combinations are:
+
+* `"status": "AVAILABLE"` with a null or empty `issuedTo` — the item is available.
+* `"status": "ISSUED"` with a valid person's name in `issuedTo` — the item is issued to that person.
+
+When you change whether an item is available, update **both** fields together. For example, to mark `MIC001` as
+returned, change `"status": "ISSUED"` to `"status": "AVAILABLE"` **and** `"issuedTo": "John Tan"` to
+`"issuedTo": null`. Changing only one of them makes the whole data file invalid.
+
+If a record has no `status` field, ClubLogistics works out the status from `issuedTo`. This is only for
+compatibility with older data files; ClubLogistics always writes `status` when it saves.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. The invalid file remains on disk until you run a command (ClubLogistics saves after every command). We recommend backing up the file before editing it.<br>

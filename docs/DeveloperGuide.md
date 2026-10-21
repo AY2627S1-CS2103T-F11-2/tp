@@ -55,8 +55,11 @@ the item, so observers receive the updated record without losing the selected fi
 
 `StorageManager` delegates to `JsonUserPrefsStorage` and `JsonClubLogisticsStorage`. The latter reads and writes
 `JsonSerializableClubLogisticsData`, whose top-level `equipment` array contains `JsonAdaptedEquipment` records.
-Each record stores `id`, `name`, and `issuedTo`; status is derived from the borrower. Invalid IDs, names,
-borrowers, duplicate IDs, and null records cause loading to fail. No contact register is stored.
+Each record stores `id`, `name`, `status`, and `issuedTo`. `status` must be `AVAILABLE` with a null or empty
+`issuedTo`, or `ISSUED` with a valid borrower; any other combination causes loading to fail. A record without
+`status` is accepted for compatibility with older files, and its status is inferred from the borrower. Saving always
+writes `status`. Invalid IDs, names, borrowers, statuses, duplicate IDs, and null records also cause loading to fail.
+No contact register is stored.
 
 The application uses `data/clublogistics.json` exclusively. No data migration is performed.
 
