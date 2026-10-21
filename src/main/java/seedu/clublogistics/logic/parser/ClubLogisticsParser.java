@@ -59,8 +59,8 @@ public class ClubLogisticsParser {
             case RemoveCommand.COMMAND_WORD -> new RemoveCommandParser().parse(arguments);
             case ReturnCommand.COMMAND_WORD -> new ReturnCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new ListCommandParser().parse(arguments);
-            case ExitCommand.COMMAND_WORD -> new ExitCommand();
-            case HelpCommand.COMMAND_WORD -> new HelpCommand();
+            case ExitCommand.COMMAND_WORD -> new ExitCommandParser().parse(arguments);
+            case HelpCommand.COMMAND_WORD -> new HelpCommandParser().parse(arguments);
             case IssueCommand.COMMAND_WORD -> new IssueCommandParser().parse(arguments);
             default -> {
                 logger.finer("This user input caused a ParseException: " + userInput);
