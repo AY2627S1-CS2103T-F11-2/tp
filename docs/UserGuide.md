@@ -144,7 +144,7 @@ Possible errors:
 Situation | Error message
 ----------|--------------
 No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
-The item is currently issued | `Error: Equipment CAM001 is currently issued to John Tan and cannot be removed.`
+The item is currently issued | `Error: Equipment CAM001 is issued to John Tan and cannot be removed.`
 A parameter is missing or extra | `Error: Invalid command format. Usage: remove <equipment-id>`
 
 ### Listing all equipment: `list`
