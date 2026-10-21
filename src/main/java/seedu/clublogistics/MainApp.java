@@ -64,7 +64,7 @@ public class MainApp extends Application {
      * Loads ClubLogistics data and preferences into a model manager.
      * Uses sample data when the file is missing, or empty data when loading fails.
      */
-    private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
+    protected Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
         logger.info("Using data file : " + storage.getClubLogisticsDataFilePath());
 
         Optional<ReadOnlyClubLogisticsData> clubLogisticsDataOptional;
