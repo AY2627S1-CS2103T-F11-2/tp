@@ -92,13 +92,9 @@ How the parsing works:
 | `filter` | `FilterCommandParser` | `FilterCommand` |
 | `issue` | `IssueCommandParser` | `IssueCommand` |
 | `return` | `ReturnCommandParser` | `ReturnCommand` |
-
-<div markdown="span" class="alert alert-info">
-
-:information_source: **Note:** `clear`, `help`, and `exit` are constructed directly as `ClearCommand`,
-`HelpCommand`, and `ExitCommand` by `ClubLogisticsParser`; they have no dedicated parsers.
-
-</div>
+| `clear` | `ClearCommandParser` | `ClearCommand` |
+| `help` | `HelpCommandParser` | `HelpCommand` |
+| `exit` | `ExitCommandParser` | `ExitCommand` |
 
 ### Model component
 

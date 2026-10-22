@@ -25,7 +25,7 @@ XYZCommandParser ..> XYZCommand : <<create>>
 XYZCommand -up-|> Command
 
 legend bottom
-  XYZCommandParser and XYZCommand represent the six concrete pairs listed in the guide.
+  XYZCommandParser and XYZCommand represent the nine concrete pairs listed in the guide.
   Parser<T extends Command> defines parse(String): T.
 endlegend
 @enduml
