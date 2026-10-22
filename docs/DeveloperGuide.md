@@ -129,8 +129,6 @@ equipment-only implementation; use the descriptions above and the source code fo
 
 <img src="images/ModelClassDiagram.png" width="450" />
 
-<img src="images/BetterModelClassDiagram.png" width="450" />
-
 <img src="images/StorageClassDiagram.png" width="550" />
 
 ![UndoRedoState0](images/UndoRedoState0.png)
