@@ -228,7 +228,14 @@ The stories below describe the full product vision. They include deferred capabi
 
 (For all use cases below, the **System** is `ClubLogistics` and the **Actor** is the logistics coordinator.)
 
+The use cases below describe the product vision, not only the released commands. Each use case is labelled with
+its release status. The implemented release supports `add`, `remove`, `list`, `filter`, `issue`, `return`,
+`clear`, `help`, and `exit`; refer to the [User Guide](UserGuide.md) for their exact command formats.
+
 #### Use case UC01: Register a new asset
+
+**Release status: Partially implemented.** The release supports registering an item with an equipment ID and name
+using `add`. It records the new item as available. Storage location and condition are planned capabilities.
 
 **MSS**
 
@@ -251,6 +258,9 @@ The stories below describe the full product vision. They include deferred capabi
     Use case ends.
 
 #### Use case UC02: Issue an asset to a borrower
+
+**Release status: Partially implemented.** The release supports `issue <equipment-id> <borrower-name>` for an
+available item. Searching by name, due dates, purpose, and loan records are planned capabilities.
 
 **Preconditions**: The asset exists and is available and usable.
 
@@ -282,6 +292,10 @@ The stories below describe the full product vision. They include deferred capabi
 
 #### Use case UC03: Receive an asset and record damage
 
+**Release status: Partially implemented.** The release supports `return <equipment-id>`, which clears the
+borrower and makes an issued item available. Recording damage, loan records, and condition are planned
+capabilities.
+
 **Preconditions**: The asset has an active loan.
 
 **MSS**
@@ -307,6 +321,9 @@ The stories below describe the full product vision. They include deferred capabi
 
 #### Use case UC04: Prepare equipment for an event
 
+**Release status: Planned.** The release can only filter the register by `available` or `issued` status. Category,
+event-tag, storage-location, condition, count, and detailed-record workflows are planned capabilities.
+
 **MSS**
 
 1. Coordinator requests assets for a category, event tag, or storage location.
@@ -327,6 +344,9 @@ The stories below describe the full product vision. They include deferred capabi
     Use case ends.
 
 #### Use case UC05: Hand over the logistics role
+
+**Release status: Planned.** The release does not provide unresolved-loan summaries, asset history, exports, or
+backup commands. Equipment data is retained locally in `data/clublogistics.json` after successful commands.
 
 **MSS**
 
