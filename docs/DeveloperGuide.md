@@ -70,6 +70,13 @@ The supported commands are `add`, `remove`, `list`, `filter`, `issue`, `return`,
 Each equipment command parser validates its own positional arguments. For example, `issue CAM001 John Tan`
 creates an `IssueCommand` containing an `EquipmentId` and a `BorrowerName`.
 
+<img src="images/LogicClassDiagram.png" width="600"/>
+
+*Structure of the Logic component. `LogicManager` owns one `ClubLogisticsParser` (solid arrow), which creates command
+parsers (`XYZCommandParser`, such as `FilterCommandParser`), which in turn create concrete `Command` objects
+(dashed `<<create>>` arrows). `LogicManager` calls the resulting `Command`, which uses the `Model` and returns a
+`CommandResult`. The commands shown are a representative subset.*
+
 #### Positional command parsers
 
 The following classes are used for parsing user commands:
@@ -146,8 +153,6 @@ equipment-only implementation; use the descriptions above and the source code fo
 <img src="images/ArchitectureDiagram.png" width="280" />
 
 ![Structure of the UI Component](images/UiClassDiagram.png)
-
-<img src="images/LogicClassDiagram.png" width="550"/>
 
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
 
