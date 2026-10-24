@@ -344,7 +344,8 @@ changes, and your edits are lost. To edit the data file safely:
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and run it once so that it creates its data file. Then:
+**A**: Install the app on the other computer and run it and enter any successful command, such as `list`. The data file is created only when a command succeeds and
+the register is saved, not when the app starts. Then:
 
 1. Back up the data files on both computers.
 2. Close ClubLogistics on both computers.
