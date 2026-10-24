@@ -330,12 +330,29 @@ If your changes make the data file invalid, ClubLogistics starts with an empty e
 Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
+ClubLogistics reads the data file only when it starts, and does not notice changes made while it is running. If you
+edit the file while ClubLogistics is open, the next successful command saves the register in memory over your
+changes, and your edits are lost. To edit the data file safely:
+
+1. Back up `data/clublogistics.json` by copying it somewhere else.
+2. Close every running ClubLogistics window.
+3. Edit the data file, then save it.
+4. Start ClubLogistics again to load your changes.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous ClubLogistics home folder.
+**A**: Install the app on the other computer and run it and enter any successful command, such as `list`. The data file is created only when a command succeeds and
+the register is saved, not when the app starts. Then:
+
+1. Back up the data files on both computers.
+2. Close ClubLogistics on both computers.
+3. Overwrite the data file on the new computer with `data/clublogistics.json` from your previous ClubLogistics home folder.
+4. Start ClubLogistics on the new computer to load the transferred records.
+
+If ClubLogistics is still running when you replace the file, the next command you run saves its old data over the transferred file.
 
 **Q**: Do I need to register a person before issuing equipment to them?<br>
 **A**: No. ClubLogistics only records the name of the person currently holding each item, so you can issue equipment to anyone by name.
