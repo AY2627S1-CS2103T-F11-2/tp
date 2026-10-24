@@ -240,10 +240,37 @@ A parameter is missing or extra | `Error: Invalid command format. Usage: return 
 
 ### Filtering equipment: `filter`
 
-Shows equipment with the selected status. Type the command word `filter` in lowercase.
-The status value, `available` or `issued`, is case-insensitive. For example, `filter available`,
-`filter AVAILABLE`, and `filter Available` are accepted, while `FILTER AVAILABLE` returns the error `Unknown command.`
-The filter remains active as equipment changes. Run `list` to show all equipment again.
+Shows only equipment with the selected status. Type the command word `filter` in lowercase; `FILTER AVAILABLE`
+returns the error `Unknown command.` The status argument, `available` or `issued`, is case-insensitive.
+
+Format: `filter <available|issued>`
+
+Examples:
+* `filter available` shows equipment that can be issued.
+* `filter issued` shows equipment currently held by borrowers.
+* `filter AVAILABLE` has the same effect as `filter available`.
+
+The command reports one of the following results:
+
+Selected status | Matching equipment exists | No equipment matches
+----------------|---------------------------|---------------------
+`available` | `Showing available equipment.` | `No available equipment found.`
+`issued` | `Showing issued equipment.` | `No issued equipment found.`
+
+An empty result means no equipment matches the selected status; it does not necessarily mean
+that the whole register is empty. Filtering changes only the displayed list, not the equipment records.
+
+The selected filter remains active as equipment is added, issued, returned, or removed, and the
+visible list updates to reflect each item's current status. Run `list` to clear the filter and
+show all equipment again. The filter is not saved between application sessions.
+
+Possible errors:
+
+Situation | Error message
+----------|--------------
+Status is missing, e.g., `filter` | `Error: Invalid command format. Usage: filter <available|issued>`
+Extra arguments, e.g., `filter available extra` | `Error: Invalid command format. Usage: filter <available|issued>`
+Unsupported status, e.g., `filter damaged` | `Error: Invalid command format. Usage: filter <available|issued>`
 
 ### Clearing the register: `clear`
 
@@ -270,8 +297,9 @@ save manually, and the data is retained when you restart the application.
 
 ### Editing the data file
 
-The equipment register is saved as a JSON file at `[JAR file location]/data/clublogistics.json`. Advanced users are
-welcome to update the data directly by editing that file.
+The equipment register is saved as `data/clublogistics.json` relative to the folder from which you start the app.
+Following the Quick Start instructions and running the JAR from the ClubLogistics home folder therefore stores the
+file in that folder's `data` directory. Advanced users are welcome to update the data directly by editing that file.
 
 Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, a `status`, and an
 `issuedTo` value:
@@ -302,12 +330,43 @@ If your changes make the data file invalid, ClubLogistics starts with an empty e
 Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
+ClubLogistics reads the data file only when it starts, and does not notice changes made while it is running. If you
+edit the file while ClubLogistics is open, the next successful command saves the register in memory over your
+changes, and your edits are lost. To edit the data file safely:
+
+1. Back up `data/clublogistics.json` by copying it somewhere else.
+2. Close every running ClubLogistics window.
+3. Edit the data file, then save it.
+4. Start ClubLogistics again to load your changes.
+
+#### Recovering from an invalid data file
+
+ClubLogistics does not repair an invalid data file automatically. It starts with an empty register, and the invalid
+file stays on disk until a successful command saves the empty register over it. To recover your records:
+
+1. Close ClubLogistics, then copy the invalid `data/clublogistics.json` somewhere safe before changing anything.
+2. Choose one of the following:
+   * **Restore a backup:** replace `data/clublogistics.json` with a valid backup copy.
+   * **Repair the file:** if there is no backup, edit the file so it follows the format described above. Each item needs
+     a valid `id` and `name`, and a `status` that is `AVAILABLE` with an empty `issuedTo`, or `ISSUED` with a valid
+     borrower name in `issuedTo`. Equipment IDs must be unique.
+3. Start ClubLogistics and check that your records are listed. Do not run any command until you have confirmed that they
+   loaded, because a successful command overwrites the file.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous ClubLogistics home folder.
+**A**: Install the app on the other computer and run it and enter any successful command, such as `list`. The data file is created only when a command succeeds and
+the register is saved, not when the app starts. Then:
+
+1. Back up the data files on both computers.
+2. Close ClubLogistics on both computers.
+3. Overwrite the data file on the new computer with `data/clublogistics.json` from your previous ClubLogistics home folder.
+4. Start ClubLogistics on the new computer to load the transferred records.
+
+If ClubLogistics is still running when you replace the file, the next command you run saves its old data over the transferred file.
 
 **Q**: Do I need to register a person before issuing equipment to them?<br>
 **A**: No. ClubLogistics only records the name of the person currently holding each item, so you can issue equipment to anyone by name.

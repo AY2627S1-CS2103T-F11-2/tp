@@ -35,7 +35,7 @@ ClubLogisticsData *--> "1" UniqueEquipmentList
 UniqueEquipmentList --> "0..*" Equipment
 Equipment *--> "1" EquipmentId
 Equipment *--> "1" EquipmentName
-Equipment *--> "1" EquipmentStatus
+Equipment --> "1" EquipmentStatus
 Equipment *--> "0..1 issuedTo" BorrowerName
 
 note bottom of Equipment

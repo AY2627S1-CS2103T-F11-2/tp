@@ -1,12 +1,14 @@
 package seedu.clublogistics.commons.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static seedu.clublogistics.testutil.Assert.assertThrows;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.clublogistics.commons.exceptions.DataLoadingException;
 import seedu.clublogistics.testutil.SerializableTestClass;
 import seedu.clublogistics.testutil.TestUtil;
 
@@ -37,6 +39,15 @@ public class JsonUtilTest {
         assertEquals(serializableTestClass.getName(), SerializableTestClass.getNameTestValue());
         assertEquals(serializableTestClass.getListOfLocalDateTimes(), SerializableTestClass.getListTestValues());
         assertEquals(serializableTestClass.getMapOfIntegerToString(), SerializableTestClass.getHashMapTestValues());
+    }
+
+    /** Rejects a file containing only the JSON literal {@code null} instead of returning a null object. */
+    @Test
+    public void readJsonFile_nullJsonDocument_throwsDataLoadingException() throws IOException {
+        FileUtil.writeToFile(SERIALIZATION_FILE, "null");
+
+        assertThrows(DataLoadingException.class, () ->
+                JsonUtil.readJsonFile(SERIALIZATION_FILE, SerializableTestClass.class));
     }
 
     //TODO: @Test jsonUtil_readJsonStringToObjectInstance_correctObject()

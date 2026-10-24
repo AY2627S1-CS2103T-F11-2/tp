@@ -1,60 +1,53 @@
 @startuml
 !include style.puml
+hide empty members
 skinparam arrowThickness 1.1
 skinparam arrowColor UI_COLOR_T4
-skinparam classBackgroundColor UI_COLOR
+skinparam classBackgroundColor UI_COLOR_T4
+skinparam nodesep 35
+skinparam ranksep 60
 
-package UI <<Rectangle>>{
-Class "<<interface>>\nUi" as Ui
-Class "{abstract}\nUiPart" as UiPart
-Class UiManager
-Class MainWindow
-Class HelpWindow
-Class ResultDisplay
-Class PersonListPanel
-Class PersonCard
-Class StatusBarFooter
-Class CommandBox
+package UI <<Rectangle>> {
+interface Ui
+abstract class UiPart
+class UiManager
+class MainWindow
+class HelpWindow
+class EquipmentListPanel
+class EquipmentCard
+class ResultDisplay
+class CommandBox
+class StatusBarFooter
 }
 
-package Model <<Rectangle>> {
-Class HiddenModel #FFFFFF
+package "Logic" as LogicPackage <<Rectangle>> {
+interface Logic
 }
 
-package Logic <<Rectangle>> {
-Class HiddenLogic #FFFFFF
+package "Model" as ModelPackage <<Rectangle>> {
+class Equipment #9D0012
 }
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Ui
+UiManager ..|> Ui
+UiManager --> "0..1" MainWindow : mainWindow
+UiManager --> Logic : logic
+MainWindow --> Logic : logic
+MainWindow --> "1" HelpWindow : helpWindow
+MainWindow --> "0..1" EquipmentListPanel : equipmentListPanel
+MainWindow --> "0..1" ResultDisplay : resultDisplay
+MainWindow ..> CommandBox : creates
+MainWindow ..> StatusBarFooter : creates
+EquipmentListPanel ..> EquipmentCard : creates
+EquipmentListPanel ..> Equipment : observes
+EquipmentCard ..> Equipment : reads
 
-UiManager .left.|> Ui
-UiManager -down-> "1" MainWindow
-MainWindow *-down->  "1" CommandBox
-MainWindow *-down-> "1" ResultDisplay
-MainWindow *-down-> "1" PersonListPanel
-MainWindow *-down-> "1" StatusBarFooter
-MainWindow --> "0..1" HelpWindow
-
-PersonListPanel -down-> "*" PersonCard
-
-MainWindow -left-|> UiPart
-
+MainWindow --|> UiPart
+HelpWindow --|> UiPart
+EquipmentListPanel --|> UiPart
+EquipmentCard --|> UiPart
 ResultDisplay --|> UiPart
 CommandBox --|> UiPart
-PersonListPanel --|> UiPart
-PersonCard --|> UiPart
 StatusBarFooter --|> UiPart
-HelpWindow --|> UiPart
 
-PersonCard ..> Model
-UiManager -right-> Logic
-MainWindow -left-> Logic
 
-PersonListPanel -[hidden]left- HelpWindow
-HelpWindow -[hidden]left- CommandBox
-CommandBox -[hidden]left- ResultDisplay
-ResultDisplay -[hidden]left- StatusBarFooter
-
-MainWindow -[hidden]-|> UiPart
 @enduml
