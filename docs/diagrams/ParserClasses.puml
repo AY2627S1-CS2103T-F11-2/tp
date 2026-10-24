@@ -3,36 +3,29 @@
 skinparam arrowThickness 1.1
 skinparam arrowColor LOGIC_COLOR_T4
 skinparam classBackgroundColor LOGIC_COLOR
+skinparam linetype polyline
+skinparam nodesep 35
+skinparam ranksep 40
 
-Class "{abstract}\nCommand" as Command
-Class XYZCommand
+abstract class Command
+class XYZCommand
 
-package "Parser classes"{
-Class "<<interface>>\nParser" as Parser
-Class ClubLogisticsParser
-Class XYZCommandParser
-Class CliSyntax
-Class ParserUtil
-Class ArgumentMultimap
-Class ArgumentTokenizer
-Class Prefix
+package "Parser classes" {
+    interface Parser <<interface>>
+    class ClubLogisticsParser
+    class XYZCommandParser
+
+    Parser -[hidden]right-> ClubLogisticsParser
 }
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> ClubLogisticsParser
-
-ClubLogisticsParser .down.> XYZCommandParser: <<create>>
-
-XYZCommandParser ..> XYZCommand : <<create>>
+ClubLogisticsParser .down.> XYZCommandParser : <<create>>
 ClubLogisticsParser ..> Command : <<use>>
 XYZCommandParser .up.|> Parser
-XYZCommandParser ..> ArgumentMultimap
-XYZCommandParser ..> ArgumentTokenizer
-ArgumentTokenizer .left.> ArgumentMultimap
-XYZCommandParser ..> CliSyntax
-CliSyntax ..> Prefix
-XYZCommandParser ..> ParserUtil
-ParserUtil .down.> Prefix
-ArgumentTokenizer .down.> Prefix
+XYZCommandParser ..> XYZCommand : <<create>>
 XYZCommand -up-|> Command
+
+legend bottom
+  XYZCommandParser and XYZCommand represent the nine concrete pairs listed in the guide.
+  Parser<T extends Command> defines parse(String): T.
+endlegend
 @enduml

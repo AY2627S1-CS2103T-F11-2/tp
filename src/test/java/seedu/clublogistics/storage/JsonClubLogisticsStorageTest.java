@@ -58,6 +58,12 @@ public class JsonClubLogisticsStorageTest {
         assertThrows(DataLoadingException.class, () -> readClubLogisticsData("notJsonFormatClubLogisticsData.json"));
     }
 
+    /** Reports a JSON document containing only {@code null} as a loading error. */
+    @Test
+    public void read_nullJsonDocument_exceptionThrown() {
+        assertThrows(DataLoadingException.class, () -> readClubLogisticsData("nullClubLogisticsData.json"));
+    }
+
     /** Verifies saving, updating, and reloading the equipment register. */
     @Test
     public void readAndSaveClubLogisticsData_allInOrder_success() throws Exception {

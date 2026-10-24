@@ -1,12 +1,11 @@
 @startuml
-!pragma layout smetana
 !include style.puml
 hide empty members
 skinparam arrowThickness 1.1
 skinparam arrowColor UI_COLOR_T4
 skinparam classBackgroundColor UI_COLOR_T4
 skinparam nodesep 35
-skinparam ranksep 45
+skinparam ranksep 60
 
 package UI <<Rectangle>> {
 interface Ui
@@ -31,8 +30,8 @@ class Equipment #9D0012
 
 UiManager ..|> Ui
 UiManager --> "0..1" MainWindow : mainWindow
-UiManager --> "1" Logic : logic
-MainWindow --> "1" Logic : logic
+UiManager --> Logic : logic
+MainWindow --> Logic : logic
 MainWindow --> "1" HelpWindow : helpWindow
 MainWindow --> "0..1" EquipmentListPanel : equipmentListPanel
 MainWindow --> "0..1" ResultDisplay : resultDisplay

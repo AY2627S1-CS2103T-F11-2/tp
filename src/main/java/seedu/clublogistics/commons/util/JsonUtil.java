@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import seedu.clublogistics.commons.core.LogsCenter;
 import seedu.clublogistics.commons.exceptions.DataLoadingException;
+import seedu.clublogistics.commons.exceptions.IllegalValueException;
 
 /**
  * Converts a Java object instance to JSON and vice versa
@@ -46,7 +47,7 @@ public class JsonUtil {
      *
      * @param filePath cannot be null.
      * @param classOfObjectToDeserialize JSON file has to correspond to the structure in the class given here.
-     * @throws DataLoadingException if loading of the JSON file failed.
+     * @throws DataLoadingException if loading of the JSON file failed, or the file contains only {@code null}.
      */
     public static <T> Optional<T> readJsonFile(
             Path filePath, Class<T> classOfObjectToDeserialize) throws DataLoadingException {
@@ -57,16 +58,32 @@ public class JsonUtil {
         }
         logger.info("JSON file " + filePath + " found.");
 
-        T jsonFile;
+        T jsonFile = deserializeOrThrow(filePath, classOfObjectToDeserialize);
+        requireNonNullDocument(filePath, jsonFile);
 
+        return Optional.of(jsonFile);
+    }
+
+    private static <T> T deserializeOrThrow(Path filePath, Class<T> classOfObjectToDeserialize)
+            throws DataLoadingException {
         try {
-            jsonFile = deserializeObjectFromJsonFile(filePath, classOfObjectToDeserialize);
+            return deserializeObjectFromJsonFile(filePath, classOfObjectToDeserialize);
         } catch (IOException e) {
             logger.warning("Error reading from jsonFile file " + filePath + ": " + e);
             throw new DataLoadingException(e);
         }
+    }
 
-        return Optional.of(jsonFile);
+    /**
+     * Rejects a JSON document consisting only of the literal {@code null}, which Jackson
+     * deserializes to {@code null} rather than reporting as an error.
+     */
+    private static void requireNonNullDocument(Path filePath, Object jsonFile) throws DataLoadingException {
+        if (jsonFile == null) {
+            logger.warning("JSON file " + filePath + " contains a null document.");
+            throw new DataLoadingException(
+                    new IllegalValueException("JSON file " + filePath + " contains a null document."));
+        }
     }
 
     /**

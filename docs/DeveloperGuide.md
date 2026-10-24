@@ -20,9 +20,38 @@ Refer to [Setting up and getting started](SettingUp.md). Build and run the proje
 
 ### Architecture
 
-`Main` launches `MainApp`, which creates the storage, model, logic, and UI components. `MainApp` reads
-`preferences.json` and `data/clublogistics.json`. A missing data file starts the app with sample equipment;
-an invalid data file starts it with an empty register. Shutdown saves the window preferences.
+**Main components**
+
+`Main` launches `MainApp`, which manages application startup and shutdown:
+
+* On startup, it creates and connects the storage, model, logic, and UI components and loads preferences
+  and equipment data. Missing equipment data uses sample data; invalid equipment data uses an empty register.
+* On shutdown, it saves the user preferences, including window settings.
+
+The four main components are:
+
+* [**`UI`**](#ui-component): Displays equipment and handles user input.
+* [**`Logic`**](#logic-component): Parses and executes commands.
+* [**`Model`**](#model-component): Holds equipment data and user preferences in memory.
+* [**`Storage`**](#storage-component): Reads and writes equipment data and preferences.
+
+[**`Commons`**](#common-classes) contains utilities shared by multiple components.
+
+**Component interactions**
+
+The sequence diagram below shows the interactions for a successful `remove CAM001` command, assuming
+`CAM001` is registered and available. Parsing, equipment lookup, and availability checks are omitted.
+
+![Successful remove CAM001 interactions between UI, Logic, Model, and Storage](images/ArchitectureSequenceDiagram.png)
+
+Each component exposes its API through an interface (`Ui`, `Logic`, `Model`, or `Storage`) and implements it
+in a corresponding manager class (`UiManager`, `LogicManager`, `ModelManager`, or `StorageManager`).
+
+For example, `Logic.java` declares the command API and `LogicManager.java` implements it. Components depend
+on these interfaces rather than specific implementations. The partial class diagram below shows this
+relationship for `LogicManager`, `Model`, and `Storage`.
+
+![Component interfaces and their manager implementations](images/ComponentManagers.png)
 
 ### UI component
 
@@ -30,6 +59,27 @@ an invalid data file starts it with an empty register. Shutdown saves the window
 and `StatusBarFooter`. `EquipmentListPanel` displays `EquipmentCard` instances bound to the model's filtered
 observable equipment list. Cards show each item's ID, name, and availability or borrower. `HelpWindow`
 displays the ClubLogistics User Guide link. Visible components inherit from `UiPart` and use matching FXML layouts.
+
+<img src="images/UiClassDiagram.png" width="1000" alt="UI class diagram showing equipment panels and cards, UiPart inheritance, and Logic dependencies" />
+
+*Equipment UI classes and their relationships. Solid arrows represent stored references,
+dashed arrows represent dependencies, and hollow triangles represent inheritance or interface realization.*
+
+`UiManager` holds a `Logic` reference and creates `MainWindow` during `start`. Its window reference
+is initially absent. Every successfully constructed `MainWindow` creates one `HelpWindow`, whether
+or not that help window is visible. `fillInnerParts()` initializes the equipment panel and result
+display, which are stored in fields; both are absent before that method runs.
+
+`MainWindow` passes `logic.getFilteredEquipmentList()` to
+`EquipmentListPanel(ObservableList<Equipment>)`. The panel observes the list and creates an
+`EquipmentCard` for each non-empty cell. Cards read equipment data, including the borrower and status;
+they do not mutate the model. `CommandBox` receives the window's command-execution callback.
+
+The window attaches the root nodes of `CommandBox`, `ResultDisplay`, `EquipmentListPanel`, and
+`StatusBarFooter` to its JavaFX placeholders. This scene-graph containment is distinct from Java
+object fields: `CommandBox` and `StatusBarFooter` are local variables in `fillInnerParts()`, so the
+diagram shows creation dependencies rather than stored associations for these two wrappers.
+All seven UI part classes inherit from `UiPart`; `UiManager` implements `Ui`.
 
 ### Logic component
 
@@ -40,6 +90,39 @@ Storage errors are converted to command errors, with a separate message for perm
 The supported commands are `add`, `remove`, `list`, `filter`, `issue`, `return`, `clear`, `help`, and `exit`.
 Each equipment command parser validates its own positional arguments. For example, `issue CAM001 John Tan`
 creates an `IssueCommand` containing an `EquipmentId` and a `BorrowerName`.
+
+<img src="images/LogicClassDiagram.png" width="600"/>
+
+*Structure of the Logic component. `LogicManager` owns one `ClubLogisticsParser` (solid arrow), which creates command
+parsers (`XYZCommandParser`, such as `FilterCommandParser`), which in turn create concrete `Command` objects
+(dashed `<<create>>` arrows). `LogicManager` calls the resulting `Command`, which uses the `Model` and returns a
+`CommandResult`. The commands shown are a representative subset.*
+
+#### Positional command parsers
+
+The following classes are used for parsing user commands:
+
+![Parser structure using XYZ placeholders for the concrete parser and command pairs](images/ParserClasses.png)
+
+How the parsing works:
+
+* `ClubLogisticsParser` creates the matching `XYZCommandParser`, which parses the arguments and creates an
+  `XYZCommand`. The resulting command is returned to `LogicManager` for execution.
+* All `XYZCommandParser` classes implement `Parser<T extends Command>`.
+
+`XYZCommandParser` and `XYZCommand` are placeholders for the following concrete classes:
+
+| Command word | `XYZCommandParser` represents | `XYZCommand` represents |
+| --- | --- | --- |
+| `add` | `AddEquipmentCommandParser` | `AddEquipmentCommand` |
+| `remove` | `RemoveCommandParser` | `RemoveCommand` |
+| `list` | `ListCommandParser` | `ListCommand` |
+| `filter` | `FilterCommandParser` | `FilterCommand` |
+| `issue` | `IssueCommandParser` | `IssueCommand` |
+| `return` | `ReturnCommandParser` | `ReturnCommand` |
+| `clear` | `ClearCommandParser` | `ClearCommand` |
+| `help` | `HelpCommandParser` | `HelpCommand` |
+| `exit` | `ExitCommandParser` | `ExitCommand` |
 
 ### Model component
 
@@ -53,10 +136,17 @@ the item, so observers receive the updated record without losing the selected fi
 
 ### Storage component
 
+<img src="images/StorageClassDiagram.png" width="390" alt="Storage class diagram" />
+
+*Structure of the Storage component*
+
 `StorageManager` delegates to `JsonUserPrefsStorage` and `JsonClubLogisticsStorage`. The latter reads and writes
 `JsonSerializableClubLogisticsData`, whose top-level `equipment` array contains `JsonAdaptedEquipment` records.
-Each record stores `id`, `name`, and `issuedTo`; status is derived from the borrower. Invalid IDs, names,
-borrowers, duplicate IDs, and null records cause loading to fail. No contact register is stored.
+Each record stores `id`, `name`, `status`, and `issuedTo`. `status` must be `AVAILABLE` with a null or empty
+`issuedTo`, or `ISSUED` with a valid borrower; any other combination causes loading to fail. A record without
+`status` is accepted for compatibility with older files, and its status is inferred from the borrower. Saving always
+writes `status`. Invalid IDs, names, borrowers, statuses, duplicate IDs, and null records also cause loading to fail.
+No contact register is stored.
 
 The application uses `data/clublogistics.json` exclusively. No data migration is performed.
 
@@ -80,52 +170,16 @@ available item and records its borrower. `ReturnCommand` requires an issued item
 as items are added, removed, issued, or returned. `ListCommand` restores the predicate that shows every item.
 The filter is a view preference for the running session and is not saved in the equipment file.
 
-### Equipment UI class diagram
-
-<img src="images/UiClassDiagram.png" width="1000" alt="UI class diagram showing equipment panels and cards, UiPart inheritance, and Logic dependencies" />
-
-*Equipment UI classes and their relationships. Solid arrows represent stored references,
-dashed arrows represent dependencies, and hollow triangles represent inheritance or interface realization.*
-
-`UiManager` holds a `Logic` reference and creates `MainWindow` during `start`. Its window reference
-is initially absent. Every successfully constructed `MainWindow` creates one `HelpWindow`, whether
-or not that help window is visible. `fillInnerParts()` initializes the equipment panel and result
-display, which are stored in fields; both are absent before that method runs.
-
-`MainWindow` passes `logic.getFilteredEquipmentList()` to
-`EquipmentListPanel(ObservableList<Equipment>)`. The panel observes the list and creates an
-`EquipmentCard` for each non-empty cell. Cards read equipment data, including the borrower and status;
-they do not mutate the model. `CommandBox` receives the window's command-execution callback.
-
-The window attaches the root nodes of `CommandBox`, `ResultDisplay`, `EquipmentListPanel`, and
-`StatusBarFooter` to its JavaFX placeholders. This scene-graph containment is distinct from Java
-object fields: `CommandBox` and `StatusBarFooter` are local variables in `fillInnerParts()`, so the
-diagram shows creation dependencies rather than stored associations for these two wrappers.
-All seven UI part classes inherit from `UiPart`; `UiManager` implements `Ui`.
-
 ### Existing diagrams
 
-The remaining diagrams below and their sources in `docs/diagrams` have not yet been adapted
-to the equipment-only implementation; use the descriptions above and the source code for the current design.
+The remaining diagrams below and their sources in `docs/diagrams` have not yet been adapted to the
+equipment-only implementation; use the descriptions above and the source code for the current design.
 
 <img src="images/ArchitectureDiagram.png" width="280" />
 
-<img src="images/ArchitectureSequenceDiagram.png" width="574" />
-
-<img src="images/ComponentManagers.png" width="300" />
-
-
-<img src="images/LogicClassDiagram.png" width="550"/>
-
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
 
-<img src="images/ParserClasses.png" width="600"/>
-
 <img src="images/ModelClassDiagram.png" width="450" />
-
-<img src="images/BetterModelClassDiagram.png" width="450" />
-
-<img src="images/StorageClassDiagram.png" width="550" />
 
 ![UndoRedoState0](images/UndoRedoState0.png)
 
@@ -224,7 +278,14 @@ The stories below describe the full product vision. They include deferred capabi
 
 (For all use cases below, the **System** is `ClubLogistics` and the **Actor** is the logistics coordinator.)
 
+The use cases below describe the product vision, not only the released commands. Each use case is labelled with
+its release status. The implemented release supports `add`, `remove`, `list`, `filter`, `issue`, `return`,
+`clear`, `help`, and `exit`; refer to the [User Guide](UserGuide.md) for their exact command formats.
+
 #### Use case UC01: Register a new asset
+
+**Release status: Partially implemented.** The release supports registering an item with an equipment ID and name
+using `add`. It records the new item as available. Storage location and condition are planned capabilities.
 
 **MSS**
 
@@ -247,6 +308,9 @@ The stories below describe the full product vision. They include deferred capabi
     Use case ends.
 
 #### Use case UC02: Issue an asset to a borrower
+
+**Release status: Partially implemented.** The release supports `issue <equipment-id> <borrower-name>` for an
+available item. Searching by name, due dates, purpose, and loan records are planned capabilities.
 
 **Preconditions**: The asset exists and is available and usable.
 
@@ -278,6 +342,10 @@ The stories below describe the full product vision. They include deferred capabi
 
 #### Use case UC03: Receive an asset and record damage
 
+**Release status: Partially implemented.** The release supports `return <equipment-id>`, which clears the
+borrower and makes an issued item available. Recording damage, loan records, and condition are planned
+capabilities.
+
 **Preconditions**: The asset has an active loan.
 
 **MSS**
@@ -303,6 +371,9 @@ The stories below describe the full product vision. They include deferred capabi
 
 #### Use case UC04: Prepare equipment for an event
 
+**Release status: Planned.** The release can only filter the register by `available` or `issued` status. Category,
+event-tag, storage-location, condition, count, and detailed-record workflows are planned capabilities.
+
 **MSS**
 
 1. Coordinator requests assets for a category, event tag, or storage location.
@@ -323,6 +394,9 @@ The stories below describe the full product vision. They include deferred capabi
     Use case ends.
 
 #### Use case UC05: Hand over the logistics role
+
+**Release status: Planned.** The release does not provide unresolved-loan summaries, asset history, exports, or
+backup commands. Equipment data is retained locally in `data/clublogistics.json` after successful commands.
 
 **MSS**
 
