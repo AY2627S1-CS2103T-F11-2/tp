@@ -67,6 +67,9 @@ Every item has one of two statuses:
 * Words in angle brackets are parameters to be supplied by you.<br>
   For example, in `return <equipment-id>`, replace `<equipment-id>` with a value such as `CAM001`.
 
+* Command words are case-sensitive and must be typed in lowercase, such as `filter`, `list`, and `issue`.
+  The status value for `filter` is case-insensitive.
+
 * Parameters must be given in the order shown in the command format.
 
 * Every parameter is required. A missing or extra parameter is rejected with an error showing the correct usage,
@@ -144,7 +147,7 @@ Possible errors:
 Situation | Error message
 ----------|--------------
 No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
-The item is currently issued | `Error: Equipment CAM001 is currently issued to John Tan and cannot be removed.`
+The item is currently issued | `Error: Equipment CAM001 is issued to John Tan and cannot be removed.`
 A parameter is missing or extra | `Error: Invalid command format. Usage: remove <equipment-id>`
 
 ### Listing all equipment: `list`
@@ -237,7 +240,8 @@ A parameter is missing or extra | `Error: Invalid command format. Usage: return 
 
 ### Filtering equipment: `filter`
 
-Shows only equipment with the selected status. The status argument is case-insensitive.
+Shows only equipment with the selected status. Type the command word `filter` in lowercase; `FILTER AVAILABLE`
+returns the error `Unknown command.` The status argument, `available` or `issued`, is case-insensitive.
 
 Format: `filter <available|issued>`
 
@@ -293,8 +297,9 @@ save manually, and the data is retained when you restart the application.
 
 ### Editing the data file
 
-The equipment register is saved as a JSON file at `[JAR file location]/data/clublogistics.json`. Advanced users are
-welcome to update the data directly by editing that file.
+The equipment register is saved as `data/clublogistics.json` relative to the folder from which you start the app.
+Following the Quick Start instructions and running the JAR from the ClubLogistics home folder therefore stores the
+file in that folder's `data` directory. Advanced users are welcome to update the data directly by editing that file.
 
 Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, a `status`, and an
 `issuedTo` value:
