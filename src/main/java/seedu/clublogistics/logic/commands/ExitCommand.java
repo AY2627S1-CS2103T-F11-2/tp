@@ -9,6 +9,8 @@ public class ExitCommand extends Command {
 
     public static final String COMMAND_WORD = "exit";
 
+    public static final String MESSAGE_INVALID_COMMAND_FORMAT =
+            "Error: Invalid command format. Usage: " + COMMAND_WORD;
     public static final String MESSAGE_EXIT_ACKNOWLEDGEMENT = "Exiting ClubLogistics as requested ...";
 
     /** {@inheritDoc} */
