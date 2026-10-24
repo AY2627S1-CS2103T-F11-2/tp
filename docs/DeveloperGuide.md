@@ -134,6 +134,12 @@ unmodifiable observable equipment list. Replacing the register validates all rec
 item. Equipment is available when no borrower is recorded and issued otherwise. Issuing and returning replace
 the item, so observers receive the updated record without losing the selected filter.
 
+<img src="images/ModelClassDiagram.png" width="700" />
+
+*Structure of the Model component. `ModelManager` owns the register (`ClubLogisticsData`) and a filtered view of its
+equipment. `ClubLogisticsData` stores uniquely identified `Equipment` records. An `AVAILABLE` record has no borrower;
+an `ISSUED` record has exactly one `BorrowerName`.*
+
 ### Storage component
 
 <img src="images/StorageClassDiagram.png" width="390" alt="Storage class diagram" />
@@ -178,8 +184,6 @@ equipment-only implementation; use the descriptions above and the source code fo
 <img src="images/ArchitectureDiagram.png" width="280" />
 
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
-
-<img src="images/ModelClassDiagram.png" width="450" />
 
 ![UndoRedoState0](images/UndoRedoState0.png)
 
