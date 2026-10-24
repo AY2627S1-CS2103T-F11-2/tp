@@ -115,6 +115,10 @@ the item, so observers receive the updated record without losing the selected fi
 
 ### Storage component
 
+<img src="images/StorageClassDiagram.png" width="390" alt="Storage class diagram" />
+
+*Structure of the Storage component*
+
 `StorageManager` delegates to `JsonUserPrefsStorage` and `JsonClubLogisticsStorage`. The latter reads and writes
 `JsonSerializableClubLogisticsData`, whose top-level `equipment` array contains `JsonAdaptedEquipment` records.
 Each record stores `id`, `name`, `status`, and `issuedTo`. `status` must be `AVAILABLE` with a null or empty
@@ -157,8 +161,6 @@ equipment-only implementation; use the descriptions above and the source code fo
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
 
 <img src="images/ModelClassDiagram.png" width="450" />
-
-<img src="images/StorageClassDiagram.png" width="550" />
 
 ![UndoRedoState0](images/UndoRedoState0.png)
 
