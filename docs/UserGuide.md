@@ -339,6 +339,20 @@ changes, and your edits are lost. To edit the data file safely:
 3. Edit the data file, then save it.
 4. Start ClubLogistics again to load your changes.
 
+#### Recovering from an invalid data file
+
+ClubLogistics does not repair an invalid data file automatically. It starts with an empty register, and the invalid
+file stays on disk until a successful command saves the empty register over it. To recover your records:
+
+1. Close ClubLogistics, then copy the invalid `data/clublogistics.json` somewhere safe before changing anything.
+2. Choose one of the following:
+   * **Restore a backup:** replace `data/clublogistics.json` with a valid backup copy.
+   * **Repair the file:** if there is no backup, edit the file so it follows the format described above. Each item needs
+     a valid `id` and `name`, and a `status` that is `AVAILABLE` with an empty `issuedTo`, or `ISSUED` with a valid
+     borrower name in `issuedTo`. Equipment IDs must be unique.
+3. Start ClubLogistics and check that your records are listed. Do not run any command until you have confirmed that they
+   loaded, because a successful command overwrites the file.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## FAQ
