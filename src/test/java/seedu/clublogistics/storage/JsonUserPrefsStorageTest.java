@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.clublogistics.testutil.Assert.assertThrows;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 import seedu.clublogistics.commons.core.GuiSettings;
 import seedu.clublogistics.commons.exceptions.DataLoadingException;
+import seedu.clublogistics.model.ClubLogisticsData;
+import seedu.clublogistics.model.ModelManager;
 import seedu.clublogistics.model.UserPrefs;
 
 public class JsonUserPrefsStorageTest {
@@ -122,6 +125,24 @@ public class JsonUserPrefsStorageTest {
         jsonUserPrefsStorage.saveUserPrefs(original);
         readBack = jsonUserPrefsStorage.readUserPrefs().get();
         assertEquals(original, readBack);
+    }
+
+
+    /** Verifies an explicit null GUI setting recovers before model initialization. */
+    @Test
+    public void readUserPrefs_nullGuiSettings_usesDefaultsAndInitializesModel() throws Exception {
+        Path prefsPath = testFolder.resolve("nullGuiSettings.json");
+        Files.writeString(prefsPath, "{\"guiSettings\":null}");
+        JsonUserPrefsStorage storage = new JsonUserPrefsStorage(prefsPath);
+
+        UserPrefs loaded = storage.readUserPrefs().orElseThrow();
+        assertEquals(new GuiSettings(), loaded.getGuiSettings());
+        assertEquals(new UserPrefs(), new UserPrefs(loaded));
+        ModelManager model = new ModelManager(new ClubLogisticsData(), loaded);
+        assertEquals(new GuiSettings(), model.getGuiSettings());
+
+        storage.saveUserPrefs(model.getUserPrefs());
+        assertEquals(new UserPrefs(), storage.readUserPrefs().orElseThrow());
     }
 
 }

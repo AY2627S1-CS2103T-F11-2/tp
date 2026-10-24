@@ -67,6 +67,9 @@ Every item has one of two statuses:
 * Words in angle brackets are parameters to be supplied by you.<br>
   For example, in `return <equipment-id>`, replace `<equipment-id>` with a value such as `CAM001`.
 
+* Command words are case-sensitive and must be typed in lowercase, such as `filter`, `list`, and `issue`.
+  The status value for `filter` is case-insensitive.
+
 * Parameters must be given in the order shown in the command format.
 
 * Every parameter is required. A missing or extra parameter is rejected with an error showing the correct usage,
@@ -144,7 +147,7 @@ Possible errors:
 Situation | Error message
 ----------|--------------
 No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
-The item is currently issued | `Error: Equipment CAM001 is currently issued to John Tan and cannot be removed.`
+The item is currently issued | `Error: Equipment CAM001 is issued to John Tan and cannot be removed.`
 A parameter is missing or extra | `Error: Invalid command format. Usage: remove <equipment-id>`
 
 ### Listing all equipment: `list`
@@ -181,7 +184,8 @@ Format: `issue <equipment-id> <person-name>`
 
 * The equipment ID must follow the [equipment ID rules](#features).
 * All text after the ID is treated as the person's name, including spaces.
-* The person's name has 1–50 characters and contains only letters and spaces. Digits and punctuation are rejected.
+* The person's name has 1–50 characters and contains only the English letters `A–Z` and `a–z` and spaces. Digits,
+  punctuation, and accented or non-English letters such as `é` are rejected.
   Leading and trailing spaces are removed, and consecutive spaces are combined into one.
 * The item must exist and be available. Each item can have only one holder at a time, so issuing an item that is
   already issued is rejected and its current holder is kept.
@@ -236,8 +240,37 @@ A parameter is missing or extra | `Error: Invalid command format. Usage: return 
 
 ### Filtering equipment: `filter`
 
-Shows equipment with the selected status. Use `filter available` or `filter issued` (case-insensitive).
-The filter remains active as equipment changes. Run `list` to show all equipment again.
+Shows only equipment with the selected status. Type the command word `filter` in lowercase; `FILTER AVAILABLE`
+returns the error `Unknown command.` The status argument, `available` or `issued`, is case-insensitive.
+
+Format: `filter <available|issued>`
+
+Examples:
+* `filter available` shows equipment that can be issued.
+* `filter issued` shows equipment currently held by borrowers.
+* `filter AVAILABLE` has the same effect as `filter available`.
+
+The command reports one of the following results:
+
+Selected status | Matching equipment exists | No equipment matches
+----------------|---------------------------|---------------------
+`available` | `Showing available equipment.` | `No available equipment found.`
+`issued` | `Showing issued equipment.` | `No issued equipment found.`
+
+An empty result means no equipment matches the selected status; it does not necessarily mean
+that the whole register is empty. Filtering changes only the displayed list, not the equipment records.
+
+The selected filter remains active as equipment is added, issued, returned, or removed, and the
+visible list updates to reflect each item's current status. Run `list` to clear the filter and
+show all equipment again. The filter is not saved between application sessions.
+
+Possible errors:
+
+Situation | Error message
+----------|--------------
+Status is missing, e.g., `filter` | `Error: Invalid command format. Usage: filter <available|issued>`
+Extra arguments, e.g., `filter available extra` | `Error: Invalid command format. Usage: filter <available|issued>`
+Unsupported status, e.g., `filter damaged` | `Error: Invalid command format. Usage: filter <available|issued>`
 
 ### Clearing the register: `clear`
 
@@ -264,33 +297,62 @@ save manually, and the data is retained when you restart the application.
 
 ### Editing the data file
 
-The equipment register is saved as a JSON file at `[JAR file location]/data/clublogistics.json`. Advanced users are
-welcome to update the data directly by editing that file.
+The equipment register is saved as `data/clublogistics.json` relative to the folder from which you start the app.
+Following the Quick Start instructions and running the JAR from the ClubLogistics home folder therefore stores the
+file in that folder's `data` directory. Advanced users are welcome to update the data directly by editing that file.
 
-Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, and an `issuedTo` value:
+Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, a `status`, and an
+`issuedTo` value:
 
 ```json
 {
   "equipment": [
-    { "id": "CAM001", "name": "Sony Camera", "issuedTo": null },
-    { "id": "MIC001", "name": "Wireless Microphone", "issuedTo": "John Tan" }
+    { "id": "CAM001", "name": "Sony Camera", "status": "AVAILABLE", "issuedTo": null },
+    { "id": "MIC001", "name": "Wireless Microphone", "status": "ISSUED", "issuedTo": "John Tan" }
   ]
 }
 ```
 
-An empty or null `issuedTo` value means the item is available. A valid person's name means it is issued to that person.
+The `status` and `issuedTo` values must agree with each other. The only valid combinations are:
+
+* `"status": "AVAILABLE"` with a null or empty `issuedTo` — the item is available.
+* `"status": "ISSUED"` with a valid person's name in `issuedTo` — the item is issued to that person.
+
+When you change whether an item is available, update **both** fields together. For example, to mark `MIC001` as
+returned, change `"status": "ISSUED"` to `"status": "AVAILABLE"` **and** `"issuedTo": "John Tan"` to
+`"issuedTo": null`. Changing only one of them makes the whole data file invalid.
+
+If a record has no `status` field, ClubLogistics works out the status from `issuedTo`. This is only for
+compatibility with older data files; ClubLogistics always writes `status` when it saves.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
 If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. The invalid file remains on disk until you run a command (ClubLogistics saves after every command). We recommend backing up the file before editing it.<br>
 Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
+ClubLogistics reads the data file only when it starts, and does not notice changes made while it is running. If you
+edit the file while ClubLogistics is open, the next successful command saves the register in memory over your
+changes, and your edits are lost. To edit the data file safely:
+
+1. Back up `data/clublogistics.json` by copying it somewhere else.
+2. Close every running ClubLogistics window.
+3. Edit the data file, then save it.
+4. Start ClubLogistics again to load your changes.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous ClubLogistics home folder.
+**A**: Install the app on the other computer and run it and enter any successful command, such as `list`. The data file is created only when a command succeeds and
+the register is saved, not when the app starts. Then:
+
+1. Back up the data files on both computers.
+2. Close ClubLogistics on both computers.
+3. Overwrite the data file on the new computer with `data/clublogistics.json` from your previous ClubLogistics home folder.
+4. Start ClubLogistics on the new computer to load the transferred records.
+
+If ClubLogistics is still running when you replace the file, the next command you run saves its old data over the transferred file.
 
 **Q**: Do I need to register a person before issuing equipment to them?<br>
 **A**: No. ClubLogistics only records the name of the person currently holding each item, so you can issue equipment to anyone by name.
