@@ -52,21 +52,24 @@ public class ClubLogisticsParserTest {
     @Test
     public void parseCommand_clear() throws Exception {
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
-        assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD + " 3") instanceof ClearCommand);
+        assertThrows(ParseException.class, ClearCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
+                -> parser.parseCommand(ClearCommand.COMMAND_WORD + " 3"));
     }
 
     /** Parses the exit command. */
     @Test
     public void parseCommand_exit() throws Exception {
         assertTrue(parser.parseCommand(ExitCommand.COMMAND_WORD) instanceof ExitCommand);
-        assertTrue(parser.parseCommand(ExitCommand.COMMAND_WORD + " 3") instanceof ExitCommand);
+        assertThrows(ParseException.class, ExitCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
+                -> parser.parseCommand(ExitCommand.COMMAND_WORD + " 3"));
     }
 
     /** Parses the help command. */
     @Test
     public void parseCommand_help() throws Exception {
         assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD) instanceof HelpCommand);
-        assertTrue(parser.parseCommand(HelpCommand.COMMAND_WORD + " 3") instanceof HelpCommand);
+        assertThrows(ParseException.class, HelpCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
+                -> parser.parseCommand(HelpCommand.COMMAND_WORD + " 3"));
     }
 
     /** Parses list and rejects extra arguments. */

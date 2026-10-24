@@ -1,5 +1,4 @@
 @startuml
-!pragma layout elk
 !include style.puml
 skinparam arrowThickness 1.1
 skinparam arrowColor LOGIC_COLOR_T4
@@ -43,8 +42,8 @@ ReturnCommand -up-|> Command
 FilterCommand -up-|> Command
 LogicManager .down.> Command : <<call>>
 
+LogicManager -left-> Model
 LogicManager -right-> Storage
-LogicManager -down-> Model
 Command .down.> Model
 note left of XYZCommandParser: XYZCommandParser = AddEquipmentCommandParser, \nFilterCommandParser, etc
 note bottom of CommandClasses: Representative subset. Other commands include\nRemoveCommand, ListCommand, ClearCommand,\nHelpCommand and ExitCommand.
