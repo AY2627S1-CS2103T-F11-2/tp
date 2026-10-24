@@ -77,6 +77,32 @@ parsers (`XYZCommandParser`, such as `FilterCommandParser`), which in turn creat
 (dashed `<<create>>` arrows). `LogicManager` calls the resulting `Command`, which uses the `Model` and returns a
 `CommandResult`. The commands shown are a representative subset.*
 
+#### Positional command parsers
+
+The following classes are used for parsing user commands:
+
+![Parser structure using XYZ placeholders for the concrete parser and command pairs](images/ParserClasses.png)
+
+How the parsing works:
+
+* `ClubLogisticsParser` creates the matching `XYZCommandParser`, which parses the arguments and creates an
+  `XYZCommand`. The resulting command is returned to `LogicManager` for execution.
+* All `XYZCommandParser` classes implement `Parser<T extends Command>`.
+
+`XYZCommandParser` and `XYZCommand` are placeholders for the following concrete classes:
+
+| Command word | `XYZCommandParser` represents | `XYZCommand` represents |
+| --- | --- | --- |
+| `add` | `AddEquipmentCommandParser` | `AddEquipmentCommand` |
+| `remove` | `RemoveCommandParser` | `RemoveCommand` |
+| `list` | `ListCommandParser` | `ListCommand` |
+| `filter` | `FilterCommandParser` | `FilterCommand` |
+| `issue` | `IssueCommandParser` | `IssueCommand` |
+| `return` | `ReturnCommandParser` | `ReturnCommand` |
+| `clear` | `ClearCommandParser` | `ClearCommand` |
+| `help` | `HelpCommandParser` | `HelpCommand` |
+| `exit` | `ExitCommandParser` | `ExitCommand` |
+
 ### Model component
 
 `ModelManager` owns a copy of `ClubLogisticsData`, user preferences, and a `FilteredList<Equipment>`.
@@ -129,8 +155,6 @@ equipment-only implementation; use the descriptions above and the source code fo
 ![Structure of the UI Component](images/UiClassDiagram.png)
 
 ![Interactions Inside the Logic Component for the `delete 1` Command](images/DeleteSequenceDiagram.png)
-
-<img src="images/ParserClasses.png" width="600"/>
 
 <img src="images/ModelClassDiagram.png" width="450" />
 
