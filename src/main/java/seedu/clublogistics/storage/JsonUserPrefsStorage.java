@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 
+import seedu.clublogistics.commons.core.GuiSettings;
 import seedu.clublogistics.commons.exceptions.DataLoadingException;
 import seedu.clublogistics.commons.util.JsonUtil;
 import seedu.clublogistics.model.ReadOnlyUserPrefs;
@@ -40,7 +41,15 @@ public class JsonUserPrefsStorage {
      * @throws DataLoadingException if the file format is not as expected.
      */
     public Optional<UserPrefs> readUserPrefs(Path prefsFilePath) throws DataLoadingException {
-        return JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class);
+        return JsonUtil.readJsonFile(prefsFilePath, UserPrefs.class)
+                .map(JsonUserPrefsStorage::withDefaultGuiSettings);
+    }
+
+    private static UserPrefs withDefaultGuiSettings(UserPrefs prefs) {
+        if (prefs.getGuiSettings() == null) {
+            prefs.setGuiSettings(new GuiSettings());
+        }
+        return prefs;
     }
 
     /**

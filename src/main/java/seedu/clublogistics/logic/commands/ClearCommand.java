@@ -11,6 +11,9 @@ import seedu.clublogistics.model.Model;
 public class ClearCommand extends Command {
 
     public static final String COMMAND_WORD = "clear";
+    public static final String MESSAGE_USAGE = COMMAND_WORD;
+    public static final String MESSAGE_INVALID_COMMAND_FORMAT =
+            "Error: Invalid command format. Usage: " + MESSAGE_USAGE;
     public static final String MESSAGE_SUCCESS = "ClubLogistics data has been cleared!";
 
     /** {@inheritDoc} */
