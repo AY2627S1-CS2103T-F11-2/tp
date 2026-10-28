@@ -292,14 +292,22 @@ Format: `exit`
 
 ### Saving the data
 
-ClubLogistics saves the equipment register automatically after every successful command. You do not need to
-save manually, and the data is retained when you restart the application.
+ClubLogistics saves the equipment register automatically after successful commands, except `help` and `exit`,
+which do not change or save equipment data. You do not need to save manually, and saved data is retained when
+you restart the application. If saving fails, the command reports an error and the previous equipment register
+is restored in memory. Resolve the reported file or folder problem before retrying; Help and exit remain available.
+
+Saving writes a complete replacement before replacing the previous file. If your folder cannot support this
+safe replacement, saving reports an error and keeps the previous file. Use a writable local folder for the app.
+Keep separate backups for recovery from device failures; the app does not keep backup versions automatically.
 
 ### Editing the data file
 
-The equipment register is saved as `data/clublogistics.json` relative to the folder from which you start the app.
-Following the Quick Start instructions and running the JAR from the ClubLogistics home folder therefore stores the
-file in that folder's `data` directory. Advanced users are welcome to update the data directly by editing that file.
+The equipment register is saved as `data/clublogistics.json` inside the folder containing the JAR file, even if
+you launch it from another directory. Window preferences and log files also stay inside that home folder.
+Advanced users are welcome to update the equipment data directly by editing that file. If an older version
+saved your data in a different launch folder, close the app, back up that file, and copy it into the new home
+folder's `data` directory before starting the updated version.
 
 Equipment is stored in the top-level `equipment` array. Each item has an `id`, a `name`, a `status`, and an
 `issuedTo` value:
@@ -326,12 +334,12 @@ If a record has no `status` field, ClubLogistics works out the status from `issu
 compatibility with older data files; ClubLogistics always writes `status` when it saves.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. The invalid file remains on disk until you run a command (ClubLogistics saves after every command). We recommend backing up the file before editing it.<br>
+If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. Help and exit leave the equipment file untouched. Other successful commands replace it with the in-memory register. Back up the file before editing it or running other commands.<br>
 Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
 ClubLogistics reads the data file only when it starts, and does not notice changes made while it is running. If you
-edit the file while ClubLogistics is open, the next successful command saves the register in memory over your
+edit the file while ClubLogistics is open, the next successful command other than `help` or `exit` saves the register in memory over your
 changes, and your edits are lost. To edit the data file safely:
 
 1. Back up `data/clublogistics.json` by copying it somewhere else.
@@ -341,8 +349,9 @@ changes, and your edits are lost. To edit the data file safely:
 
 #### Recovering from an invalid data file
 
-ClubLogistics does not repair an invalid data file automatically. It starts with an empty register, and the invalid
-file stays on disk until a successful command saves the empty register over it. To recover your records:
+ClubLogistics does not repair an invalid data file automatically. It starts with an empty register. Help and exit
+leave the equipment file untouched; other successful commands replace it with the in-memory register. To recover
+your records:
 
 1. Close ClubLogistics, then copy the invalid `data/clublogistics.json` somewhere safe before changing anything.
 2. Choose one of the following:
@@ -351,14 +360,14 @@ file stays on disk until a successful command saves the empty register over it. 
      a valid `id` and `name`, and a `status` that is `AVAILABLE` with an empty `issuedTo`, or `ISSUED` with a valid
      borrower name in `issuedTo`. Equipment IDs must be unique.
 3. Start ClubLogistics and check that your records are listed. Do not run any command until you have confirmed that they
-   loaded, because a successful command overwrites the file.
+   loaded, because a successful command other than `help` or `exit` overwrites the file.
 
 --------------------------------------------------------------------------------------------------------------------
 
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and run it and enter any successful command, such as `list`. The data file is created only when a command succeeds and
+**A**: Install the app on the other computer and run it and enter `list`. The data file is created only when a command other than `help` or `exit` succeeds and
 the register is saved, not when the app starts. Then:
 
 1. Back up the data files on both computers.
@@ -366,16 +375,18 @@ the register is saved, not when the app starts. Then:
 3. Overwrite the data file on the new computer with `data/clublogistics.json` from your previous ClubLogistics home folder.
 4. Start ClubLogistics on the new computer to load the transferred records.
 
-If ClubLogistics is still running when you replace the file, the next command you run saves its old data over the transferred file.
+If ClubLogistics is still running when you replace the file, the next saving command replaces the transferred file with its old in-memory data.
 
 **Q**: Do I need to register a person before issuing equipment to them?<br>
 **A**: No. ClubLogistics only records the name of the person currently holding each item, so you can issue equipment to anyone by name.
 
 --------------------------------------------------------------------------------------------------------------------
 
-## Known issues
+## Window settings
 
-1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
+ClubLogistics restores saved window settings when they fit the current displays. Invalid sizes use defaults,
+and positions outside all current displays are ignored. If you need to reset the window settings manually,
+close ClubLogistics and delete `preferences.json` before starting it again; equipment data is stored separately.
 
 --------------------------------------------------------------------------------------------------------------------
 

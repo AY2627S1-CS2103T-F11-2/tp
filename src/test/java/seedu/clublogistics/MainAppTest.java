@@ -30,7 +30,7 @@ public class MainAppTest {
         Field dataFilePath = MainApp.class.getDeclaredField("CLUB_LOGISTICS_FILE_PATH");
         dataFilePath.setAccessible(true);
 
-        assertEquals(Paths.get("data", "clublogistics.json"), dataFilePath.get(null));
+        assertEquals(Paths.get("data", "clublogistics.json").toAbsolutePath(), dataFilePath.get(null));
     }
 
     /** Falls back to default preferences when the preferences file contains only {@code null}. */
