@@ -79,6 +79,11 @@ public class Equipment {
         return other != null && id.isSameId(other.id);
     }
 
+    /** Returns a renamed copy preserving ID, status, and the optional current borrower. */
+    public Equipment withName(EquipmentName newName) {
+        return new Equipment(id, requireNonNull(newName), status, issuedTo);
+    }
+
     /** Returns an issued copy, leaving this record unchanged. */
     public Equipment issueTo(BorrowerName borrower) {
         requireNonNull(borrower);

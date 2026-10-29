@@ -94,7 +94,7 @@ Parse and command errors are reported to the user. If saving throws an `IOExcept
 pre-command equipment register and reports a command error, with a separate message for permission failures.
 This restores in-memory records; it does not guarantee that a failed file write left the file intact.
 
-The supported commands are `add`, `remove`, `list`, `filter`, `find`, `issue`, `return`, `clear`, `help`, and `exit`.
+The supported commands are `add`, `remove`, `rename`, `list`, `filter`, `find`, `issue`, `return`, `clear`, `help`, and `exit`.
 Each equipment command parser validates its own positional arguments. For example, `issue CAM001 John Tan`
 creates an `IssueCommand` containing an `EquipmentId` and a `BorrowerName`.
 
@@ -123,6 +123,7 @@ How the parsing works:
 | --- | --- | --- |
 | `add` | `AddEquipmentCommandParser` | `AddEquipmentCommand` |
 | `remove` | `RemoveCommandParser` | `RemoveCommand` |
+| `rename` | `RenameCommandParser` | `RenameCommand` |
 | `list` | `ListCommandParser` | `ListCommand` |
 | `filter` | `FilterCommandParser` | `FilterCommand` |
 | `issue` | `IssueCommandParser` | `IssueCommand` |
@@ -161,7 +162,10 @@ Each record stores `id`, `name`, `status`, and `issuedTo`. `status` must be `AVA
 writes `status`. Invalid IDs, names, borrowers, statuses, duplicate IDs, and null records also cause loading to fail.
 No contact register is stored.
 
-The application uses `data/clublogistics.json` exclusively. No data migration is performed.
+The application uses `data/clublogistics.json` for active storage. Before initializing components,
+`MainApp` detects an existing sibling `addressbook.json` when the new file is absent. It displays manual
+backup/copy instructions and exits without loading samples or writing preferences. An existing new file
+takes precedence. No automatic migration or merge is performed.
 
 ### Common classes
 
@@ -195,8 +199,11 @@ For `add CAM001 Sony Camera`:
 1. `ClubLogisticsParser` delegates the arguments to `AddEquipmentCommandParser`. The parser trims them
    and splits on whitespace at most once: `CAM001` is the ID and the remaining text is the equipment name.
 2. `EquipmentId` accepts 1–20 ASCII letters or digits and preserves spelling for display. Equality and
-   lookup ignore letter case. `EquipmentName` trims and collapses whitespace, then requires 1–50 characters.
-   For example, `add CAM001 Sony   Camera` creates the name `Sony Camera`.
+   lookup ignore letter case. `EquipmentName` trims and collapses whitespace, then requires 1–50 characters
+   made up of Unicode letters, digits, spaces and the symbols `- / ' . , & ( ) # + :`.
+   For example, `add CAM001 Sony   Camera` creates the name `Sony Camera`. When loading existing records,
+   `EquipmentName.fromStoredName` retains v1.4's nonempty, 50-character rule, including previously accepted
+   symbols. This preserves existing names and loans across upgrades while restricting new entries.
 3. The parser creates an available `Equipment` with no borrower and passes it to `AddEquipmentCommand`.
    The command calls `model.hasEquipment`; an existing `cam001` therefore rejects `CAM001` as a duplicate.
 4. On success, `ModelManager.addEquipment` delegates through `ClubLogisticsData.addEquipment` to
@@ -206,6 +213,8 @@ For `add CAM001 Sony Camera`:
 ![Registration interaction and duplicate rejection](images/AddEquipmentSequence.png)
 
 The duplicate branch reports `Error: Equipment with ID CAM001 already exists.` before adding or saving.
+It looks up the existing item with `model.findEquipment` and reports that item's ID as stored, so
+`add cam001 Tripod` against a stored `CAM001` names `CAM001`, matching what the equipment list shows.
 Missing ID/name tokens produce usage feedback; invalid values produce the corresponding value-type
 constraint message. Names are descriptive rather than unique: `add CAM002 Sony Camera` is valid alongside
 `CAM001`, because each physical item has its own ID. Starting new equipment as available avoids inventing
@@ -213,6 +222,26 @@ a borrower during registration. Central value types and the unique list protect 
 both commands and loaded data, at the cost of validating some inputs at more than one layer.
 
 An active `filter issued` still hides a newly added available item; registration does not reset the view.
+
+#### Registration validation and verification
+
+Validation happens before the live register changes. The parser constructs value objects, the command
+checks the ID against the model, and the unique list protects the invariant for callers that bypass commands.
+This deliberate repetition keeps JSON loading and direct model calls safe without making the UI responsible
+for validation. A unique name would reject legitimate copies of the same camera model; a unique ID identifies
+the individual asset instead.
+
+| Input, starting with CAM001 registered | Outcome | Register change |
+| --- | --- | --- |
+| `add cam001 Replacement Camera` | Duplicate-ID error | None; original CAM001 is retained |
+| `add CAM002 Sony   Camera` | Available CAM002 named Sony Camera | Add one record, retaining CAM001 |
+| `add CAM003` | Usage error | None |
+
+`AddEquipmentCommandParserTest` checks splitting, whitespace and constraints. `AddEquipmentCommandTest`
+checks successful registration and duplicate IDs with different case. `LogicManagerTest` verifies the
+observable update and persisted record; `FilterCommandIntegrationTest` checks that adding an available
+item does not discard an issued filter. Together these cover the parser, invariant, UI source list and save
+boundary rather than treating feedback text alone as proof of registration.
 
 
 ### Removing equipment
@@ -236,6 +265,21 @@ Both checks precede mutation and saving. The coordinator must return the equipme
 This preserves the borrower assignment while equipment is outstanding. IDs target physical assets
 independently of their display order or filter; targeting a visible index would couple removal to view state.
 
+#### Removal sequence and verification
+
+![Available equipment removal with missing and issued rejection branches](images/RemoveEquipmentSequence.png)
+
+The diagram includes checks omitted from the architecture overview. The command retrieves the stored
+record before removing it, so its success message uses `CAM001` even when the user types `cam001`.
+No intermediate available copy is created to bypass the issued-state guard. A rejected removal leaves
+both the model and the saved borrower assignment intact; a successful removal saves the complete remaining
+register through the shared pipeline.
+
+`RemoveCommandParserTest` verifies the single-ID grammar. `RemoveCommandTest` checks successful removal,
+missing equipment, and the issued guard. `IssueCommandIntegrationTest.execute_removeIssuedItem_rejectsWithoutLosingBorrower`
+verifies the borrower survives a rejected removal in memory and storage. `FilterCommandIntegrationTest`
+checks removals while another status is selected, so lookup and deletion remain independent of visibility.
+
 
 ### Listing equipment
 
@@ -243,13 +287,30 @@ independently of their display order or filter; targeting a visible index would 
 produces `Error: Invalid command format. Usage: list`. `ListCommand.execute` calls
 `ModelManager.updateFilteredEquipmentList(PREDICATE_SHOW_ALL_EQUIPMENT)`, which sets the predicate on the
 existing `FilteredList`. It does not copy or modify equipment records. The panel observes the changed view,
-and `ResultDisplay` receives `Listed all equipment.`. After resetting the predicate, an empty view means
-the entire register is empty, so the command returns `No equipment found.` instead.
+and `ResultDisplay` receives `Listed all equipment.` followed by `Showing X of Y equipment records.`.
+After resetting the predicate, X and Y are equal. An empty view means the entire register is empty,
+so the first line becomes `No equipment found.` and the count line is `Showing 0 of 0 equipment records.`.
 
 For example, with available `CAM001` and issued `MIC001`, `filter issued` shows only `MIC001`; `list` then
 shows both. A previously empty filtered result is not evidence of an empty register: `list` can reveal
 records of the other status. Using a single view avoids maintaining separate result lists and lets later
-record changes update the same binding. Logic still saves the unchanged register after successful `list`.
+record changes update the same binding. Logic returns the result without saving the unchanged register after successful `list`.
+
+#### Listing sequence and verification
+
+![Listing resets the existing view without saving equipment data](images/ListEquipmentSequence.png)
+
+`list` is a read-only command: the default `Command.isDataMutating()` is false. A successful execution
+therefore reaches the UI without asking storage to write the unchanged register. This matters after a
+loading failure or when the data folder is unwritable: inspecting records must not replace the rejected
+file or turn a successful view change into a save error. Copying the register into a new result list would
+also disconnect future updates from the panel's existing observable binding.
+
+`ListCommandParserTest` checks extra-argument rejection. `ListCommandTest` verifies full-list restoration
+and the empty-register message. `FilterCommandIntegrationTest` covers both status filters followed by
+`list`, including an empty filtered result with records still in the register.
+`ReadOnlyCommandPersistenceTest` verifies that read-only commands leave rejected data untouched and never
+attempt an equipment save even when writing is impossible.
 
 
 ### Filtering by status
@@ -266,7 +327,8 @@ case; missing, unsupported, or extra tokens produce
 | available | `Showing available equipment.` | `No available equipment found.` |
 | issued | `Showing issued equipment.` | `No issued equipment found.` |
 
-The messages describe the result when the filter command executes. Subsequent record changes update the
+The table shows the first feedback line. Each result also appends `Showing X of Y equipment records.`,
+where X counts matches and Y counts the full register. The messages describe the result when the filter command executes. Subsequent record changes update the
 cards automatically, without rerunning the filter command or regenerating its feedback.
 
 ![Available-filter membership changes during issue and return](images/FilterEquipmentActivity.png)
@@ -280,14 +342,29 @@ list. Another `filter` replaces the predicate; `list` restores the show-all pred
 A derived observable view avoids synchronising a separate filtered collection after every command.
 The predicate is session state only: the JSON snapshot contains the complete register, and neither equipment
 storage nor preferences serialize the filter. A restart creates a new unfiltered view. Successful `filter`
-still passes through the shared save step.
+skips equipment saving because it changes only the view.
+
+#### Filter verification and persistence boundary
+
+Status filtering is a read-only view operation. `FilterCommand` inherits `isDataMutating() == false`,
+so applying or switching a filter does not write the equipment file. Later successful `issue`, `return`,
+`add`, `remove`, `rename`, or `clear` commands save the complete source register, including hidden records. The
+selected predicate remains only in memory; restarting rebuilds an unfiltered view from the saved records.
+
+`FilterCommandParserTest` verifies case handling and rejects extra/unsupported tokens. `FilterCommandTest`
+checks both matching and empty messages. `EquipmentFilterModelTest` exercises membership changes on the
+same filtered list. `FilterCommandIntegrationTest` covers issue/return, add/remove, filter switching, `list`
+reset and restart through the real command pipeline. `ReadOnlyCommandPersistenceTest` verifies that view
+commands skip writing even when the equipment file cannot be saved.
+
 
 ### Issuing equipment
 
 For `issue CAM001 John Tan`, `IssueCommandParser` splits the trimmed arguments once into ID and complete
-borrower name. `BorrowerName` trims and collapses consecutive ordinary spaces and accepts 1–50 ASCII letters
-and spaces, beginning with a letter. Thus `John   Tan` becomes `John Tan`; digits, punctuation, and embedded
-tabs are invalid. Missing fields produce the issue usage message; invalid ID/name values produce their
+borrower name. `BorrowerName` trims and collapses consecutive ordinary spaces and accepts 1–50 characters
+forming space-separated words of ASCII letters, where an apostrophe or hyphen may join two letters. Thus
+`John   Tan` becomes `John Tan`, and `O'Brien` and `Mary-Jane` are valid; digits, other punctuation, a leading,
+trailing or doubled `'`/`-`, and embedded tabs are invalid. Missing fields produce the issue usage message; invalid ID/name values produce their
 constraint messages. The parser creates `IssueCommand(EquipmentId, BorrowerName)`.
 
 `IssueCommand` looks up the item through `ModelManager.findEquipment` in the full register, ignoring ID case.
@@ -316,6 +393,25 @@ individual equipment records, so there is no separate person register or cross-r
 John Tan may hold both `CAM001` and `MIC001`; this model stores current assignments without identifying
 people beyond their names.
 
+#### Loan state and verification
+
+| Prior record | Request | Resulting record |
+| --- | --- | --- |
+| CAM001, available, no borrower | `issue CAM001 John Tan` | Same ID/name, ISSUED, John Tan |
+| CAM001, issued to John Tan | `issue CAM001 Alice Lim` | Rejected; John Tan remains the borrower |
+| No CAM001 | `issue CAM001 John Tan` | Rejected; no record or loan is created |
+
+The check and immutable replacement concern one equipment record. A second item may independently be
+issued to John Tan; matching borrower strings do not establish a shared person identity or a single
+cross-equipment loan. Making borrowers unique would incorrectly prevent this ordinary borrowing workflow.
+
+`IssueCommandParserTest` verifies ID/borrower parsing and normalization. `IssueCommandTest` checks state
+preconditions and target-only changes. `IssueCommandIntegrationTest` verifies saved borrowers, rejected
+repeat issues, independent assignments to the same name, and add → issue → restart. `EquipmentTest` checks
+the immutable record's own state guards. A rejected precondition does not invoke replacement or saving;
+a later save failure instead uses Logic's register rollback, as described in the storage walkthrough.
+
+
 ### Returning equipment
 
 `return CAM001` follows `ClubLogisticsParser` → `ReturnCommandParser` → `ReturnCommand`. The parser requires
@@ -325,8 +421,8 @@ That method returns a new available record retaining ID/name and clearing the bo
 `ModelManager.setEquipment` → `ClubLogisticsData.setEquipment` → `UniqueEquipmentList.set` replaces the record,
 updates observers under the active predicate, and hands the register back to Logic for saving.
 
-Return follows the [issue interaction diagram](#issuing-equipment), replacing the available-state check
-with an issued-state check and calling `markReturned()` instead of `issueTo(borrower)`.
+The dedicated return sequence below shows the issued-state check and `markReturned()` call, including
+the missing and already-available rejection paths.
 
 After returning the issued example above, feedback is:
 
@@ -341,46 +437,78 @@ A missing item reports `Error: Equipment with ID CAM001 does not exist.`. An alr
 single consistent status/borrower update. Return makes later reissue or removal possible. It does not retain
 loan history, return dates, or return condition: only the latest availability and borrower are represented.
 
+#### Return sequence and verification
+
+![Returning issued equipment and rejecting missing or available records](images/ReturnEquipmentSequence.png)
+
+The replacement has the stored ID/name, `AVAILABLE` status and no borrower. The source list position is
+retained; visibility can change when the selected predicate is re-evaluated. For example, an issued-only
+view loses CAM001 immediately after return, while an available-only view gains it. The success feedback
+still describes the returned item even when its card disappears from the selected view.
+
+`ReturnCommandParserTest` verifies the single-ID grammar. `ReturnCommandTest` checks target-only changes,
+missing targets and available-item rejection. `ReturnCommandIntegrationTest.execute_repeatedReturn_preservesSavedData`
+checks that a second return leaves saved data intact; its round-trip tests verify borrower removal and
+that issue followed by return restores the original record. `EquipmentTest` checks that `markReturned`
+leaves the old issued instance intact and rejects an already available record.
+
 
 ### Clearing the register
 
-`ClubLogisticsParser` dispatches `clear` through `ClearCommandParser`, which rejects nonblank arguments with
-`Error: Invalid command format. Usage: clear`. `ClearCommand.execute` supplies a new empty
-`ClubLogisticsData` to `ModelManager.setClubLogisticsData`. The manager calls `resetData` on its existing
+`ClubLogisticsParser` dispatches `clear` through `ClearCommandParser`, which builds an unforced
+`ClearCommand` for blank arguments and a forced one for the case-insensitive keyword `force`. Any other
+argument is rejected with `Error: Invalid command format. Usage: clear [force]`. An unforced
+`ClearCommand.execute` first collects issued items from the register; if there are any, it throws a
+`CommandException` naming each item and holder, leaving the register and saved file untouched. Otherwise, or
+when forced, it supplies a new empty `ClubLogisticsData` to `ModelManager.setClubLogisticsData`. The manager calls `resetData` on its existing
 register; `ClubLogisticsData.setEquipments` delegates to `UniqueEquipmentList.setEquipment`. That method
 validates the replacement collection in a temporary unique list and uses `internalList.setAll` to replace
 contents, preserving the observable list and its observers. The existing filter predicate remains selected,
 with no matching records after clear.
 
-For example, a register containing available `CAM001` and issued `MIC001` becomes empty, even if
-`filter available` previously hid `MIC001`. Feedback is `ClubLogistics data has been cleared!`. Logic saves
+For example, with available `CAM001` and issued `MIC001`, `clear` is refused even if `filter available`
+previously hid `MIC001`, because the check covers the whole register rather than the visible list.
+`clear force` then empties it. Feedback is `ClubLogistics data has been cleared!`. Logic saves
 `{"equipment": []}`, so restarting loads an empty register rather than missing-file sample data.
-Unlike `remove`, clear has no per-item issued-state protection: it intentionally resets all records,
-including borrower assignments. It provides no confirmation step, undo, or retained loan history.
+The issued-item check mirrors `remove`'s protection, while `force` keeps a deliberate full reset available
+without first returning every item. A stateless keyword is used instead of a two-step prompt, so no pending
+confirmation state has to survive between commands. Clear provides no undo or retained loan history.
 Resetting contents through the shared register API avoids replacing the model/list objects bound to the UI.
 
 #### Clear scope and verification
 
 With `filter available` selected, the visible cards are only a view of the reset target:
 
-| State | Full register | Visible available view | Saved equipment after success |
+| State | Full register | Visible available view | Saved equipment |
 | --- | --- | --- | --- |
 | Before `clear` | CAM001 available; MIC001 issued to Alice Lim | CAM001 | Both records |
-| After `clear` | Empty | Empty, same selected predicate | Empty array |
+| After refused `clear` | CAM001 available; MIC001 issued to Alice Lim | CAM001, same selected predicate | Both records unchanged |
+| After `clear force` | Empty | Empty, same selected predicate | Empty array |
 | After restart | Empty | Empty, fresh show-all predicate | Empty array |
 
 A present empty register differs from a missing file: the former loads zero records, while the latter
 selects samples. Clearing does not delete the equipment file to request sample initialization. Unlike
-repeated per-item removal, the register reset also removes issued items; unlike replacing the model,
+repeated per-item removal, a forced register reset also removes issued items; unlike replacing the model,
 `setAll` preserves the observable collection that existing UI controls observe.
 
-`ClearCommandParserTest` verifies that extra arguments are rejected; this grammar is implemented, rather
-than an assumed pending change. `ClearCommandTest` covers empty and populated registers.
-`ClearCommandIntegrationTest` checks empty persistence and that rejected arguments retain saved records.
+`ClearCommandParserTest` accepts blank arguments or case-insensitive `force` and rejects other arguments.
+`ClearCommandTest` covers empty and populated registers, including refusal while equipment is issued.
+`ClearCommandIntegrationTest` checks forced empty persistence and that refused clears or rejected arguments
+retain saved records.
 `EquipmentFilterModelTest` verifies predicate-preserving lifecycle changes, and `MainWindowTest` checks
 that the equipment panel empties when the register is cleared. There is no undo or stored loan history to recover
 borrower assignments after a successful clear; manual backups remain separate from this command.
 
+
+### Correcting equipment names
+
+`rename CAM001 Sony Camera Mark II` dispatches through `RenameCommandParser`, which splits the ID
+from the remaining name and delegates validation to `EquipmentId` and `EquipmentName`. `RenameCommand`
+finds the full-register record and calls `Equipment.withName`. Immutable replacement retains its ID,
+status, and borrower, so no return/reissue is fabricated and the existing predicate remains active.
+The command is data-mutating, so Logic saves the correction and restores the original register if saving
+fails. Cards observe the replacement through the same list as issue/return. Missing targets fail before
+mutation. The issued-item removal guard remains independent of descriptive name corrections.
 
 ### Borrower search and view descriptions
 
@@ -392,6 +520,14 @@ across register changes until `list` or another search/filter replaces it; view 
 `ModelManager` publishes a read-only string property alongside the predicate. Status filters, borrower searches
 and `list` set an explicit view description. `LogicManager` exposes it to `EquipmentListPanel`, whose label binds
 to the property. Command feedback can change independently without hiding the selected view.
+
+### Inventory count presentation
+
+`ListCommand` and `FilterCommand` append a count snapshot from the filtered and full observable lists.
+`EquipmentListPanel` binds its view label to both lists and the view description, using
+`Messages.formatEquipmentCount` for the same wording. Source-list changes invalidate that binding, so
+counts remain current after hidden records change as well as visible additions and replacements.
+Feedback describes the moment a command executes; the label continues observing later commands.
 
 ### Keyboard history and local Help
 
@@ -406,7 +542,11 @@ button. Opening Help does not fetch remote content, so the syntax reference work
 
 #### Startup and recovery
 
-`MainApp.init` creates `JsonUserPrefsStorage`, loads preferences, and creates `JsonClubLogisticsStorage` and
+`MainApp.init` first checks for a legacy-only register. If `addressbook.json` exists and the destination
+`clublogistics.json` does not, it shows backup/copy instructions and exits before creating preferences or
+selecting samples. The loading sequence below applies after this preflight allows startup to continue.
+
+`MainApp.init` then creates `JsonUserPrefsStorage`, loads preferences, and creates `JsonClubLogisticsStorage` and
 `StorageManager`. `initModelManager` calls `StorageManager.readClubLogisticsData`, delegated to the JSON
 storage. `JsonUtil.readJsonFile` deserializes with Jackson; `JsonSerializableClubLogisticsData.toModelType`
 adapts each `JsonAdaptedEquipment` and checks ID uniqueness while constructing a separate register.
@@ -422,7 +562,7 @@ empty register. Recovery selects in-memory startup data; it does not repair or b
 
 #### Saving and the persisted schema
 
-After a successful data command (including `list` and `filter`), `LogicManager` calls
+After a successful equipment-changing command, `LogicManager` calls
 `StorageManager.saveClubLogisticsData`, which delegates to `JsonClubLogisticsStorage`.
 The latter constructs a `JsonSerializableClubLogisticsData` snapshot without creating an empty destination file.
 Each `JsonAdaptedEquipment` copies the record's scalar fields. `JsonUtil.saveJsonFile` serializes the snapshot
@@ -475,7 +615,7 @@ than waiting for shutdown. If file logging cannot start, console logging remains
 another filename is performed. External edits are read on the
 next startup only; a successful saving command in the running session writes its in-memory register to the file.
 Read-only commands do not save equipment data. `Command.isDataMutating()` defaults to false; `add`, `remove`,
-`issue`, `return` and `clear` override it to request a transactional save.
+`rename`, `issue`, `return` and `clear` override it to request a transactional save.
 
 Storage adapters isolate Jackson's representation and compatibility rules from immutable domain objects.
 The copied serialization snapshot is independent of later changes to the model, but does not provide
@@ -486,6 +626,28 @@ null inputs, duplicates, and round trips. `IssueCommandIntegrationTest`, `Return
 restart behavior; `LogicManagerTest` checks the save handoff and storage error reporting. `FileUtilTest` checks
 complete-file visibility, failed replacement cleanup, missing folders and read-only protection.
 
+#### Load/save boundary verification
+
+After the legacy-register preflight, startup selects in-memory data before any equipment-changing command. Missing-file sample selection
+itself does not write an equipment file; an initial `list` or `filter` also leaves it absent. Likewise,
+invalid-file fallback does not repair the rejected file. The first successful equipment-changing command
+saves the full in-memory register, so users must preserve a rejected file before changing records.
+
+| Boundary | Evidence to check |
+| --- | --- |
+| Missing versus invalid startup input | `MainAppTest` and the explicit branches in `initModelManager` |
+| Null documents and null records (#81/#82) | `JsonClubLogisticsStorageTest`, `JsonSerializableClubLogisticsDataTest`; loading fails with `DataLoadingException` |
+| Values, inferred status and status/borrower agreement | `JsonAdaptedEquipmentTest` |
+| Available/issued records and restart | `JsonClubLogisticsStorageTest`, `ClubLogisticsStorageRoundTripTest` |
+| Inspection without overwriting rejected data | `ReadOnlyCommandPersistenceTest` |
+| Restoration after save failure | `LogicManagerStorageFailureTest` |
+
+The null-input defects mentioned in the issue are fixed in this code: a JSON `null` document and a null
+equipment entry are rejected through the same loading-error path. An absent/null **equipment collection**
+still represents an empty register. These distinct inputs must not be conflated when extending compatibility.
+The tables and sequence diagrams describe the current code, including read-only save suppression and atomic
+file replacement, rather than assuming behavior from the earlier release.
+
 ## **Documentation, logging, testing, dev-ops**
 
 * [Documentation guide](Documentation.md)
@@ -494,6 +656,7 @@ complete-file visibility, failed replacement cleanup, missing folders and read-o
 * [DevOps guide](DevOps.md)
 
 ## **Appendix: Requirements**
+
 
 ### Product scope
 
@@ -566,7 +729,7 @@ The stories below describe the full product vision. They include deferred capabi
 (For all use cases below, the **System** is `ClubLogistics` and the **Actor** is the logistics coordinator.)
 
 The use cases below describe the product vision, not only the released commands. Each use case is labelled with
-its release status. The implemented release supports `add`, `remove`, `list`, `filter`, `issue`, `return`,
+its release status. The implemented release supports `add`, `remove`, `rename`, `list`, `filter`, `find`, `issue`, `return`,
 `clear`, `help`, and `exit`; refer to the [User Guide](UserGuide.md) for their exact command formats.
 
 #### Use case UC01: Register a new asset
@@ -763,7 +926,9 @@ The User Guide describes the implemented commands and current limitations.
 4. Run `remove TRI001`. Expect an error and no changes because the item is issued.
 5. Run `return TRI001`, then `list`. Expect the tripod to be available.
 6. Run `remove tri001`. Expect only the tripod to be removed, regardless of ID capitalization.
-7. Run `clear`. Expect an empty equipment register.
+7. Run `add TRI002 Tripod`, `issue TRI002 John Tan`, then `clear`. Expect an error naming `TRI002 (John Tan)`
+   and no changes.
+8. Run `clear force`. Expect an empty equipment register.
 
 ### Saving data and reporting errors
 

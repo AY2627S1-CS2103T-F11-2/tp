@@ -11,6 +11,7 @@ start
 :Register has available CAM001;
 :filter available\nSet status predicate on existing FilteredList;
 :Panel shows CAM001;
+note right: filter changes only the view; no equipment save
 :issue CAM001 John Tan\nReplace source record with ISSUED copy;
 :Panel hides CAM001\nRegister still contains CAM001;
 :return CAM001\nFind in full register and replace with AVAILABLE copy;

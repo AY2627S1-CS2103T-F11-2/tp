@@ -6,14 +6,14 @@ skinparam sequenceParticipantBackgroundColor #F4F5F7
 skinparam sequenceParticipantBorderColor #555555
 skinparam sequenceArrowColor #333333
 hide footbox
-title Successful equipment save (help and exit skip this flow)
+title Successful equipment-changing command save
 participant ":LogicManager" as L
 participant ":ModelManager" as M
 participant ":StorageManager" as S
 participant ":JsonClubLogisticsStorage" as J
 participant ":JsonSerializableClubLogisticsData" as SNAP
 participant "JsonUtil / FileUtil" as F
-note over L : Data command executed successfully
+note over L : Equipment-changing command succeeded\nisDataMutating() is true\nlist/filter/find/help/exit skip this flow
 L -> M : getClubLogisticsData()
 M --> L : read-only register
 L -> S : saveClubLogisticsData(register)

@@ -69,7 +69,8 @@ public class LogicManagerTest {
     @Test
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
-        assertCommandSuccess(listCommand, ListCommand.MESSAGE_EMPTY_REGISTER, model);
+        assertCommandSuccess(listCommand, ListCommand.MESSAGE_EMPTY_REGISTER + "\nShowing 0 of 0 equipment records.",
+                model);
     }
 
     /** Rejects extra list arguments. */
@@ -95,7 +96,7 @@ public class LogicManagerTest {
         assertEquals(model.getClubLogisticsData(), saved);
 
         assertCommandException("add cam001 Other Camera",
-                String.format(AddEquipmentCommand.MESSAGE_DUPLICATE_EQUIPMENT, "cam001"));
+                String.format(AddEquipmentCommand.MESSAGE_DUPLICATE_EQUIPMENT, "CAM001"));
         assertEquals(saved, new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
 
         logic.execute("clear");

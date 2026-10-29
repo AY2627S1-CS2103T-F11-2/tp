@@ -27,10 +27,12 @@ public class HelpWindowTest extends JavaFxTest {
                 help.show();
                 help.getRoot().getScene().getRoot().applyCss();
                 Label reference = (Label) help.getRoot().getScene().lookup("#quickReference");
-                for (String command : List.of("add <", "remove <", "issue <", "return <", "find <",
+                for (String command : List.of("add <", "remove <", "rename <", "issue <", "return <", "find <",
                         "filter <", "list", "clear", "help", "exit", "Up", "Down")) {
                     assertTrue(reference.getText().contains(command), command);
                 }
+                assertTrue(reference.getText().contains("clear force"));
+                assertTrue(reference.getText().contains("clear — delete records only when nothing is issued"));
                 Label link = (Label) help.getRoot().getScene().lookup("#helpMessage");
                 assertTrue(link.getText().contains(HelpWindow.USERGUIDE_URL));
                 Button copy = (Button) help.getRoot().getScene().lookup("#copyButton");

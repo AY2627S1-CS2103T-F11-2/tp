@@ -1,11 +1,14 @@
 package seedu.clublogistics;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import seedu.clublogistics.commons.core.AppPaths;
 import seedu.clublogistics.commons.core.LogsCenter;
@@ -32,7 +35,7 @@ import seedu.clublogistics.ui.UiManager;
  */
 public class MainApp extends Application {
 
-    public static final String VERSION = "V1.4";
+    public static final String VERSION = "V1.5";
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
     private static final Path USER_PREFS_FILE_PATH = AppPaths.getHomeFolder().resolve("preferences.json");
@@ -43,10 +46,17 @@ public class MainApp extends Application {
     protected Storage storage;
     protected Model model;
 
+    private Optional<String> legacyMigrationNotice = Optional.empty();
+
+    /** Initializes components unless a legacy register needs manual migration first. */
     @Override
     public void init() throws Exception {
         logger.info("=============================[ Initializing ClubLogistics ]===========================");
         super.init();
+        legacyMigrationNotice = getLegacyMigrationNotice(CLUB_LOGISTICS_FILE_PATH);
+        if (legacyMigrationNotice.isPresent()) {
+            return;
+        }
 
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(USER_PREFS_FILE_PATH);
         UserPrefs userPrefs = initPrefs(userPrefsStorage);
@@ -58,6 +68,21 @@ public class MainApp extends Application {
         logic = new LogicManager(model, storage);
 
         ui = new UiManager(logic, storage.getClubLogisticsDataFilePath());
+    }
+
+    /** Returns migration instructions when only the old v1.3 equipment file exists. */
+    protected Optional<String> getLegacyMigrationNotice(Path destination) {
+        Path absoluteDestination = destination.toAbsolutePath();
+        Path legacy = absoluteDestination.resolveSibling("addressbook.json");
+        if (Files.exists(absoluteDestination) || !Files.exists(legacy)) {
+            return Optional.empty();
+        }
+        return Optional.of("A v1.3 register was found at:\n" + legacy
+                + "\n\nBack up the entire data folder before continuing. With the app closed, copy "
+                + "addressbook.json to:\n" + absoluteDestination
+                + "\n\nKeep the original file. Restart and verify equipment IDs and current borrowers "
+                + "against the original before changing records. See the User Guide’s upgrade instructions."
+                + "\n\nClubLogistics will now close without creating sample data or changing either register.");
     }
 
     /**
@@ -117,14 +142,32 @@ public class MainApp extends Application {
         return initializedPrefs;
     }
 
+    /** Shows migration instructions or starts the equipment window. */
     @Override
     public void start(Stage primaryStage) {
+        if (legacyMigrationNotice.isPresent()) {
+            showLegacyMigrationNotice();
+            return;
+        }
         logger.info("Starting ClubLogistics " + MainApp.VERSION);
         ui.start(primaryStage);
     }
 
+    private void showLegacyMigrationNotice() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("ClubLogistics upgrade");
+        alert.setHeaderText("Migrate your v1.3 equipment register before continuing");
+        alert.setContentText(legacyMigrationNotice.orElseThrow());
+        alert.showAndWait();
+        Platform.exit();
+    }
+
+    /** Saves preferences after an ordinary session; migration-only startup writes nothing. */
     @Override
     public void stop() {
+        if (storage == null) {
+            return;
+        }
         logger.info("============================ [ Stopping ClubLogistics ] =============================");
         try {
             storage.saveUserPrefs(model.getUserPrefs());

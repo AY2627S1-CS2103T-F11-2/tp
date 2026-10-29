@@ -104,7 +104,7 @@ public class JsonAdaptedEquipmentTest {
 
     @Test
     public void toModelType_invalidBorrower_throwsIllegalValueException() {
-        for (String borrower : new String[] {" ", "John3", "John-Tan", "A".repeat(51)}) {
+        for (String borrower : new String[] {" ", "John3", "John--Tan", "A".repeat(51)}) {
             JsonAdaptedEquipment equipment = new JsonAdaptedEquipment(VALID_ID, VALID_NAME, null, borrower);
             assertThrows(IllegalValueException.class, BorrowerName.MESSAGE_CONSTRAINTS, equipment::toModelType);
         }

@@ -113,6 +113,28 @@ public class JsonClubLogisticsStorageTest {
         assertEquals(returnedEquipment, new ClubLogisticsData(storage.readClubLogisticsData().get()));
     }
 
+    /** Previously accepted names remain loadable and retain their loans after saving and reloading. */
+    @Test
+    public void readAndSaveClubLogisticsData_legacyNameSymbols_preservesRecords() throws Exception {
+        Path filePath = testFolder.resolve("LegacyNames.json");
+        Files.writeString(filePath, """
+                {"equipment": [
+                  {"id": "CAM001", "name": "Camera <HD>"},
+                  {"id": "MIC001", "name": "Mic@Club", "issuedTo": "John Tan"}
+                ]}
+                """);
+        JsonClubLogisticsStorage storage = new JsonClubLogisticsStorage(filePath);
+        ReadOnlyClubLogisticsData loaded = storage.readClubLogisticsData().orElseThrow();
+        assertEquals("Camera <HD>", loaded.getEquipmentList().get(0).getName().value);
+        Equipment microphone = loaded.getEquipmentList().get(1);
+        assertEquals("Mic@Club", microphone.getName().value);
+        assertEquals(new BorrowerName("John Tan"), microphone.getIssuedTo().orElseThrow());
+        assertEquals("Mic@Club", microphone.markReturned().getName().value);
+        storage.saveClubLogisticsData(loaded);
+        assertEquals(new ClubLogisticsData(loaded),
+                new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
+    }
+
     /** Loads available equipment from the equipment-only JSON schema. */
     @Test
     public void readClubLogisticsData_equipmentOnly_success() throws Exception {
@@ -127,6 +149,19 @@ public class JsonClubLogisticsStorageTest {
         assertEquals(2, readBack.getEquipmentList().size());
         assertEquals(new EquipmentId("CAM001"), readBack.getEquipmentList().get(0).getId());
         assertTrue(readBack.getEquipmentList().stream().noneMatch(Equipment::isIssued));
+    }
+
+    /** Accepts an editor's UTF-8 BOM without changing equipment or active loans. */
+    @Test
+    public void readClubLogisticsData_utf8Bom_preservesRegister() throws Exception {
+        Path filePath = testFolder.resolve("Bom.json");
+        JsonClubLogisticsStorage storage = new JsonClubLogisticsStorage(filePath);
+        ClubLogisticsData original = getTypicalClubLogisticsData();
+        original.setEquipment(CAMERA, CAMERA.issueTo(new BorrowerName("Alice Tan")));
+        storage.saveClubLogisticsData(original);
+        Files.writeString(filePath, "\uFEFF" + Files.readString(filePath));
+
+        assertEquals(original, new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
     }
 
     /** Rejects invalid records even when valid records precede them. */

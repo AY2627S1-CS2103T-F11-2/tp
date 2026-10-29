@@ -51,7 +51,10 @@ class JsonAdaptedEquipment {
         if (name == null) {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, "name"));
         }
-        if (!EquipmentName.isValidName(name)) {
+        EquipmentName equipmentName;
+        try {
+            equipmentName = EquipmentName.fromStoredName(name);
+        } catch (IllegalArgumentException exception) {
             throw new IllegalValueException(EquipmentName.MESSAGE_CONSTRAINTS);
         }
 
@@ -76,6 +79,6 @@ class JsonAdaptedEquipment {
         if ((equipmentStatus == EquipmentStatus.ISSUED) != (borrower != null)) {
             throw new IllegalValueException("Equipment status and borrower do not match.");
         }
-        return new Equipment(new EquipmentId(id), new EquipmentName(name), equipmentStatus, borrower);
+        return new Equipment(new EquipmentId(id), equipmentName, equipmentStatus, borrower);
     }
 }

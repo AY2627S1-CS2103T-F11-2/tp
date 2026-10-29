@@ -16,6 +16,7 @@ participant ":ClubLogisticsData" as D
 participant ":UniqueEquipmentList" as U
 L -> P : parseCommand("add CAM001 Sony Camera")
 P -> AP : parse(arguments)
+note over AP : Split once; validate ID and normalized name\nCreate AVAILABLE record with no borrower
 AP --> P : command with available Equipment
 P --> L : command
 L -> C : execute(model)
@@ -27,6 +28,7 @@ D --> M : duplicate?
 M --> C : duplicate?
 alt ID already present (ignoring case)
   C --> L : throws CommandException
+  note over L, U : No register mutation or equipment save
 else unique ID
   C -> M : addEquipment(equipment)
   M -> D : addEquipment(equipment)

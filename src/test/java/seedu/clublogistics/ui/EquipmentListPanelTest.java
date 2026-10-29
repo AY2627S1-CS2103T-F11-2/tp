@@ -77,6 +77,26 @@ public class EquipmentListPanelTest extends JavaFxTest {
         });
     }
 
+    /** The displayed counts remain current even when another command replaces the feedback. */
+    @Test
+    public void counts_followHiddenAndVisibleChanges() throws Exception {
+        runOnFxThread(() -> {
+            ModelManager model = new ModelManager();
+            EquipmentListPanel panel = new EquipmentListPanel(model.getFilteredEquipmentList(),
+                    model.equipmentFilterDescriptionProperty(), model.getEquipmentList());
+            Label label = (Label) panel.getRoot().lookup("#filterDescription");
+            model.updateFilteredEquipmentList(Equipment::isIssued);
+            model.addEquipment(CAMERA);
+            assertTrue(label.getText().endsWith("Showing 0 of 1 equipment records."));
+            model.setEquipment(CAMERA, CAMERA.issueTo(new BorrowerName("Alice Tan")));
+            assertTrue(label.getText().endsWith("Showing 1 of 1 equipment records."));
+            model.setEquipment(model.getEquipmentList().get(0), CAMERA);
+            assertTrue(label.getText().endsWith("Showing 0 of 1 equipment records."));
+            model.removeEquipment(CAMERA);
+            assertTrue(label.getText().endsWith("Showing 0 of 0 equipment records."));
+        });
+    }
+
     /** Keeps the view description visible when another command replaces result feedback. */
     @Test
     public void viewDescription_tracksFiltersAndListReset() throws Exception {
@@ -94,7 +114,7 @@ public class EquipmentListPanelTest extends JavaFxTest {
             parser.parseCommand("find Alice").execute(model);
             assertTrue(label.getText().contains("Alice"));
             parser.parseCommand("list").execute(model);
-            assertEquals("Showing all equipment", label.getText());
+            assertEquals("Showing all equipment\nShowing 1 of 1 equipment records.", label.getText());
         });
     }
 

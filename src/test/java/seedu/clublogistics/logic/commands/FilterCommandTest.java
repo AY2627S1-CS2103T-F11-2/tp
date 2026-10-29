@@ -37,37 +37,45 @@ public class FilterCommandTest {
         model.addEquipment(microphone);
     }
 
+    /** Verifies availableWithMatches showsOnlyAvailable and count feedback. */
     @Test
     public void execute_availableWithMatches_showsOnlyAvailable() {
         assertCommandSuccess(new FilterCommand(EquipmentStatus.AVAILABLE), model,
-                FilterCommand.MESSAGE_SHOWING_AVAILABLE, expectedModelFilteredBy(EquipmentStatus.AVAILABLE));
+                FilterCommand.MESSAGE_SHOWING_AVAILABLE + "\nShowing 1 of 2 equipment records.",
+                expectedModelFilteredBy(EquipmentStatus.AVAILABLE));
         assertEquals(List.of(camera), model.getFilteredEquipmentList());
     }
 
+    /** Verifies issuedWithMatches showsOnlyIssued and count feedback. */
     @Test
     public void execute_issuedWithMatches_showsOnlyIssued() {
         assertCommandSuccess(new FilterCommand(EquipmentStatus.ISSUED), model,
-                FilterCommand.MESSAGE_SHOWING_ISSUED, expectedModelFilteredBy(EquipmentStatus.ISSUED));
+                FilterCommand.MESSAGE_SHOWING_ISSUED + "\nShowing 1 of 2 equipment records.",
+                expectedModelFilteredBy(EquipmentStatus.ISSUED));
         assertEquals(List.of(microphone), model.getFilteredEquipmentList());
     }
 
+    /** Verifies availableWithoutMatches showsNoAvailableMessage and count feedback. */
     @Test
     public void execute_availableWithoutMatches_showsNoAvailableMessage() {
         model.setEquipment(camera, camera.issueTo(new BorrowerName("Bob")));
 
         CommandResult result = new FilterCommand(EquipmentStatus.AVAILABLE).execute(model);
 
-        assertEquals(FilterCommand.MESSAGE_NO_AVAILABLE, result.getFeedbackToUser());
+        assertEquals(FilterCommand.MESSAGE_NO_AVAILABLE + "\nShowing 0 of 2 equipment records.",
+                result.getFeedbackToUser());
         assertTrue(model.getFilteredEquipmentList().isEmpty());
     }
 
+    /** Verifies issuedWithoutMatches showsNoIssuedMessage and count feedback. */
     @Test
     public void execute_issuedWithoutMatches_showsNoIssuedMessage() {
         model.setEquipment(microphone, microphone.markReturned());
 
         CommandResult result = new FilterCommand(EquipmentStatus.ISSUED).execute(model);
 
-        assertEquals(FilterCommand.MESSAGE_NO_ISSUED, result.getFeedbackToUser());
+        assertEquals(FilterCommand.MESSAGE_NO_ISSUED + "\nShowing 0 of 2 equipment records.",
+                result.getFeedbackToUser());
         assertTrue(model.getFilteredEquipmentList().isEmpty());
     }
 
