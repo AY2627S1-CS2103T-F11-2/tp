@@ -161,7 +161,10 @@ Each record stores `id`, `name`, `status`, and `issuedTo`. `status` must be `AVA
 writes `status`. Invalid IDs, names, borrowers, statuses, duplicate IDs, and null records also cause loading to fail.
 No contact register is stored.
 
-The application uses `data/clublogistics.json` exclusively. No data migration is performed.
+The application uses `data/clublogistics.json` for active storage. Before initializing components,
+`MainApp` detects an existing sibling `addressbook.json` when the new file is absent. It displays manual
+backup/copy instructions and exits without loading samples or writing preferences. An existing new file
+takes precedence. No automatic migration or merge is performed.
 
 ### Common classes
 

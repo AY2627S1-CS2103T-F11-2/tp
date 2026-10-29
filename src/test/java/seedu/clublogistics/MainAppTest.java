@@ -1,6 +1,7 @@
 package seedu.clublogistics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -53,6 +54,45 @@ public class MainAppTest {
         Model model = new MainApp().initModelManager(storage, new UserPrefs());
 
         assertEquals(new ClubLogisticsData(), model.getClubLogisticsData());
+    }
+
+    /** A v1.3 register must be detected before samples are offered, without changing either file. */
+    @Test
+    public void legacyMigrationNotice_onlyLegacyExists_explainsSafeCopy() throws Exception {
+        Path legacy = testFolder.resolve("addressbook.json");
+        Path destination = testFolder.resolve("clublogistics.json");
+        String data = "{\"equipment\":[{\"id\":\"UPG001\",\"name\":\"Tripod\",\"issuedTo\":\"Alice Tan\"}]}";
+        Files.writeString(legacy, data);
+
+        String notice = new MainApp().getLegacyMigrationNotice(destination).orElseThrow();
+
+        assertTrue(notice.contains(legacy.toString()));
+        assertTrue(notice.contains(destination.toString()));
+        assertTrue(notice.contains("Back up"));
+        assertTrue(notice.contains("copy"));
+        assertEquals(data, Files.readString(legacy));
+        assertTrue(Files.notExists(destination));
+
+        Files.copy(legacy, destination);
+        var migrated = new JsonClubLogisticsStorage(destination).readClubLogisticsData().orElseThrow();
+        assertEquals("UPG001", migrated.getEquipmentList().get(0).getId().toString());
+        assertEquals("Alice Tan", migrated.getEquipmentList().get(0).getIssuedTo().orElseThrow().toString());
+        assertEquals(data, Files.readString(legacy));
+    }
+
+    /** An existing new-format register takes precedence even when the legacy file remains as a backup. */
+    @Test
+    public void legacyMigrationNotice_destinationExists_doesNotInterruptStartup() throws IOException {
+        Files.writeString(testFolder.resolve("addressbook.json"), "legacy backup");
+        Path destination = testFolder.resolve("clublogistics.json");
+        Files.writeString(destination, "{\"equipment\":[]}");
+        assertTrue(new MainApp().getLegacyMigrationNotice(destination).isEmpty());
+    }
+
+    /** Fresh installations have no upgrade notice. */
+    @Test
+    public void legacyMigrationNotice_noLegacy_doesNotInterruptStartup() {
+        assertTrue(new MainApp().getLegacyMigrationNotice(testFolder.resolve("clublogistics.json")).isEmpty());
     }
 
     private Path writeNullJsonDocument(String fileName) throws IOException {

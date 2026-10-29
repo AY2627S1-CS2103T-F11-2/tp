@@ -345,6 +345,23 @@ Exits the program.
 
 Format: `exit`
 
+### Upgrading from v1.3
+
+v1.3 stores equipment in `data/addressbook.json`; newer releases use `data/clublogistics.json` in the
+application home folder. If only the old file exists, startup shows migration instructions and closes
+before creating samples or saving preferences. It leaves both register paths untouched.
+
+1. Close ClubLogistics and back up the **entire data folder** to a separate location.
+2. Copy `data/addressbook.json` to `data/clublogistics.json`. Keep the original file.
+   The old equipment entries and borrower assignments are accepted; absent status is inferred from the borrower.
+3. Restart and compare equipment IDs, names, and current borrowers with your backup before changing records.
+4. Retain the backup and old file until you are satisfied that the register is correct.
+
+If `clublogistics.json` already exists, it takes precedence and the upgrade notice is not shown. If it
+contains samples from an earlier upgrade attempt, close the app and back up **both** files first. Compare
+both registers before choosing which equipment records to keep; copying the old file over the new one
+would discard changes made in the new register. ClubLogistics does not merge the two files automatically.
+
 ### Saving the data
 
 Only one ClubLogistics instance can use the same home folder at a time. If startup reports that ClubLogistics
