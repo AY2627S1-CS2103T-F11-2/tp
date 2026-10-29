@@ -1,0 +1,37 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #222222
+skinparam sequenceParticipantBackgroundColor #F4F5F7
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceArrowColor #333333
+hide footbox
+title Remove cam001 (stored ID CAM001)
+participant ":LogicManager" as L
+participant ":RemoveCommand" as C
+participant ":ModelManager" as M
+participant "equipment:Equipment" as E
+participant ":ClubLogisticsData" as D
+participant ":UniqueEquipmentList" as U
+L -> C : execute(model)
+C -> M : findEquipment(id)
+ref over M, U : Lookup full register; ignore ID case
+M --> C : Optional<Equipment>
+alt missing
+  C --> L : throws not-found CommandException
+else record exists
+  C -> E : isIssued()
+  E --> C : issued?
+  alt issued
+    C --> L : throws issued-item CommandException
+    note over L, U : Preserve record and borrower; no save
+  else available
+    C -> M : removeEquipment(equipment)
+    M -> D : removeEquipment(equipment)
+    D -> U : remove(equipment)
+    note over U : Observable source removes stored record\nExisting filtered view updates
+    C --> L : CommandResult (stored ID CAM001)
+    ref over L : Save remaining full register
+  end
+end
+@enduml
