@@ -87,7 +87,7 @@ Every item has one of two statuses:
 * Leading and trailing spaces are ignored.
 * IDs are matched without regard to capitalization, so `CAM001` and `cam001` refer to the same item.
 * An invalid ID is rejected with
-  `Error: Equipment ID must contain only letters and numbers and cannot contain spaces.`
+  `Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers, with no spaces.`
 </div>
 
 ### Adding equipment: `add`
@@ -119,7 +119,7 @@ Possible errors:
 Situation | Error message
 ----------|--------------
 The ID is already in use (ignoring capitalization) | `Error: Equipment with ID CAM001 already exists.`
-The ID is invalid | `Error: Equipment ID must contain only letters and numbers and cannot contain spaces.`
+The ID is invalid | `Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers, with no spaces.`
 The name is empty, too long, or contains other symbols | `Error: Equipment name must be 1 to 50 characters long and contain only letters, numbers, spaces and these symbols: - / ' . , & ( ) # + :`
 A parameter is missing | `Error: Invalid command format. Usage: add <equipment-id> <equipment-name>`
 
@@ -260,6 +260,7 @@ Selected status | Matching equipment exists | No equipment matches
 An empty result means no equipment matches the selected status; it does not necessarily mean
 that the whole register is empty. Filtering changes only the displayed list, not the equipment records.
 
+A persistent label above the equipment cards identifies the selected status even after other command feedback.
 The selected filter remains active as equipment is added, issued, returned, or removed, and the
 visible list updates to reflect each item's current status. Run `list` to clear the filter and
 show all equipment again. The filter is not saved between application sessions.
@@ -272,6 +273,33 @@ Status is missing, e.g., `filter` | `Error: Invalid command format. Usage: filte
 Extra arguments, e.g., `filter available extra` | `Error: Invalid command format. Usage: filter <available|issued>`
 Unsupported status, e.g., `filter damaged` | `Error: Invalid command format. Usage: filter <available|issued>`
 
+### Finding a borrower's equipment: `find`
+
+Shows equipment whose current borrower's name contains the supplied name or name fragment.
+
+Format: `find <borrower-name>`
+
+Examples: `find Alice`, `find alice lim`.
+
+* Matching ignores capitalization and uses a contiguous substring, so `find Alice` can show loans to both
+  Alice Lim and Alice Tan. Only currently issued equipment can match.
+* All text after `find` is one search phrase. Leading/trailing spaces are removed and repeated spaces are combined.
+  The phrase follows the borrower-name rules: 1–50 English letters or spaces, without digits or punctuation.
+* The search replaces the previous status filter or borrower search. It stays active when equipment is changed;
+  returning a matching item removes it from the results, and issuing another matching item adds it.
+* The equipment panel always shows the selected view above the cards. Run `list` to clear any search or filter.
+  This selection is not saved between sessions.
+* Feedback reports the number of matches or `No equipment found for borrower: <name>.` Missing input shows
+  `Error: Invalid command format. Usage: find <borrower-name>`; invalid characters show the borrower-name error.
+
+### Recalling recent commands
+
+With the command box focused, press **Up** to recall older successful commands and **Down** to move forward.
+After the newest command, Down restores the draft you were typing before browsing. Recalling a command does not
+execute it: edit it if needed and press Enter. Only the last 100 successful commands are retained for the current
+session; failed commands are not added, and history is cleared when the app closes. Modified arrow shortcuts
+(such as Ctrl+Up) retain their normal text-editing behavior.
+
 ### Clearing the register: `clear`
 
 Removes all equipment records, including issued items, and saves the empty register.
@@ -280,7 +308,9 @@ Format: `clear`
 
 ### Viewing help: `help`
 
-Opens a window containing the ClubLogistics User Guide link. F1 opens the same help window.
+Opens a local command quick reference, including command formats and history shortcuts, that works without
+an Internet connection. The window also contains the ClubLogistics User Guide link and a Copy URL button for
+detailed online instructions. F1 opens the same help window.
 
 Format: `help`
 
@@ -296,10 +326,10 @@ Only one ClubLogistics instance can use the same home folder at a time. If start
 is already running, use the existing window or close it before launching again. The app keeps a small
 `.clublogistics.lock` file in its home folder; do not delete it while the app is running.
 
-ClubLogistics saves the equipment register automatically after successful commands, except `help` and `exit`,
-which do not change or save equipment data. You do not need to save manually, and saved data is retained when
+ClubLogistics saves the equipment register automatically after successful `add`, `remove`, `issue`, `return`,
+or `clear` commands. Read-only commands (`list`, `filter`, `find`, `help` and `exit`) do not save equipment data. You do not need to save manually, and saved data is retained when
 you restart the application. If saving fails, the command reports an error and the previous equipment register
-is restored in memory. Resolve the reported file or folder problem before retrying; Help and exit remain available.
+is restored in memory. Resolve the reported file or folder problem before retrying; Read-only commands remain available.
 
 Saving writes a complete replacement before replacing the previous file. If your folder cannot support this
 safe replacement, saving reports an error and keeps the previous file. Use a writable local folder for the app.
@@ -338,12 +368,12 @@ If a record has no `status` field, ClubLogistics works out the status from `issu
 compatibility with older data files; ClubLogistics always writes `status` when it saves.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. Help and exit leave the equipment file untouched. Other successful commands replace it with the in-memory register. Back up the file before editing it or running other commands.<br>
+If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. Read-only commands leave the equipment file untouched. A successful add, remove, issue, return or clear replaces it with the in-memory register. Back up the file before editing it or changing equipment records.<br>
 Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
 ClubLogistics reads the data file only when it starts, and does not notice changes made while it is running. If you
-edit the file while ClubLogistics is open, the next successful command other than `help` or `exit` saves the register in memory over your
+edit the file while ClubLogistics is open, the next successful `add`, `remove`, `issue`, `return` or `clear` saves the register in memory over your
 changes, and your edits are lost. To edit the data file safely:
 
 1. Back up `data/clublogistics.json` by copying it somewhere else.
@@ -353,8 +383,8 @@ changes, and your edits are lost. To edit the data file safely:
 
 #### Recovering from an invalid data file
 
-ClubLogistics does not repair an invalid data file automatically. It starts with an empty register. Help and exit
-leave the equipment file untouched; other successful commands replace it with the in-memory register. To recover
+ClubLogistics does not repair an invalid data file automatically. It starts with an empty register. Read-only commands
+leave the equipment file untouched; successful equipment-changing commands replace it with the in-memory register. To recover
 your records:
 
 1. Close ClubLogistics, then copy the invalid `data/clublogistics.json` somewhere safe before changing anything.
@@ -363,23 +393,25 @@ your records:
    * **Repair the file:** if there is no backup, edit the file so it follows the format described above. Each item needs
      a valid `id` and `name`, and a `status` that is `AVAILABLE` with an empty `issuedTo`, or `ISSUED` with a valid
      borrower name in `issuedTo`. Equipment IDs must be unique.
-3. Start ClubLogistics and check that your records are listed. Do not run any command until you have confirmed that they
-   loaded, because a successful command other than `help` or `exit` overwrites the file.
+3. Start ClubLogistics and run `list` to check that your records loaded. Do not run `add`, `remove`, `issue`,
+   `return` or `clear` until you have confirmed recovery, because a successful equipment-changing command overwrites the file.
 
 --------------------------------------------------------------------------------------------------------------------
 
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and run it and enter `list`. The data file is created only when a command other than `help` or `exit` succeeds and
-the register is saved, not when the app starts. Then:
+**A**: Install the app on the other computer, launch it once, then close it. Then:
 
-1. Back up the data files on both computers.
+1. Back up the data files on both computers, if present.
 2. Close ClubLogistics on both computers.
-3. Overwrite the data file on the new computer with `data/clublogistics.json` from your previous ClubLogistics home folder.
-4. Start ClubLogistics on the new computer to load the transferred records.
+3. In the new app's home folder, create a `data` subfolder if it does not exist. Copy the old
+   `data/clublogistics.json` into it, replacing the new computer's file if present.
+4. Start ClubLogistics and run `list` to verify the transferred records.
 
-If ClubLogistics is still running when you replace the file, the next saving command replaces the transferred file with its old in-memory data.
+A fresh app creates its equipment file only after a successful equipment-changing command, so running `list`
+does not create that file. If the app is still running when you replace the file, its next successful
+`add`, `remove`, `issue`, `return` or `clear` saves its in-memory register over the transferred records.
 
 **Q**: Do I need to register a person before issuing equipment to them?<br>
 **A**: No. ClubLogistics only records the name of the person currently holding each item, so you can issue equipment to anyone by name.
@@ -403,6 +435,7 @@ Action | Format, Examples
 **Issue equipment** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
 **Return equipment** | `return <equipment-id>`<br> e.g., `return CAM001`
 **List all equipment** | `list`
+**Find by borrower** | `find <borrower-name>`<br> e.g., `find Alice`
 **Filter by status** | `filter available` or `filter issued`
 **Clear the register** | `clear`
 **Help** | `help`

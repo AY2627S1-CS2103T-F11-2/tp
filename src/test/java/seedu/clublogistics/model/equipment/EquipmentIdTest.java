@@ -24,6 +24,14 @@ public class EquipmentIdTest {
         }
     }
 
+    /** The rejection message must state every rule, so a too-long all-letter ID is explained. */
+    @Test
+    public void messageConstraints_statesLengthLimitAndAllowedCharacters() {
+        assertTrue(EquipmentId.MESSAGE_CONSTRAINTS.contains("1 to 20 characters"));
+        assertTrue(EquipmentId.MESSAGE_CONSTRAINTS.contains("only letters and numbers"));
+        assertTrue(EquipmentId.MESSAGE_CONSTRAINTS.contains("no spaces"));
+    }
+
     @Test
     public void constructor_validIds_trimsAndPreservesCase() {
         String[] validIds = {"A", "7", "A".repeat(20), "cam001", " CAM001 "};

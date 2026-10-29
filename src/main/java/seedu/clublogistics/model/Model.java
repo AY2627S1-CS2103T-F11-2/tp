@@ -3,6 +3,7 @@ package seedu.clublogistics.model;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.collections.ObservableList;
 import seedu.clublogistics.commons.core.GuiSettings;
 import seedu.clublogistics.model.equipment.Equipment;
@@ -47,6 +48,9 @@ public interface Model {
     /** Returns an unmodifiable observable view of all registered equipment. */
     ObservableList<Equipment> getEquipmentList();
 
+    /** Returns the current view description for persistent UI feedback. */
+    ReadOnlyStringProperty equipmentFilterDescriptionProperty();
+
     /** Returns the equipment currently shown to the user. */
     default ObservableList<Equipment> getFilteredEquipmentList() {
         return getClubLogisticsData().getEquipmentList();
@@ -56,6 +60,9 @@ public interface Model {
     default void updateFilteredEquipmentList(Predicate<Equipment> predicate) {
         throw new UnsupportedOperationException("Equipment filtering is not supported by this model");
     }
+
+    /** Updates the view together with its human-readable description. */
+    void updateFilteredEquipmentList(Predicate<Equipment> predicate, String description);
 
     /** Returns the equipment with the given case-insensitive ID, if present. */
     Optional<Equipment> findEquipment(EquipmentId id);

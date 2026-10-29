@@ -23,7 +23,7 @@ public class ClubLogisticsCleanupTest {
     @Test
     public void parseCommand_contactCommands_rejected() {
         ClubLogisticsParser parser = new ClubLogisticsParser();
-        for (String command : new String[] {"delete 1", "edit 1 n/Alice", "find Alice"}) {
+        for (String command : new String[] {"delete 1", "edit 1 n/Alice"}) {
             assertThrows(ParseException.class, Messages.MESSAGE_UNKNOWN_COMMAND, () -> parser.parseCommand(command));
         }
     }

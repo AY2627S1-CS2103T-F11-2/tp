@@ -17,4 +17,11 @@ public abstract class Command {
      */
     public abstract CommandResult execute(Model model) throws CommandException;
 
+    /**
+     * Returns whether this command changes the persisted equipment register.
+     */
+    public boolean isDataMutating() {
+        return false;
+    }
+
 }
