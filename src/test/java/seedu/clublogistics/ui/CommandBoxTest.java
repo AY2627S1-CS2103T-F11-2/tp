@@ -74,6 +74,8 @@ public class CommandBoxTest extends JavaFxTest {
             assertEquals("list", field.getText());
             press(field, KeyCode.DOWN);
             assertEquals("bad", field.getText());
+            submit(field, " \t ");
+            assertEquals("", field.getText());
             submit(field, "");
             press(field, KeyCode.UP);
             assertEquals("list", field.getText());

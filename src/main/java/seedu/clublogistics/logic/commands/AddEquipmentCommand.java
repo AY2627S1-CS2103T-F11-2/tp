@@ -31,6 +31,12 @@ public class AddEquipmentCommand extends Command {
         return new CommandResult(String.format(MESSAGE_SUCCESS, equipmentToAdd.getId()));
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean isDataMutating() {
+        return true;
+    }
+
     @Override
     public boolean equals(Object other) {
         return other == this || (other instanceof AddEquipmentCommand otherCommand

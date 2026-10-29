@@ -48,6 +48,7 @@ public class CommandBox extends UiPart<Region> {
     private void handleCommandEntered() {
         String commandText = commandTextField.getText();
         if (commandText.isBlank()) {
+            commandTextField.setText("");
             return;
         }
 

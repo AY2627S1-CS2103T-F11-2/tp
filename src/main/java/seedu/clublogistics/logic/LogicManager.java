@@ -49,10 +49,12 @@ public class LogicManager implements Logic {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
         Command command = clubLogisticsParser.parseCommand(commandText);
-        ReadOnlyClubLogisticsData previousData = new ClubLogisticsData(model.getClubLogisticsData());
+        boolean mutatesData = command.isDataMutating();
+        ReadOnlyClubLogisticsData previousData = mutatesData
+                ? new ClubLogisticsData(model.getClubLogisticsData()) : null;
         CommandResult commandResult = command.execute(model);
 
-        if (!commandResult.isShowHelp() && !commandResult.isExit()) {
+        if (mutatesData) {
             saveDataOrRestore(previousData);
         }
 

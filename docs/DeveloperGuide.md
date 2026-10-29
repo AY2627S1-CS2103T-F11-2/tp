@@ -89,12 +89,12 @@ All seven UI part classes inherit from `UiPart`; `UiManager` implements `Ui`.
 ### Logic component
 
 `LogicManager.execute` passes input to `ClubLogisticsParser`, executes the resulting command against `Model`,
-and saves the register after successful execution, except for `help` and `exit`, which do not write equipment data.
+and saves the register only after successful equipment-changing commands. Read-only commands do not write equipment data.
 Parse and command errors are reported to the user. If saving throws an `IOException`, Logic restores the
 pre-command equipment register and reports a command error, with a separate message for permission failures.
 This restores in-memory records; it does not guarantee that a failed file write left the file intact.
 
-The supported commands are `add`, `remove`, `list`, `filter`, `issue`, `return`, `clear`, `help`, and `exit`.
+The supported commands are `add`, `remove`, `list`, `filter`, `find`, `issue`, `return`, `clear`, `help`, and `exit`.
 Each equipment command parser validates its own positional arguments. For example, `issue CAM001 John Tan`
 creates an `IssueCommand` containing an `EquipmentId` and a `BorrowerName`.
 
@@ -183,7 +183,7 @@ changed with `add`, `remove`, `set`, or `setAll`. These changes propagate throug
 to `EquipmentListPanel` and its `EquipmentCard` cells. Commands do not recreate the UI or replace its list
 binding. The selected predicate remains active after record changes and register resets.
 
-For successful data commands, `LogicManager` saves the complete register before returning `CommandResult`.
+For successful equipment-changing commands, `LogicManager` saves the complete register before returning `CommandResult`.
 `MainWindow.executeCommand` sends its feedback to `ResultDisplay`; equipment cards come from the observable
 list, rather than being parsed from that feedback. The feature diagrams focus on command collaborators;
 the [architecture interaction diagram](#architecture) supplies the surrounding UI/Logic/save interaction.
@@ -404,7 +404,7 @@ After a successful data command (including `list` and `filter`), `LogicManager` 
 `StorageManager.saveClubLogisticsData`, which delegates to `JsonClubLogisticsStorage`.
 The latter constructs a `JsonSerializableClubLogisticsData` snapshot without creating an empty destination file.
 Each `JsonAdaptedEquipment` copies the record's scalar fields. `JsonUtil.saveJsonFile` serializes the snapshot
-with Jackson before asking `FileUtil` to save it. `help` and `exit` skip this equipment save, so they remain usable when writes
+with Jackson before asking `FileUtil` to save it. Read-only commands (`list`, `filter`, `find`, `help` and `exit`) skip this equipment save, so they remain usable when writes
 fail. Command success is returned only after the save succeeds. On `IOException`, Logic restores the
 pre-command register through `model.setClubLogisticsData` and reports the storage error; observers and the
 selected predicate survive that reset.
@@ -452,7 +452,8 @@ startup, while `MainApp.stop` saves them on shutdown. Equipment is saved during 
 than waiting for shutdown. If file logging cannot start, console logging remains available. No migration from
 another filename is performed. External edits are read on the
 next startup only; a successful saving command in the running session writes its in-memory register to the file.
-Help and exit do not save equipment data.
+Read-only commands do not save equipment data. `Command.isDataMutating()` defaults to false; `add`, `remove`,
+`issue`, `return` and `clear` override it to request a transactional save.
 
 Storage adapters isolate Jackson's representation and compatibility rules from immutable domain objects.
 The copied serialization snapshot is independent of later changes to the model, but does not provide
@@ -747,7 +748,7 @@ The User Guide describes the implemented commands and current limitations.
 1. Add equipment, issue it, exit, and relaunch. Expect the item and borrower to be retained.
 2. With the app closed, check `data/clublogistics.json`. Expect only an `equipment` array at the top level.
 3. In a disposable test folder, replace the data file with invalid JSON and launch the app. Expect an empty register.
-   Help and exit leave the equipment file untouched; other successful commands replace it when saving.
+   Read-only commands leave the equipment file untouched; successful equipment-changing commands replace it when saving.
    Back up the invalid file before running saving commands.
 4. Run `help`. Expect the ClubLogistics User Guide link.
 5. Try an invalid equipment ID or an unknown command. Expect an error without changing any records.

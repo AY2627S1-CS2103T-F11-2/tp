@@ -161,6 +161,7 @@ public class FilterCommandIntegrationTest {
     /** Verifies switching filters preserves records and restarting restores the unfiltered view. */
     @Test
     public void execute_switchFiltersAndRestart_preservesRecordsWithoutSavingFilter() throws Exception {
+        clubLogisticsStorage.saveClubLogisticsData(model.getClubLogisticsData());
         logic.execute("filter available");
         assertEquals(List.of(CAMERA), logic.getFilteredEquipmentList());
         logic.execute("filter issued");
