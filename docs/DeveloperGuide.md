@@ -400,7 +400,7 @@ empty register. Recovery selects in-memory startup data; it does not repair or b
 
 #### Saving and the persisted schema
 
-After a successful data command (including `list` and `filter`), `LogicManager` calls
+After a successful equipment-changing command, `LogicManager` calls
 `StorageManager.saveClubLogisticsData`, which delegates to `JsonClubLogisticsStorage`.
 The latter constructs a `JsonSerializableClubLogisticsData` snapshot without creating an empty destination file.
 Each `JsonAdaptedEquipment` copies the record's scalar fields. `JsonUtil.saveJsonFile` serializes the snapshot
@@ -472,6 +472,29 @@ complete-file visibility, failed replacement cleanup, missing folders and read-o
 * [DevOps guide](DevOps.md)
 
 ## **Appendix: Requirements**
+
+#### Load/save boundary verification
+
+Startup selects in-memory data before any equipment-changing command. Missing-file sample selection
+itself does not write an equipment file; an initial `list` or `filter` also leaves it absent. Likewise,
+invalid-file fallback does not repair the rejected file. The first successful equipment-changing command
+saves the full in-memory register, so users must preserve a rejected file before changing records.
+
+| Boundary | Evidence to check |
+| --- | --- |
+| Missing versus invalid startup input | `MainAppTest` and the explicit branches in `initModelManager` |
+| Null documents and null records (#81/#82) | `JsonClubLogisticsStorageTest`, `JsonSerializableClubLogisticsDataTest`; loading fails with `DataLoadingException` |
+| Values, inferred status and status/borrower agreement | `JsonAdaptedEquipmentTest` |
+| Available/issued records and restart | `JsonClubLogisticsStorageTest`, `ClubLogisticsStorageRoundTripTest` |
+| Inspection without overwriting rejected data | `ReadOnlyCommandPersistenceTest` |
+| Restoration after save failure | `LogicManagerStorageFailureTest` |
+
+The null-input defects mentioned in the issue are fixed in this code: a JSON `null` document and a null
+equipment entry are rejected through the same loading-error path. An absent/null **equipment collection**
+still represents an empty register. These distinct inputs must not be conflated when extending compatibility.
+The tables and sequence diagrams describe the current code, including read-only save suppression and atomic
+file replacement, rather than assuming behavior from the earlier release.
+
 
 ### Product scope
 
