@@ -1,0 +1,64 @@
+name: Product website
+
+on:
+  push:
+    branches: [master]
+    paths: ['docs/**', '.github/workflows/pages.yml', '.github/check-website.py']
+  pull_request:
+    paths: ['docs/**', '.github/workflows/pages.yml', '.github/check-website.py']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Build documentation
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
+      - name: Record source revision
+        run: |
+          python3 -c 'import json, os; json.dump({"commit": os.environ["GITHUB_SHA"]}, open("_site/deployment.json", "w"))'
+      - name: Check published content
+        run: python3 .github/check-website.py _site --commit "$GITHUB_SHA"
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish website
+        id: deployment
+        uses: actions/deploy-pages@v5
+      - uses: actions/checkout@v4
+      - name: Verify live content and revision
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            if python3 .github/check-website.py "$PAGE_URL" --commit "$GITHUB_SHA"; then
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1
