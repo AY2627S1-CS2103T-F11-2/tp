@@ -87,7 +87,7 @@ Every item has one of two statuses:
 * Leading and trailing spaces are ignored.
 * IDs are matched without regard to capitalization, so `CAM001` and `cam001` refer to the same item.
 * An invalid ID is rejected with
-  `Error: Equipment ID must contain only letters and numbers and cannot contain spaces.`
+  `Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers, with no spaces.`
 </div>
 
 ### Adding equipment: `add`
@@ -119,7 +119,7 @@ Possible errors:
 Situation | Error message
 ----------|--------------
 The ID is already in use (ignoring capitalization); the message shows the ID as it appears in the list | `Error: Equipment with ID CAM001 already exists.`
-The ID is invalid | `Error: Equipment ID must contain only letters and numbers and cannot contain spaces.`
+The ID is invalid | `Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers, with no spaces.`
 The name is empty or too long | `Error: Equipment name cannot be empty and must be 1–50 characters long.`
 A parameter is missing | `Error: Invalid command format. Usage: add <equipment-id> <equipment-name>`
 

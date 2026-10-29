@@ -91,7 +91,8 @@ public class ReturnCommandIntegrationTest {
         assertThrows(ParseException.class, "Error: Invalid command format. Usage: return <equipment-id>", ()
                 -> logic.execute("return"));
         assertThrows(ParseException.class,
-                "Error: Equipment ID must contain only letters and numbers and cannot contain spaces.", ()
+                "Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers,"
+                        + " with no spaces.", ()
                 -> logic.execute("return CAM-001"));
         assertThrows(CommandException.class, "Error: Equipment with ID UNKNOWN does not exist.", ()
                 -> logic.execute("return UNKNOWN"));
