@@ -280,7 +280,21 @@ list. Another `filter` replaces the predicate; `list` restores the show-all pred
 A derived observable view avoids synchronising a separate filtered collection after every command.
 The predicate is session state only: the JSON snapshot contains the complete register, and neither equipment
 storage nor preferences serialize the filter. A restart creates a new unfiltered view. Successful `filter`
-still passes through the shared save step.
+skips equipment saving because it changes only the view.
+
+#### Filter verification and persistence boundary
+
+Status filtering is a read-only view operation. `FilterCommand` inherits `isDataMutating() == false`,
+so applying or switching a filter does not write the equipment file. Later successful `issue`, `return`,
+`add`, `remove`, or `clear` commands save the complete source register, including hidden records. The
+selected predicate remains only in memory; restarting rebuilds an unfiltered view from the saved records.
+
+`FilterCommandParserTest` verifies case handling and rejects extra/unsupported tokens. `FilterCommandTest`
+checks both matching and empty messages. `EquipmentFilterModelTest` exercises membership changes on the
+same filtered list. `FilterCommandIntegrationTest` covers issue/return, add/remove, filter switching, `list`
+reset and restart through the real command pipeline. `ReadOnlyCommandPersistenceTest` verifies that view
+commands skip writing even when the equipment file cannot be saved.
+
 
 ### Issuing equipment
 
