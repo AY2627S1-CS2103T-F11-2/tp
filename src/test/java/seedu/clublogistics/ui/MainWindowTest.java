@@ -5,8 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -18,6 +23,8 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import seedu.clublogistics.commons.core.GuiSettings;
 import seedu.clublogistics.logic.LogicManager;
+import seedu.clublogistics.logic.commands.exceptions.CommandException;
+import seedu.clublogistics.logic.parser.exceptions.ParseException;
 import seedu.clublogistics.model.ModelManager;
 import seedu.clublogistics.storage.JsonClubLogisticsStorage;
 import seedu.clublogistics.storage.JsonUserPrefsStorage;
@@ -81,6 +88,63 @@ public class MainWindowTest extends JavaFxTest {
         });
     }
 
+    /** Command diagnostics must retain outcomes without recording input or borrower-bearing feedback. */
+    @Test
+    public void executeCommand_borrowerWorkflows_doNotLogPersonalData() throws Exception {
+        runOnFxThread(() -> {
+            List<String> messages = new ArrayList<>();
+            Logger logger = Logger.getLogger("clublogistics");
+            Handler capture = new Handler() {
+                /** Captures diagnostic messages. */
+                @Override
+                public void publish(LogRecord record) {
+                    messages.add(record.getMessage());
+                }
+
+                /** No buffered output. */
+                @Override
+                public void flush() {
+                }
+
+                /** No resources to release. */
+                @Override
+                public void close() {
+                }
+            };
+            Stage stage = new Stage();
+            logger.addHandler(capture);
+            try {
+                Path dataFile = testFolder.resolve("privacy.json");
+                StorageManager storage = new StorageManager(new JsonClubLogisticsStorage(dataFile),
+                        new JsonUserPrefsStorage(testFolder.resolve("prefs.json")));
+                MainWindow window = new MainWindow(stage, new LogicManager(new ModelManager(), storage), dataFile);
+                window.fillInnerParts();
+                var execute = MainWindow.class.getDeclaredMethod("executeCommand", String.class);
+                execute.setAccessible(true);
+                for (String command : List.of("add CAM001 Camera", "issue CAM001 Alpha Privacy Tester",
+                        "issue CAM001 Other Private Borrower", "remove CAM001", "find Alpha Privacy Tester",
+                        "return CAM001", "issue CAM001 Invalid Private 123", "unknown Alpha Privacy Tester")) {
+                    try {
+                        execute.invoke(window, command);
+                    } catch (InvocationTargetException e) {
+                        assertTrue(e.getCause() instanceof CommandException
+                                || e.getCause() instanceof ParseException);
+                    }
+                }
+                String diagnostics = String.join("\n", messages);
+                for (String personal : List.of("Alpha", "Privacy", "Tester", "Other", "Borrower", "Invalid")) {
+                    assertTrue(!diagnostics.contains(personal), diagnostics);
+                }
+                assertTrue(diagnostics.contains("IssueCommand"), diagnostics);
+                assertTrue(diagnostics.contains("completed"), diagnostics);
+                assertTrue(diagnostics.contains("failed"), diagnostics);
+            } finally {
+                logger.removeHandler(capture);
+                stage.close();
+            }
+        });
+    }
+
     private Stage createWindow(ModelManager model) {
         Path dataFile = testFolder.resolve("window-data.json");
         StorageManager storage = new StorageManager(new JsonClubLogisticsStorage(dataFile),
@@ -126,7 +190,7 @@ public class MainWindowTest extends JavaFxTest {
                 assertTrue(equipment.lookupAll(".label").stream()
                         .anyMatch(node -> node instanceof Label label
                                 && "Issued to: John Tan".equals(label.getText())));
-                logic.execute("clear");
+                logic.execute("clear force");
                 assertTrue(equipment.getItems().isEmpty());
                 logic.execute("add CAM001 Sony Camera");
                 logic.execute("remove cam001");

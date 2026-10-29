@@ -45,11 +45,35 @@ public class FilterCommandIntegrationTest {
         model.addEquipment(ISSUED_MICROPHONE);
     }
 
+    /** Counts are calculated from current records after every inventory transition. */
+    @Test
+    public void execute_inventoryChanges_reportsMatchingAndTotalCounts() throws Exception {
+        assertCount("filter available", 1, 2);
+        logic.execute("add TRI001 Tripod");
+        assertCount("filter available", 2, 3);
+        logic.execute("issue CAM001 Alice Tan");
+        assertCount("filter available", 1, 3);
+        assertCount("filter issued", 2, 3);
+        logic.execute("return MIC001");
+        assertCount("filter issued", 1, 3);
+        logic.execute("remove MIC001");
+        assertCount("list", 2, 2);
+        logic.execute("clear force");
+        assertCount("filter issued", 0, 0);
+        assertCount("list", 0, 0);
+    }
+
+    private void assertCount(String command, int shown, int total) throws Exception {
+        assertTrue(logic.execute(command).getFeedbackToUser()
+                .endsWith("Showing " + shown + " of " + total + " equipment records."));
+    }
+
     /** Verifies issuing removes a match and returning restores it in the same observable view. */
     @Test
     public void execute_filterAvailableThenIssueAndReturn_updatesVisibleEquipment() throws Exception {
         ObservableList<Equipment> visible = logic.getFilteredEquipmentList();
-        assertEquals("Showing available equipment.", logic.execute("filter AVAILABLE").getFeedbackToUser());
+        assertEquals("Showing available equipment.\nShowing 1 of 2 equipment records.",
+                logic.execute("filter AVAILABLE").getFeedbackToUser());
         assertEquals(List.of(CAMERA), visible);
 
         logic.execute("issue CAM001 John Tan");
@@ -68,7 +92,8 @@ public class FilterCommandIntegrationTest {
     @Test
     public void execute_filterIssuedThenReturnAndIssue_updatesVisibleEquipment() throws Exception {
         ObservableList<Equipment> visible = logic.getFilteredEquipmentList();
-        assertEquals("Showing issued equipment.", logic.execute("filter IsSuEd").getFeedbackToUser());
+        assertEquals("Showing issued equipment.\nShowing 1 of 2 equipment records.",
+                logic.execute("filter IsSuEd").getFeedbackToUser());
         assertEquals(List.of(ISSUED_MICROPHONE), visible);
 
         logic.execute("return MIC001");
@@ -88,7 +113,8 @@ public class FilterCommandIntegrationTest {
         logic.execute("filter available");
         assertEquals(List.of(CAMERA), logic.getFilteredEquipmentList());
 
-        assertEquals("Listed all equipment.", logic.execute("list").getFeedbackToUser());
+        assertEquals("Listed all equipment.\nShowing 2 of 2 equipment records.",
+                logic.execute("list").getFeedbackToUser());
 
         assertEquals(List.of(CAMERA, ISSUED_MICROPHONE), logic.getFilteredEquipmentList());
         logic.execute("issue CAM001 John Tan");
@@ -101,7 +127,8 @@ public class FilterCommandIntegrationTest {
         logic.execute("filter issued");
         assertEquals(List.of(ISSUED_MICROPHONE), logic.getFilteredEquipmentList());
 
-        assertEquals("Listed all equipment.", logic.execute("list").getFeedbackToUser());
+        assertEquals("Listed all equipment.\nShowing 2 of 2 equipment records.",
+                logic.execute("list").getFeedbackToUser());
 
         assertEquals(List.of(CAMERA, ISSUED_MICROPHONE), logic.getFilteredEquipmentList());
         logic.execute("return MIC001");
@@ -113,7 +140,8 @@ public class FilterCommandIntegrationTest {
     public void execute_filterAvailableWithoutMatches_showsEmptyResult() throws Exception {
         logic.execute("issue CAM001 John Tan");
 
-        assertEquals("No available equipment found.", logic.execute("filter available").getFeedbackToUser());
+        assertEquals("No available equipment found.\nShowing 0 of 2 equipment records.",
+                logic.execute("filter available").getFeedbackToUser());
 
         assertTrue(logic.getFilteredEquipmentList().isEmpty());
         logic.execute("list");
@@ -126,7 +154,8 @@ public class FilterCommandIntegrationTest {
     public void execute_filterIssuedWithoutMatches_showsEmptyResult() throws Exception {
         logic.execute("return MIC001");
 
-        assertEquals("No issued equipment found.", logic.execute("filter issued").getFeedbackToUser());
+        assertEquals("No issued equipment found.\nShowing 0 of 2 equipment records.",
+                logic.execute("filter issued").getFeedbackToUser());
 
         assertTrue(logic.getFilteredEquipmentList().isEmpty());
         logic.execute("list");

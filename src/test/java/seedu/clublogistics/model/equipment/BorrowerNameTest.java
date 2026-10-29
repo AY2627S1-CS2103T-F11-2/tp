@@ -17,7 +17,9 @@ public class BorrowerNameTest {
 
     @Test
     public void constructor_invalidNames_throwsIllegalArgumentException() {
-        String[] invalidNames = {"", " ", "John1", "John-Tan", "John/Tan", "John\tTan", "é", "A".repeat(51)};
+        String[] invalidNames = {"", " ", "John1", "John/Tan", "John\tTan", "é", "A".repeat(51),
+            "'John", "John-", "O''Brien", "Mary--Jane", "John - Tan", "John -Tan",
+            "A".repeat(25) + "-" + "B".repeat(25)};
         for (String name : invalidNames) {
             assertFalse(BorrowerName.isValidName(name));
             assertThrows(IllegalArgumentException.class, BorrowerName.MESSAGE_CONSTRAINTS, ()
@@ -35,6 +37,23 @@ public class BorrowerNameTest {
         String longInput = "A".repeat(24) + "   " + "B".repeat(25);
         assertTrue(BorrowerName.isValidName(longInput));
         assertEquals(50, new BorrowerName(longInput).toString().length());
+    }
+
+    /** Apostrophes and hyphens joining letters, as in common real names, are accepted unchanged. */
+    @Test
+    public void constructor_apostrophesAndHyphensBetweenLetters_accepted() {
+        String[] validNames = {"O'Brien", "Mary-Jane Tan", "Jean-Luc O'Neil", "D'Angelo-Smith",
+            "A".repeat(24) + "-" + "B".repeat(25)};
+        for (String name : validNames) {
+            assertTrue(BorrowerName.isValidName(name), name);
+            assertEquals(name, new BorrowerName(name).toString());
+        }
+    }
+
+    /** The rejection message mentions the newly allowed punctuation. */
+    @Test
+    public void messageConstraints_mentionsApostrophesAndHyphens() {
+        assertTrue(BorrowerName.MESSAGE_CONSTRAINTS.contains("apostrophes (') and hyphens (-)"));
     }
 
     @Test

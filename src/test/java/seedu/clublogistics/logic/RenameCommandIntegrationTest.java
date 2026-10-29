@@ -81,7 +81,7 @@ public class RenameCommandIntegrationTest {
     public void execute_invalidRename_preservesRegister() throws Exception {
         String before = Files.readString(dataFile);
         for (String command : new String[] {"rename", "rename CAM001", "rename BAD-ID Camera",
-            "rename CAM001 " + "x".repeat(51)}) {
+            "rename CAM001 " + "x".repeat(51), "rename CAM001 Camera@"}) {
             assertThrows(ParseException.class, () -> logic.execute(command));
             assertEquals(before, Files.readString(dataFile));
         }

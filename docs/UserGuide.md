@@ -87,7 +87,7 @@ Every item has one of two statuses:
 * Leading and trailing spaces are ignored.
 * IDs are matched without regard to capitalization, so `CAM001` and `cam001` refer to the same item.
 * An invalid ID is rejected with
-  `Error: Equipment ID must contain only letters and numbers and cannot contain spaces.`
+  `Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers, with no spaces.`
 </div>
 
 ### Adding equipment: `add`
@@ -97,8 +97,9 @@ Adds a new item to the equipment register. The new item is available and is not 
 Format: `add <equipment-id> <equipment-name>`
 
 * The equipment ID must follow the [equipment ID rules](#features) and must not already be in use.
-* The equipment name has 1–50 characters. Letters, digits, spaces, and common punctuation such as `-`, `/`, and `'`
-  are allowed. All text after the ID is treated as the name.
+* The equipment name has 1–50 characters. Only letters, digits, spaces, and the symbols
+  `-` `/` `'` `.` `,` `&` `(` `)` `#` `+` `:` are allowed. All text after the ID is treated as the name.
+  Existing equipment names saved by v1.4 remain loadable, including symbols that are no longer accepted for new items.
 * Leading and trailing spaces are removed from the name, and consecutive spaces are combined into one.
   The name is displayed with the capitalization you entered.
 * Several items may share a name as long as their IDs differ, since the club may own several identical items.
@@ -118,9 +119,9 @@ Possible errors:
 
 Situation | Error message
 ----------|--------------
-The ID is already in use (ignoring capitalization) | `Error: Equipment with ID CAM001 already exists.`
-The ID is invalid | `Error: Equipment ID must contain only letters and numbers and cannot contain spaces.`
-The name is empty or too long | `Error: Equipment name cannot be empty and must be 1–50 characters long.`
+The ID is already in use (ignoring capitalization); the message shows the ID as it appears in the list | `Error: Equipment with ID CAM001 already exists.`
+The ID is invalid | `Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers, with no spaces.`
+The name is empty, too long, or contains other symbols | `Error: Equipment name must be 1 to 50 characters long and contain only letters, numbers, spaces and these symbols: - / ' . , & ( ) # + :`
 A parameter is missing | `Error: Invalid command format. Usage: add <equipment-id> <equipment-name>`
 
 ### Correcting an equipment name: `rename`
@@ -201,7 +202,8 @@ Format: `issue <equipment-id> <person-name>`
 
 * The equipment ID must follow the [equipment ID rules](#features).
 * All text after the ID is treated as the person's name, including spaces.
-* The person's name has 1–50 characters and contains only the English letters `A–Z` and `a–z` and spaces. Digits,
+* The person's name has 1–50 characters and contains only the English letters `A–Z` and `a–z`, spaces, and
+  apostrophes (`'`) or hyphens (`-`) that join two letters, as in `O'Brien` or `Mary-Jane Tan`. Digits, other
   punctuation, and accented or non-English letters such as `é` are rejected.
   Leading and trailing spaces are removed, and consecutive spaces are combined into one.
 * The item must exist and be available. Each item can have only one holder at a time, so issuing an item that is
@@ -225,7 +227,7 @@ Situation | Error message
 ----------|--------------
 No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
 The item is already issued | `Error: Equipment CAM001 is already issued to John Tan.`
-The person's name is invalid | `Error: Person name must contain only letters and spaces and be 1–50 characters long.`
+The person's name is invalid | `Error: Person name must be 1 to 50 characters long and contain only letters (A-Z, a-z), spaces, and apostrophes (') and hyphens (-) between letters.`
 A parameter is missing | `Error: Invalid command format. Usage: issue <equipment-id> <person-name>`
 
 ### Returning equipment: `return`
@@ -290,6 +292,16 @@ Status is missing, e.g., `filter` | `Error: Invalid command format. Usage: filte
 Extra arguments, e.g., `filter available extra` | `Error: Invalid command format. Usage: filter <available|issued>`
 Unsupported status, e.g., `filter damaged` | `Error: Invalid command format. Usage: filter <available|issued>`
 
+### Inventory counts
+
+`list` and `filter` append `Showing X of Y equipment records.` to their feedback, including zero matches.
+`X` is the number of matching cards and `Y` is the complete register size. For example, three available
+items in a register of four produce `Showing 3 of 4 equipment records.` after `filter available`.
+
+The view label above the cards also shows these counts. It updates after add, remove, issue, return,
+and clear, even when a command replaces the feedback. `list` resets the view and shows equal counts.
+Counts describe the current register; they do not count past loans.
+
 ### Finding a borrower's equipment: `find`
 
 Shows equipment whose current borrower's name contains the supplied name or name fragment.
@@ -301,7 +313,9 @@ Examples: `find Alice`, `find alice lim`.
 * Matching ignores capitalization and uses a contiguous substring, so `find Alice` can show loans to both
   Alice Lim and Alice Tan. Only currently issued equipment can match.
 * All text after `find` is one search phrase. Leading/trailing spaces are removed and repeated spaces are combined.
-  The phrase follows the borrower-name rules: 1–50 English letters or spaces, without digits or punctuation.
+  The phrase follows the borrower-name rules: 1–50 characters made up of English letters and spaces,
+  with apostrophes (`'`) or hyphens (`-`) allowed between letters, as in `O'Brien` or `Mary-Jane`.
+  Digits and other punctuation are rejected.
 * The search replaces the previous status filter or borrower search. It stays active when equipment is changed;
   returning a matching item removes it from the results, and issuing another matching item adds it.
 * The equipment panel always shows the selected view above the cards. Run `list` to clear any search or filter.
@@ -319,9 +333,20 @@ session; failed commands are not added, and history is cleared when the app clos
 
 ### Clearing the register: `clear`
 
-Removes all equipment records, including issued items, and saves the empty register.
+Removes all equipment records and saves the empty register.
 
-Format: `clear`
+Format: `clear [force]`
+
+* If any item is still issued, `clear` is refused and lists each issued item with its holder, so that loan
+  records are not lost by accident. Return those items first, or use `clear force` to delete all records anyway.
+* `clear force` removes every record, including issued items and their borrowers. This cannot be undone.
+* `force` is not case-sensitive. Any other text after `clear` is rejected.
+
+Examples:
+* `clear` when nothing is issued: removes all records.
+* `clear` when `CAM001` is issued to John Tan: refused with
+  `Error: Some equipment is still issued: CAM001 (John Tan).`
+* `clear force`: removes all records, including `CAM001`.
 
 ### Viewing help: `help`
 
@@ -336,6 +361,23 @@ Format: `help`
 Exits the program.
 
 Format: `exit`
+
+### Upgrading from v1.3
+
+v1.3 stores equipment in `data/addressbook.json`; newer releases use `data/clublogistics.json` in the
+application home folder. If only the old file exists, startup shows migration instructions and closes
+before creating samples or saving preferences. It leaves both register paths untouched.
+
+1. Close ClubLogistics and back up the **entire data folder** to a separate location.
+2. Copy `data/addressbook.json` to `data/clublogistics.json`. Keep the original file.
+   The old equipment entries and borrower assignments are accepted; absent status is inferred from the borrower.
+3. Restart and compare equipment IDs, names, and current borrowers with your backup before changing records.
+4. Retain the backup and old file until you are satisfied that the register is correct.
+
+If `clublogistics.json` already exists, it takes precedence and the upgrade notice is not shown. If it
+contains samples from an earlier upgrade attempt, close the app and back up **both** files first. Compare
+both registers before choosing which equipment records to keep; copying the old file over the new one
+would discard changes made in the new register. ClubLogistics does not merge the two files automatically.
 
 ### Saving the data
 
@@ -356,7 +398,8 @@ Keep separate backups for recovery from device failures; the app does not keep b
 
 The equipment register is saved as `data/clublogistics.json` inside the folder containing the JAR file, even if
 you launch it from another directory. Window preferences and log files also stay inside that home folder.
-Advanced users are welcome to update the equipment data directly by editing that file. If an older version
+Advanced users are welcome to update the equipment data directly by editing that file.
+UTF-8 files saved with or without a leading byte-order mark (BOM) are accepted. If an older version
 saved your data in a different launch folder, close the app, back up that file, and copy it into the new home
 folder's `data` directory before starting the updated version.
 
@@ -455,6 +498,16 @@ Action | Format, Examples
 **List all equipment** | `list`
 **Find by borrower** | `find <borrower-name>`<br> e.g., `find Alice`
 **Filter by status** | `filter available` or `filter issued`
-**Clear the register** | `clear`
+**Clear the register** | `clear [force]`<br> e.g., `clear`, `clear force`
 **Help** | `help`
 **Exit** | `exit`
+
+### Diagnostic logs and borrower privacy
+
+Command diagnostics record command types and completion/error categories. They omit command arguments
+and feedback because these can contain borrower names, including in repeat-issue or removal errors.
+This applies to borrower search as well as issue/return. The on-screen feedback and active loan record
+still show the borrower. No sensitive command logging mode is provided.
+
+Existing log files from older versions can retain names. Review and remove those files before sharing
+an application folder or diagnostic logs. Closing a loan does not erase older log files or backups.

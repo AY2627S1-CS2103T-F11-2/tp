@@ -116,7 +116,7 @@ public class MainWindow extends UiPart<Stage> {
      */
     void fillInnerParts() {
         equipmentListPanel = new EquipmentListPanel(logic.getFilteredEquipmentList(),
-                logic.equipmentFilterDescriptionProperty());
+                logic.equipmentFilterDescriptionProperty(), logic.getEquipmentList());
         equipmentListPanelPlaceholder.getChildren().add(equipmentListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
@@ -184,7 +184,7 @@ public class MainWindow extends UiPart<Stage> {
     private CommandResult executeCommand(String commandText) throws CommandException, ParseException {
         try {
             CommandResult commandResult = logic.execute(commandText);
-            logger.info("Result: " + commandResult.getFeedbackToUser());
+            logger.info("Command completed.");
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
 
             if (commandResult.isShowHelp()) {
@@ -197,7 +197,7 @@ public class MainWindow extends UiPart<Stage> {
 
             return commandResult;
         } catch (CommandException | ParseException e) {
-            logger.info("An error occurred while executing command: " + commandText);
+            logger.info("Command failed: " + e.getClass().getSimpleName());
             resultDisplay.setFeedbackToUser(e.getMessage());
             throw e;
         }
