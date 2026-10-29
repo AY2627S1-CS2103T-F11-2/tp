@@ -320,6 +320,23 @@ Exits the program.
 
 Format: `exit`
 
+### Correcting an equipment name: `rename`
+
+Format: `rename <equipment-id> <equipment-name>`
+
+Example: `rename cam001 Sony Camera Mark II`
+
+Corrects the name using the same validation and whitespace normalization as `add` (1–50 characters).
+ID lookup ignores case. The stored ID, availability, and current borrower are preserved, including for
+issued equipment or records hidden by a filter. The card and saved register update together through the
+normal save pipeline. If saving fails, the previous name and loan are restored.
+
+Success: `Equipment CAM001 renamed to Sony Camera Mark II.`
+
+A missing record reports `Error: Equipment with ID cam001 does not exist.`. Missing arguments report
+`Error: Invalid command format. Usage: rename <equipment-id> <equipment-name>`. Invalid IDs or names
+use the same constraint messages as `add`. `remove` continues to reject issued equipment.
+
 ### Saving the data
 
 Only one ClubLogistics instance can use the same home folder at a time. If startup reports that ClubLogistics
@@ -368,12 +385,12 @@ If a record has no `status` field, ClubLogistics works out the status from `issu
 compatibility with older data files; ClubLogistics always writes `status` when it saves.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. Read-only commands leave the equipment file untouched. A successful add, remove, issue, return or clear replaces it with the in-memory register. Back up the file before editing it or changing equipment records.<br>
+If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. Read-only commands leave the equipment file untouched. A successful add, remove, rename, issue, return or clear replaces it with the in-memory register. Back up the file before editing it or changing equipment records.<br>
 Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
 ClubLogistics reads the data file only when it starts, and does not notice changes made while it is running. If you
-edit the file while ClubLogistics is open, the next successful `add`, `remove`, `issue`, `return` or `clear` saves the register in memory over your
+edit the file while ClubLogistics is open, the next successful `add`, `remove`, `rename`, `issue`, `return` or `clear` saves the register in memory over your
 changes, and your edits are lost. To edit the data file safely:
 
 1. Back up `data/clublogistics.json` by copying it somewhere else.
@@ -411,7 +428,7 @@ your records:
 
 A fresh app creates its equipment file only after a successful equipment-changing command, so running `list`
 does not create that file. If the app is still running when you replace the file, its next successful
-`add`, `remove`, `issue`, `return` or `clear` saves its in-memory register over the transferred records.
+`add`, `remove`, `rename`, `issue`, `return` or `clear` saves its in-memory register over the transferred records.
 
 **Q**: Do I need to register a person before issuing equipment to them?<br>
 **A**: No. ClubLogistics only records the name of the person currently holding each item, so you can issue equipment to anyone by name.

@@ -94,7 +94,7 @@ Parse and command errors are reported to the user. If saving throws an `IOExcept
 pre-command equipment register and reports a command error, with a separate message for permission failures.
 This restores in-memory records; it does not guarantee that a failed file write left the file intact.
 
-The supported commands are `add`, `remove`, `list`, `filter`, `find`, `issue`, `return`, `clear`, `help`, and `exit`.
+The supported commands are `add`, `remove`, `rename`, `list`, `filter`, `find`, `issue`, `return`, `clear`, `help`, and `exit`.
 Each equipment command parser validates its own positional arguments. For example, `issue CAM001 John Tan`
 creates an `IssueCommand` containing an `EquipmentId` and a `BorrowerName`.
 
@@ -123,6 +123,7 @@ How the parsing works:
 | --- | --- | --- |
 | `add` | `AddEquipmentCommandParser` | `AddEquipmentCommand` |
 | `remove` | `RemoveCommandParser` | `RemoveCommand` |
+| `rename` | `RenameCommandParser` | `RenameCommand` |
 | `list` | `ListCommandParser` | `ListCommand` |
 | `filter` | `FilterCommandParser` | `FilterCommand` |
 | `issue` | `IssueCommandParser` | `IssueCommand` |
@@ -359,6 +360,16 @@ Unlike `remove`, clear has no per-item issued-state protection: it intentionally
 including borrower assignments. It provides no confirmation step, undo, or retained loan history.
 Resetting contents through the shared register API avoids replacing the model/list objects bound to the UI.
 
+
+### Correcting equipment names
+
+`rename CAM001 Sony Camera Mark II` dispatches through `RenameCommandParser`, which splits the ID
+from the remaining name and delegates validation to `EquipmentId` and `EquipmentName`. `RenameCommand`
+finds the full-register record and calls `Equipment.withName`. Immutable replacement retains its ID,
+status, and borrower, so no return/reissue is fabricated and the existing predicate remains active.
+The command is data-mutating, so Logic saves the correction and restores the original register if saving
+fails. Cards observe the replacement through the same list as issue/return. Missing targets fail before
+mutation. The issued-item removal guard remains independent of descriptive name corrections.
 
 ### Borrower search and view descriptions
 

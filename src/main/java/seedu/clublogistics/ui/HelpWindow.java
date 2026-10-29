@@ -22,6 +22,7 @@ public class HelpWindow extends UiPart<Stage> {
             "Command quick reference (available offline)",
             "add <equipment-id> <equipment-name>",
             "remove <equipment-id>",
+            "rename <equipment-id> <equipment-name> — preserve current loan",
             "issue <equipment-id> <person-name>",
             "return <equipment-id>",
             "find <borrower-name> — search current borrowers",
