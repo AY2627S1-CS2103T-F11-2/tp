@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import seedu.clublogistics.model.equipment.BorrowerName;
 import seedu.clublogistics.model.equipment.Equipment;
@@ -68,4 +70,18 @@ public class EquipmentCardTest extends JavaFxTest {
     private static Circle getStatusIndicator(EquipmentCard card) {
         return (Circle) card.getRoot().lookup("#statusIndicator");
     }
+    /** Uses readable white equipment text on the dark card background. */
+    @Test
+    public void darkTheme_equipmentLabels_haveReadableContrast() throws Exception {
+        runOnFxThread(() -> {
+            EquipmentCard card = new EquipmentCard(new Equipment(new EquipmentId("CAM001"), "Camera"));
+            Scene scene = new Scene(card.getRoot());
+            scene.getStylesheets().add(getClass().getResource("/view/DarkTheme.css").toExternalForm());
+            card.getRoot().applyCss();
+            for (String id : new String[] {"#equipmentId", "#name", "#borrower"}) {
+                assertEquals(Color.WHITE, ((Label) card.getRoot().lookup(id)).getTextFill());
+            }
+        });
+    }
+
 }

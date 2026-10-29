@@ -32,6 +32,12 @@ public class AddEquipmentCommand extends Command {
         return new CommandResult(String.format(MESSAGE_SUCCESS, equipmentToAdd.getId()));
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean isDataMutating() {
+        return true;
+    }
+
     /** Returns the existing item's ID as stored, which may differ in case from the ID that was typed. */
     private EquipmentId findStoredId(Model model) {
         return model.findEquipment(equipmentToAdd.getId())

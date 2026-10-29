@@ -37,7 +37,9 @@ public class FilterCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        model.updateFilteredEquipmentList(equipment -> equipment.getStatus() == status);
+        model.updateFilteredEquipmentList(equipment -> equipment.getStatus() == status,
+                "Showing: " + (status == EquipmentStatus.AVAILABLE ? "Available" : "Issued")
+                        + " — use list to show all");
         return new CommandResult(selectMessage(model.getFilteredEquipmentList().isEmpty()));
     }
 

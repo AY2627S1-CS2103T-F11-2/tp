@@ -193,7 +193,7 @@ public class LogicManagerTest {
 
         logic = new LogicManager(model, storage);
 
-        // Triggers the saveClubLogisticsData method by executing an add command
+        // Triggers the saveClubLogisticsData method by executing an add command.
         String addCommand = "add CAM001 Sony Camera";
         ModelManager expectedModel = new ModelManager();
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
