@@ -391,6 +391,25 @@ individual equipment records, so there is no separate person register or cross-r
 John Tan may hold both `CAM001` and `MIC001`; this model stores current assignments without identifying
 people beyond their names.
 
+#### Loan state and verification
+
+| Prior record | Request | Resulting record |
+| --- | --- | --- |
+| CAM001, available, no borrower | `issue CAM001 John Tan` | Same ID/name, ISSUED, John Tan |
+| CAM001, issued to John Tan | `issue CAM001 Alice Lim` | Rejected; John Tan remains the borrower |
+| No CAM001 | `issue CAM001 John Tan` | Rejected; no record or loan is created |
+
+The check and immutable replacement concern one equipment record. A second item may independently be
+issued to John Tan; matching borrower strings do not establish a shared person identity or a single
+cross-equipment loan. Making borrowers unique would incorrectly prevent this ordinary borrowing workflow.
+
+`IssueCommandParserTest` verifies ID/borrower parsing and normalization. `IssueCommandTest` checks state
+preconditions and target-only changes. `IssueCommandIntegrationTest` verifies saved borrowers, rejected
+repeat issues, independent assignments to the same name, and add → issue → restart. `EquipmentTest` checks
+the immutable record's own state guards. A rejected precondition does not invoke replacement or saving;
+a later save failure instead uses Logic's register rollback, as described in the storage walkthrough.
+
+
 ### Returning equipment
 
 `return CAM001` follows `ClubLogisticsParser` → `ReturnCommandParser` → `ReturnCommand`. The parser requires
