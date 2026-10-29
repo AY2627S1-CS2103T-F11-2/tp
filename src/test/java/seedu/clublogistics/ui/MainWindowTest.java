@@ -126,7 +126,7 @@ public class MainWindowTest extends JavaFxTest {
                 assertTrue(equipment.lookupAll(".label").stream()
                         .anyMatch(node -> node instanceof Label label
                                 && "Issued to: John Tan".equals(label.getText())));
-                logic.execute("clear");
+                logic.execute("clear force");
                 assertTrue(equipment.getItems().isEmpty());
                 logic.execute("add CAM001 Sony Camera");
                 logic.execute("remove cam001");
