@@ -359,6 +359,28 @@ Unlike `remove`, clear has no per-item issued-state protection: it intentionally
 including borrower assignments. It provides no confirmation step, undo, or retained loan history.
 Resetting contents through the shared register API avoids replacing the model/list objects bound to the UI.
 
+#### Clear scope and verification
+
+With `filter available` selected, the visible cards are only a view of the reset target:
+
+| State | Full register | Visible available view | Saved equipment after success |
+| --- | --- | --- | --- |
+| Before `clear` | CAM001 available; MIC001 issued to Alice Lim | CAM001 | Both records |
+| After `clear` | Empty | Empty, same selected predicate | Empty array |
+| After restart | Empty | Empty, fresh show-all predicate | Empty array |
+
+A present empty register differs from a missing file: the former loads zero records, while the latter
+selects samples. Clearing does not delete the equipment file to request sample initialization. Unlike
+repeated per-item removal, the register reset also removes issued items; unlike replacing the model,
+`setAll` preserves the observable collection that existing UI controls observe.
+
+`ClearCommandParserTest` verifies that extra arguments are rejected; this grammar is implemented, rather
+than an assumed pending change. `ClearCommandTest` covers empty and populated registers.
+`ClearCommandIntegrationTest` checks empty persistence and that rejected arguments retain saved records.
+`EquipmentFilterModelTest` verifies predicate-preserving lifecycle changes, and `MainWindowTest` checks
+that the equipment panel empties when the register is cleared. There is no undo or stored loan history to recover
+borrower assignments after a successful clear; manual backups remain separate from this command.
+
 
 ### Borrower search and view descriptions
 
