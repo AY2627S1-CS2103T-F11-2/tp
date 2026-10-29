@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import seedu.clublogistics.logic.commands.exceptions.CommandException;
 import seedu.clublogistics.model.Model;
 import seedu.clublogistics.model.equipment.Equipment;
+import seedu.clublogistics.model.equipment.EquipmentId;
 
 /** Adds an equipment item to the equipment register. */
 public class AddEquipmentCommand extends Command {
@@ -25,10 +26,17 @@ public class AddEquipmentCommand extends Command {
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
         if (model.hasEquipment(equipmentToAdd)) {
-            throw new CommandException(String.format(MESSAGE_DUPLICATE_EQUIPMENT, equipmentToAdd.getId()));
+            throw new CommandException(String.format(MESSAGE_DUPLICATE_EQUIPMENT, findStoredId(model)));
         }
         model.addEquipment(equipmentToAdd);
         return new CommandResult(String.format(MESSAGE_SUCCESS, equipmentToAdd.getId()));
+    }
+
+    /** Returns the existing item's ID as stored, which may differ in case from the ID that was typed. */
+    private EquipmentId findStoredId(Model model) {
+        return model.findEquipment(equipmentToAdd.getId())
+                .map(Equipment::getId)
+                .orElse(equipmentToAdd.getId());
     }
 
     @Override

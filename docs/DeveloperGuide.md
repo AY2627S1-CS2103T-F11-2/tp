@@ -206,6 +206,8 @@ For `add CAM001 Sony Camera`:
 ![Registration interaction and duplicate rejection](images/AddEquipmentSequence.png)
 
 The duplicate branch reports `Error: Equipment with ID CAM001 already exists.` before adding or saving.
+It looks up the existing item with `model.findEquipment` and reports that item's ID as stored, so
+`add cam001 Tripod` against a stored `CAM001` names `CAM001`, matching what the equipment list shows.
 Missing ID/name tokens produce usage feedback; invalid values produce the corresponding value-type
 constraint message. Names are descriptive rather than unique: `add CAM002 Sony Camera` is valid alongside
 `CAM001`, because each physical item has its own ID. Starting new equipment as available avoids inventing
