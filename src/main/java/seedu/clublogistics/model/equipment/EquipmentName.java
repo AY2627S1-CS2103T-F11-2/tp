@@ -21,10 +21,27 @@ public class EquipmentName {
      * Creates an equipment name after normalising its whitespace.
      */
     public EquipmentName(String name) {
+        this(name, false);
+    }
+
+    private EquipmentName(String name, boolean fromStorage) {
         requireNonNull(name);
         String normalisedName = normalise(name);
-        checkArgument(isValidName(normalisedName), MESSAGE_CONSTRAINTS);
+        checkArgument(fromStorage ? isValidStoredName(normalisedName) : isValidName(normalisedName),
+                MESSAGE_CONSTRAINTS);
         value = normalisedName;
+    }
+
+    /**
+     * Loads names using v1.4's nonempty, 50-character rule so existing registers remain usable.
+     * New entries must use the constructor, which also checks the allowed characters.
+     */
+    public static EquipmentName fromStoredName(String name) {
+        return new EquipmentName(name, true);
+    }
+
+    private static boolean isValidStoredName(String normalisedName) {
+        return !normalisedName.isEmpty() && normalisedName.length() <= MAX_LENGTH;
     }
 
     /** Returns whether {@code test} is a valid equipment name. */

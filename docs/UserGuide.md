@@ -99,6 +99,7 @@ Format: `add <equipment-id> <equipment-name>`
 * The equipment ID must follow the [equipment ID rules](#features) and must not already be in use.
 * The equipment name has 1–50 characters. Only letters, digits, spaces, and the symbols
   `-` `/` `'` `.` `,` `&` `(` `)` `#` `+` `:` are allowed. All text after the ID is treated as the name.
+  Existing equipment names saved by v1.4 remain loadable, including symbols that are no longer accepted for new items.
 * Leading and trailing spaces are removed from the name, and consecutive spaces are combined into one.
   The name is displayed with the capitalization you entered.
 * Several items may share a name as long as their IDs differ, since the club may own several identical items.
