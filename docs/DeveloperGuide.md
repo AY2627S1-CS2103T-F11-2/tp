@@ -236,6 +236,21 @@ Both checks precede mutation and saving. The coordinator must return the equipme
 This preserves the borrower assignment while equipment is outstanding. IDs target physical assets
 independently of their display order or filter; targeting a visible index would couple removal to view state.
 
+#### Removal sequence and verification
+
+![Available equipment removal with missing and issued rejection branches](images/RemoveEquipmentSequence.png)
+
+The diagram includes checks omitted from the architecture overview. The command retrieves the stored
+record before removing it, so its success message uses `CAM001` even when the user types `cam001`.
+No intermediate available copy is created to bypass the issued-state guard. A rejected removal leaves
+both the model and the saved borrower assignment intact; a successful removal saves the complete remaining
+register through the shared pipeline.
+
+`RemoveCommandParserTest` verifies the single-ID grammar. `RemoveCommandTest` checks successful removal,
+missing equipment, and the issued guard. `IssueCommandIntegrationTest.execute_removeIssuedItem_rejectsWithoutLosingBorrower`
+verifies the borrower survives a rejected removal in memory and storage. `FilterCommandIntegrationTest`
+checks removals while another status is selected, so lookup and deletion remain independent of visibility.
+
 
 ### Listing equipment
 
