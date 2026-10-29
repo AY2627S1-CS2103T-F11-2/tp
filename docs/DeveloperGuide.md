@@ -249,7 +249,23 @@ the entire register is empty, so the command returns `No equipment found.` inste
 For example, with available `CAM001` and issued `MIC001`, `filter issued` shows only `MIC001`; `list` then
 shows both. A previously empty filtered result is not evidence of an empty register: `list` can reveal
 records of the other status. Using a single view avoids maintaining separate result lists and lets later
-record changes update the same binding. Logic still saves the unchanged register after successful `list`.
+record changes update the same binding. Logic returns the result without saving the unchanged register after successful `list`.
+
+#### Listing sequence and verification
+
+![Listing resets the existing view without saving equipment data](images/ListEquipmentSequence.png)
+
+`list` is a read-only command: the default `Command.isDataMutating()` is false. A successful execution
+therefore reaches the UI without asking storage to write the unchanged register. This matters after a
+loading failure or when the data folder is unwritable: inspecting records must not replace the rejected
+file or turn a successful view change into a save error. Copying the register into a new result list would
+also disconnect future updates from the panel's existing observable binding.
+
+`ListCommandParserTest` checks extra-argument rejection. `ListCommandTest` verifies full-list restoration
+and the empty-register message. `FilterCommandIntegrationTest` covers both status filters followed by
+`list`, including an empty filtered result with records still in the register.
+`ReadOnlyCommandPersistenceTest` verifies that read-only commands leave rejected data untouched and never
+attempt an equipment save even when writing is impossible.
 
 
 ### Filtering by status

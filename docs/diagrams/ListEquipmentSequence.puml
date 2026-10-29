@@ -1,0 +1,30 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #222222
+skinparam sequenceParticipantBackgroundColor #F4F5F7
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceArrowColor #333333
+hide footbox
+title List restores all equipment without writing data
+participant ":MainWindow" as W
+participant ":LogicManager" as L
+participant ":ClubLogisticsParser" as P
+participant ":ListCommandParser" as LP
+participant ":ListCommand" as C
+participant ":ModelManager" as M
+participant "view:FilteredList" as V
+W -> L : execute("list")
+L -> P : parseCommand("list")
+P -> LP : parse(blank arguments)
+LP --> P : ListCommand
+P --> L : command
+L -> C : execute(model)
+C -> M : updateFilteredEquipmentList(SHOW_ALL)
+M -> V : setPredicate(SHOW_ALL)
+note over V : Existing panel observes all records\nNo equipment record changes
+C --> L : CommandResult (normal or empty feedback)
+note over L : isDataMutating() is false\nNo equipment storage call
+L --> W : result
+W -> W : update ResultDisplay feedback
+@enduml
