@@ -203,4 +203,34 @@ public class MainWindowTest extends JavaFxTest {
             }
         });
     }
+    /** Renaming an issued item refreshes the card while preserving its borrower. */
+    @Test
+    public void renameCommand_updatesCardAndPreservesBorrower() throws Exception {
+        runOnFxThread(() -> {
+            ModelManager model = new ModelManager();
+            Path dataFile = testFolder.resolve("rename.json");
+            StorageManager storage = new StorageManager(new JsonClubLogisticsStorage(dataFile),
+                    new JsonUserPrefsStorage(testFolder.resolve("prefs.json")));
+            LogicManager logic = new LogicManager(model, storage);
+            Stage stage = new Stage();
+            try {
+                MainWindow window = new MainWindow(stage, logic, dataFile);
+                window.fillInnerParts();
+                stage.show();
+                logic.execute("add CAM001 Camera");
+                logic.execute("issue CAM001 Alice Tan");
+                logic.execute("rename CAM001 Sony Camera Mark II");
+                Parent root = stage.getScene().getRoot();
+                root.applyCss();
+                root.layout();
+                for (String text : List.of("CAM001", "Sony Camera Mark II", "Issued to: Alice Tan")) {
+                    assertTrue(root.lookupAll(".label").stream()
+                            .anyMatch(node -> node instanceof Label label && text.equals(label.getText())), text);
+                }
+            } finally {
+                stage.close();
+            }
+        });
+    }
+
 }

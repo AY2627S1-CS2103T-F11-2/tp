@@ -16,6 +16,7 @@ import seedu.clublogistics.logic.commands.HelpCommand;
 import seedu.clublogistics.logic.commands.IssueCommand;
 import seedu.clublogistics.logic.commands.ListCommand;
 import seedu.clublogistics.logic.commands.RemoveCommand;
+import seedu.clublogistics.logic.commands.RenameCommand;
 import seedu.clublogistics.logic.commands.ReturnCommand;
 import seedu.clublogistics.logic.parser.exceptions.ParseException;
 
@@ -51,6 +52,7 @@ public class ClubLogisticsParser {
             case FindCommand.COMMAND_WORD -> new FindCommandParser().parse(arguments);
             case FilterCommand.COMMAND_WORD -> new FilterCommandParser().parse(arguments);
             case RemoveCommand.COMMAND_WORD -> new RemoveCommandParser().parse(arguments);
+            case RenameCommand.COMMAND_WORD -> new RenameCommandParser().parse(arguments);
             case ReturnCommand.COMMAND_WORD -> new ReturnCommandParser().parse(arguments);
             case ListCommand.COMMAND_WORD -> new ListCommandParser().parse(arguments);
             case ExitCommand.COMMAND_WORD -> new ExitCommandParser().parse(arguments);

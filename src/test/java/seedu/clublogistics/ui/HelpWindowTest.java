@@ -27,7 +27,7 @@ public class HelpWindowTest extends JavaFxTest {
                 help.show();
                 help.getRoot().getScene().getRoot().applyCss();
                 Label reference = (Label) help.getRoot().getScene().lookup("#quickReference");
-                for (String command : List.of("add <", "remove <", "issue <", "return <", "find <",
+                for (String command : List.of("add <", "remove <", "rename <", "issue <", "return <", "find <",
                         "filter <", "list", "clear", "help", "exit", "Up", "Down")) {
                     assertTrue(reference.getText().contains(command), command);
                 }
