@@ -344,19 +344,24 @@ loan history, return dates, or return condition: only the latest availability an
 
 ### Clearing the register
 
-`ClubLogisticsParser` dispatches `clear` through `ClearCommandParser`, which rejects nonblank arguments with
-`Error: Invalid command format. Usage: clear`. `ClearCommand.execute` supplies a new empty
-`ClubLogisticsData` to `ModelManager.setClubLogisticsData`. The manager calls `resetData` on its existing
+`ClubLogisticsParser` dispatches `clear` through `ClearCommandParser`, which builds an unforced
+`ClearCommand` for blank arguments and a forced one for the case-insensitive keyword `force`. Any other
+argument is rejected with `Error: Invalid command format. Usage: clear [force]`. An unforced
+`ClearCommand.execute` first collects issued items from the register; if there are any, it throws a
+`CommandException` naming each item and holder, leaving the register and saved file untouched. Otherwise, or
+when forced, it supplies a new empty `ClubLogisticsData` to `ModelManager.setClubLogisticsData`. The manager calls `resetData` on its existing
 register; `ClubLogisticsData.setEquipments` delegates to `UniqueEquipmentList.setEquipment`. That method
 validates the replacement collection in a temporary unique list and uses `internalList.setAll` to replace
 contents, preserving the observable list and its observers. The existing filter predicate remains selected,
 with no matching records after clear.
 
-For example, a register containing available `CAM001` and issued `MIC001` becomes empty, even if
-`filter available` previously hid `MIC001`. Feedback is `ClubLogistics data has been cleared!`. Logic saves
+For example, with available `CAM001` and issued `MIC001`, `clear` is refused even if `filter available`
+previously hid `MIC001`, because the check covers the whole register rather than the visible list.
+`clear force` then empties it. Feedback is `ClubLogistics data has been cleared!`. Logic saves
 `{"equipment": []}`, so restarting loads an empty register rather than missing-file sample data.
-Unlike `remove`, clear has no per-item issued-state protection: it intentionally resets all records,
-including borrower assignments. It provides no confirmation step, undo, or retained loan history.
+The issued-item check mirrors `remove`'s protection, while `force` keeps a deliberate full reset available
+without first returning every item. A stateless keyword is used instead of a two-step prompt, so no pending
+confirmation state has to survive between commands. Clear provides no undo or retained loan history.
 Resetting contents through the shared register API avoids replacing the model/list objects bound to the UI.
 
 
@@ -720,7 +725,9 @@ The User Guide describes the implemented commands and current limitations.
 4. Run `remove TRI001`. Expect an error and no changes because the item is issued.
 5. Run `return TRI001`, then `list`. Expect the tripod to be available.
 6. Run `remove tri001`. Expect only the tripod to be removed, regardless of ID capitalization.
-7. Run `clear`. Expect an empty equipment register.
+7. Run `add TRI002 Tripod`, `issue TRI002 John Tan`, then `clear`. Expect an error naming `TRI002 (John Tan)`
+   and no changes.
+8. Run `clear force`. Expect an empty equipment register.
 
 ### Saving data and reporting errors
 

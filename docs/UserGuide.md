@@ -274,9 +274,20 @@ Unsupported status, e.g., `filter damaged` | `Error: Invalid command format. Usa
 
 ### Clearing the register: `clear`
 
-Removes all equipment records, including issued items, and saves the empty register.
+Removes all equipment records and saves the empty register.
 
-Format: `clear`
+Format: `clear [force]`
+
+* If any item is still issued, `clear` is refused and lists each issued item with its holder, so that loan
+  records are not lost by accident. Return those items first, or use `clear force` to delete all records anyway.
+* `clear force` removes every record, including issued items and their borrowers. This cannot be undone.
+* `force` is not case-sensitive. Any other text after `clear` is rejected.
+
+Examples:
+* `clear` when nothing is issued: removes all records.
+* `clear` when `CAM001` is issued to John Tan: refused with
+  `Error: Some equipment is still issued: CAM001 (John Tan).`
+* `clear force`: removes all records, including `CAM001`.
 
 ### Viewing help: `help`
 
@@ -404,6 +415,6 @@ Action | Format, Examples
 **Return equipment** | `return <equipment-id>`<br> e.g., `return CAM001`
 **List all equipment** | `list`
 **Filter by status** | `filter available` or `filter issued`
-**Clear the register** | `clear`
+**Clear the register** | `clear [force]`<br> e.g., `clear`, `clear force`
 **Help** | `help`
 **Exit** | `exit`

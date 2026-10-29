@@ -73,10 +73,10 @@ public class LogicManagerStorageFailureTest {
         assertRestoredAndRetrySucceeds("remove CAM001");
     }
 
-    /** A rejected clear must retain both available and issued records. */
+    /** A forced clear that cannot be saved must retain both available and issued records. */
     @Test
     public void execute_clearCannotSave_restoresRegisterAndAllowsRetry() throws Exception {
-        assertRestoredAndRetrySucceeds("clear");
+        assertRestoredAndRetrySucceeds("clear force");
     }
 
     /** Help remains accessible when writing equipment data is impossible. */
