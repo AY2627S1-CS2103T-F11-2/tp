@@ -24,14 +24,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Record source revision
+        run: |
+          python3 -c 'import json, os; json.dump({"commit": os.environ["GITHUB_SHA"]}, open("docs/deployment.json", "w"))'
       - name: Build documentation
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./docs
           destination: ./_site
-      - name: Record source revision
-        run: |
-          python3 -c 'import json, os; json.dump({"commit": os.environ["GITHUB_SHA"]}, open("_site/deployment.json", "w"))'
       - name: Check published content
         run: python3 .github/check-website.py _site --commit "$GITHUB_SHA"
       - uses: actions/upload-pages-artifact@v3

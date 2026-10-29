@@ -51,7 +51,8 @@ public class IssueCommandParserTest {
 
     @Test
     public void parse_invalidEquipmentId_failure() {
-        String message = "Error: Equipment ID must contain only letters and numbers and cannot contain spaces.";
+        String message = "Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers,"
+                + " with no spaces.";
 
         assertParseFailure(parser, "CAM-001 John Tan", message);
         assertParseFailure(parser, "CAM/001 John Tan", message);
@@ -61,10 +62,12 @@ public class IssueCommandParserTest {
 
     @Test
     public void parse_invalidBorrowerName_failure() {
-        String message = "Error: Person name must contain only letters and spaces and be 1–50 characters long.";
+        String message = "Error: Person name must be 1 to 50 characters long and contain only letters (A-Z, a-z),"
+                + " spaces, and apostrophes (') and hyphens (-) between letters.";
 
         assertParseFailure(parser, "CAM001 John1", message);
-        assertParseFailure(parser, "CAM001 John-Tan", message);
+        assertParseFailure(parser, "CAM001 John--Tan", message);
+        assertParseFailure(parser, "CAM001 -John", message);
         assertParseFailure(parser, "CAM001 John/Tan", message);
         assertParseFailure(parser, "CAM001 John\tTan", message);
         assertParseFailure(parser, "CAM001 " + "A".repeat(51), message);

@@ -1,7 +1,7 @@
 package seedu.clublogistics.logic.parser;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.clublogistics.logic.parser.CommandParserTestUtil.assertParseFailure;
+import static seedu.clublogistics.logic.parser.CommandParserTestUtil.assertParseSuccess;
 import static seedu.clublogistics.testutil.Assert.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -17,15 +17,22 @@ public class ClearCommandParserTest {
     }
 
     @Test
-    public void parse_noArguments_success() throws Exception {
-        assertTrue(parser.parse("") instanceof ClearCommand);
-        assertTrue(parser.parse("   ") instanceof ClearCommand);
+    public void parse_noArguments_returnsUnforcedClear() {
+        assertParseSuccess(parser, "", new ClearCommand(false));
+        assertParseSuccess(parser, "   ", new ClearCommand(false));
     }
 
     @Test
-    public void parse_anyArguments_failure() {
+    public void parse_forceKeyword_returnsForcedClear() {
+        assertParseSuccess(parser, " force", new ClearCommand(true));
+        assertParseSuccess(parser, "  FORCE  ", new ClearCommand(true));
+    }
+
+    @Test
+    public void parse_otherArguments_failure() {
         assertParseFailure(parser, " 3", ClearCommand.MESSAGE_INVALID_COMMAND_FORMAT);
         assertParseFailure(parser, " CAM001", ClearCommand.MESSAGE_INVALID_COMMAND_FORMAT);
-        assertParseFailure(parser, " n/camera", ClearCommand.MESSAGE_INVALID_COMMAND_FORMAT);
+        assertParseFailure(parser, " force now", ClearCommand.MESSAGE_INVALID_COMMAND_FORMAT);
+        assertParseFailure(parser, " forced", ClearCommand.MESSAGE_INVALID_COMMAND_FORMAT);
     }
 }

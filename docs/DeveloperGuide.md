@@ -195,8 +195,11 @@ For `add CAM001 Sony Camera`:
 1. `ClubLogisticsParser` delegates the arguments to `AddEquipmentCommandParser`. The parser trims them
    and splits on whitespace at most once: `CAM001` is the ID and the remaining text is the equipment name.
 2. `EquipmentId` accepts 1–20 ASCII letters or digits and preserves spelling for display. Equality and
-   lookup ignore letter case. `EquipmentName` trims and collapses whitespace, then requires 1–50 characters.
-   For example, `add CAM001 Sony   Camera` creates the name `Sony Camera`.
+   lookup ignore letter case. `EquipmentName` trims and collapses whitespace, then requires 1–50 characters
+   made up of Unicode letters, digits, spaces and the symbols `- / ' . , & ( ) # + :`.
+   For example, `add CAM001 Sony   Camera` creates the name `Sony Camera`. When loading existing records,
+   `EquipmentName.fromStoredName` retains v1.4's nonempty, 50-character rule, including previously accepted
+   symbols. This preserves existing names and loans across upgrades while restricting new entries.
 3. The parser creates an available `Equipment` with no borrower and passes it to `AddEquipmentCommand`.
    The command calls `model.hasEquipment`; an existing `cam001` therefore rejects `CAM001` as a duplicate.
 4. On success, `ModelManager.addEquipment` delegates through `ClubLogisticsData.addEquipment` to
@@ -206,6 +209,8 @@ For `add CAM001 Sony Camera`:
 ![Registration interaction and duplicate rejection](images/AddEquipmentSequence.png)
 
 The duplicate branch reports `Error: Equipment with ID CAM001 already exists.` before adding or saving.
+It looks up the existing item with `model.findEquipment` and reports that item's ID as stored, so
+`add cam001 Tripod` against a stored `CAM001` names `CAM001`, matching what the equipment list shows.
 Missing ID/name tokens produce usage feedback; invalid values produce the corresponding value-type
 constraint message. Names are descriptive rather than unique: `add CAM002 Sony Camera` is valid alongside
 `CAM001`, because each physical item has its own ID. Starting new equipment as available avoids inventing
@@ -285,9 +290,10 @@ still passes through the shared save step.
 ### Issuing equipment
 
 For `issue CAM001 John Tan`, `IssueCommandParser` splits the trimmed arguments once into ID and complete
-borrower name. `BorrowerName` trims and collapses consecutive ordinary spaces and accepts 1–50 ASCII letters
-and spaces, beginning with a letter. Thus `John   Tan` becomes `John Tan`; digits, punctuation, and embedded
-tabs are invalid. Missing fields produce the issue usage message; invalid ID/name values produce their
+borrower name. `BorrowerName` trims and collapses consecutive ordinary spaces and accepts 1–50 characters
+forming space-separated words of ASCII letters, where an apostrophe or hyphen may join two letters. Thus
+`John   Tan` becomes `John Tan`, and `O'Brien` and `Mary-Jane` are valid; digits, other punctuation, a leading,
+trailing or doubled `'`/`-`, and embedded tabs are invalid. Missing fields produce the issue usage message; invalid ID/name values produce their
 constraint messages. The parser creates `IssueCommand(EquipmentId, BorrowerName)`.
 
 `IssueCommand` looks up the item through `ModelManager.findEquipment` in the full register, ignoring ID case.
@@ -344,19 +350,24 @@ loan history, return dates, or return condition: only the latest availability an
 
 ### Clearing the register
 
-`ClubLogisticsParser` dispatches `clear` through `ClearCommandParser`, which rejects nonblank arguments with
-`Error: Invalid command format. Usage: clear`. `ClearCommand.execute` supplies a new empty
-`ClubLogisticsData` to `ModelManager.setClubLogisticsData`. The manager calls `resetData` on its existing
+`ClubLogisticsParser` dispatches `clear` through `ClearCommandParser`, which builds an unforced
+`ClearCommand` for blank arguments and a forced one for the case-insensitive keyword `force`. Any other
+argument is rejected with `Error: Invalid command format. Usage: clear [force]`. An unforced
+`ClearCommand.execute` first collects issued items from the register; if there are any, it throws a
+`CommandException` naming each item and holder, leaving the register and saved file untouched. Otherwise, or
+when forced, it supplies a new empty `ClubLogisticsData` to `ModelManager.setClubLogisticsData`. The manager calls `resetData` on its existing
 register; `ClubLogisticsData.setEquipments` delegates to `UniqueEquipmentList.setEquipment`. That method
 validates the replacement collection in a temporary unique list and uses `internalList.setAll` to replace
 contents, preserving the observable list and its observers. The existing filter predicate remains selected,
 with no matching records after clear.
 
-For example, a register containing available `CAM001` and issued `MIC001` becomes empty, even if
-`filter available` previously hid `MIC001`. Feedback is `ClubLogistics data has been cleared!`. Logic saves
+For example, with available `CAM001` and issued `MIC001`, `clear` is refused even if `filter available`
+previously hid `MIC001`, because the check covers the whole register rather than the visible list.
+`clear force` then empties it. Feedback is `ClubLogistics data has been cleared!`. Logic saves
 `{"equipment": []}`, so restarting loads an empty register rather than missing-file sample data.
-Unlike `remove`, clear has no per-item issued-state protection: it intentionally resets all records,
-including borrower assignments. It provides no confirmation step, undo, or retained loan history.
+The issued-item check mirrors `remove`'s protection, while `force` keeps a deliberate full reset available
+without first returning every item. A stateless keyword is used instead of a two-step prompt, so no pending
+confirmation state has to survive between commands. Clear provides no undo or retained loan history.
 Resetting contents through the shared register API avoids replacing the model/list objects bound to the UI.
 
 
@@ -749,7 +760,9 @@ The User Guide describes the implemented commands and current limitations.
 4. Run `remove TRI001`. Expect an error and no changes because the item is issued.
 5. Run `return TRI001`, then `list`. Expect the tripod to be available.
 6. Run `remove tri001`. Expect only the tripod to be removed, regardless of ID capitalization.
-7. Run `clear`. Expect an empty equipment register.
+7. Run `add TRI002 Tripod`, `issue TRI002 John Tan`, then `clear`. Expect an error naming `TRI002 (John Tan)`
+   and no changes.
+8. Run `clear force`. Expect an empty equipment register.
 
 ### Saving data and reporting errors
 

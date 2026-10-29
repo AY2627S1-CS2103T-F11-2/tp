@@ -9,8 +9,11 @@ import static seedu.clublogistics.commons.util.AppUtil.checkArgument;
 public final class BorrowerName {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Error: Person name must contain only letters and spaces and be 1–50 characters long.";
-    public static final String VALIDATION_REGEX = "[A-Za-z][A-Za-z ]{0,49}";
+            "Error: Person name must be 1 to 50 characters long and contain only letters (A-Z, a-z),"
+            + " spaces, and apostrophes (') and hyphens (-) between letters.";
+    public static final int MAX_LENGTH = 50;
+    private static final String WORD_REGEX = "[A-Za-z]+(?:['-][A-Za-z]+)*";
+    public static final String VALIDATION_REGEX = WORD_REGEX + "(?: " + WORD_REGEX + ")*";
 
     private final String value;
 
@@ -25,11 +28,13 @@ public final class BorrowerName {
     }
 
     /**
-     * Returns true if the normalized name contains between 1 and 50 letters and spaces.
+     * Returns true if the normalized name has 1 to 50 characters and consists of space-separated words
+     * of letters, where apostrophes and hyphens may only join two letters.
      */
     public static boolean isValidName(String name) {
         requireNonNull(name);
-        return normalize(name).matches(VALIDATION_REGEX);
+        String normalizedName = normalize(name);
+        return normalizedName.length() <= MAX_LENGTH && normalizedName.matches(VALIDATION_REGEX);
     }
 
     private static String normalize(String name) {

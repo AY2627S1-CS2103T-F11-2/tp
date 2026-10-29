@@ -6,21 +6,25 @@ import seedu.clublogistics.logic.commands.ClearCommand;
 import seedu.clublogistics.logic.parser.exceptions.ParseException;
 
 /**
- * Parses the arguments of a clear command, which takes none.
+ * Parses the arguments of a clear command, which takes either nothing or the force keyword.
  */
 public class ClearCommandParser implements Parser<ClearCommand> {
 
     /**
-     * Parses {@code args} as the empty argument list of a ClearCommand.
+     * Parses {@code args} as an unforced clear when blank, or a forced clear when it is the force keyword.
      *
-     * @throws ParseException if any argument is supplied.
+     * @throws ParseException if any other argument is supplied.
      */
     @Override
     public ClearCommand parse(String args) throws ParseException {
         requireNonNull(args);
-        if (!args.isBlank()) {
-            throw new ParseException(ClearCommand.MESSAGE_INVALID_COMMAND_FORMAT);
+        String trimmedArgs = args.trim();
+        if (trimmedArgs.isEmpty()) {
+            return new ClearCommand(false);
         }
-        return new ClearCommand();
+        if (trimmedArgs.equalsIgnoreCase(ClearCommand.FORCE_KEYWORD)) {
+            return new ClearCommand(true);
+        }
+        throw new ParseException(ClearCommand.MESSAGE_INVALID_COMMAND_FORMAT);
     }
 }

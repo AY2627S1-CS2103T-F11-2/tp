@@ -9,7 +9,8 @@ import static seedu.clublogistics.commons.util.AppUtil.checkArgument;
 public class EquipmentId {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Error: Equipment ID must contain only letters and numbers and cannot contain spaces.";
+            "Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers,"
+            + " with no spaces.";
     public static final String VALIDATION_REGEX = "[A-Za-z0-9]{1,20}";
 
     public final String value;

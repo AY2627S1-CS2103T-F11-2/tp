@@ -27,7 +27,8 @@ public class HelpWindow extends UiPart<Stage> {
             "find <borrower-name> — search current borrowers",
             "filter <available|issued> — select a status",
             "list — show all equipment and clear filters",
-            "clear — delete every equipment record, including loans",
+            "clear — delete records only when nothing is issued",
+            "clear force — delete every record, including loans; cannot be undone",
             "help — show this reference (also F1)",
             "exit — close the application",
             "Up / Down — recall the last 100 successful commands; Down restores your draft");

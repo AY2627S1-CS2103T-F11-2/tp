@@ -58,7 +58,7 @@ public class FilterCommandIntegrationTest {
         assertCount("filter issued", 1, 3);
         logic.execute("remove MIC001");
         assertCount("list", 2, 2);
-        logic.execute("clear");
+        logic.execute("clear force");
         assertCount("filter issued", 0, 0);
         assertCount("list", 0, 0);
     }
