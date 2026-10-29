@@ -129,6 +129,19 @@ public class JsonClubLogisticsStorageTest {
         assertTrue(readBack.getEquipmentList().stream().noneMatch(Equipment::isIssued));
     }
 
+    /** Accepts an editor's UTF-8 BOM without changing equipment or active loans. */
+    @Test
+    public void readClubLogisticsData_utf8Bom_preservesRegister() throws Exception {
+        Path filePath = testFolder.resolve("Bom.json");
+        JsonClubLogisticsStorage storage = new JsonClubLogisticsStorage(filePath);
+        ClubLogisticsData original = getTypicalClubLogisticsData();
+        original.setEquipment(CAMERA, CAMERA.issueTo(new BorrowerName("Alice Tan")));
+        storage.saveClubLogisticsData(original);
+        Files.writeString(filePath, "\uFEFF" + Files.readString(filePath));
+
+        assertEquals(original, new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
+    }
+
     /** Rejects invalid records even when valid records precede them. */
     @Test
     public void readClubLogisticsData_invalidEquipmentAfterValidRecord_throwsDataLoadingException() throws Exception {
