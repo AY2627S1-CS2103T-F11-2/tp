@@ -97,8 +97,8 @@ Adds a new item to the equipment register. The new item is available and is not 
 Format: `add <equipment-id> <equipment-name>`
 
 * The equipment ID must follow the [equipment ID rules](#features) and must not already be in use.
-* The equipment name has 1–50 characters. Letters, digits, spaces, and common punctuation such as `-`, `/`, and `'`
-  are allowed. All text after the ID is treated as the name.
+* The equipment name has 1–50 characters. Only letters, digits, spaces, and the symbols
+  `-` `/` `'` `.` `,` `&` `(` `)` `#` `+` `:` are allowed. All text after the ID is treated as the name.
 * Leading and trailing spaces are removed from the name, and consecutive spaces are combined into one.
   The name is displayed with the capitalization you entered.
 * Several items may share a name as long as their IDs differ, since the club may own several identical items.
@@ -120,7 +120,7 @@ Situation | Error message
 ----------|--------------
 The ID is already in use (ignoring capitalization) | `Error: Equipment with ID CAM001 already exists.`
 The ID is invalid | `Error: Equipment ID must contain only letters and numbers and cannot contain spaces.`
-The name is empty or too long | `Error: Equipment name cannot be empty and must be 1–50 characters long.`
+The name is empty, too long, or contains other symbols | `Error: Equipment name must be 1 to 50 characters long and contain only letters, numbers, spaces and these symbols: - / ' . , & ( ) # + :`
 A parameter is missing | `Error: Invalid command format. Usage: add <equipment-id> <equipment-name>`
 
 ### Removing equipment: `remove`

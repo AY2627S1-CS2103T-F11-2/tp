@@ -195,8 +195,9 @@ For `add CAM001 Sony Camera`:
 1. `ClubLogisticsParser` delegates the arguments to `AddEquipmentCommandParser`. The parser trims them
    and splits on whitespace at most once: `CAM001` is the ID and the remaining text is the equipment name.
 2. `EquipmentId` accepts 1–20 ASCII letters or digits and preserves spelling for display. Equality and
-   lookup ignore letter case. `EquipmentName` trims and collapses whitespace, then requires 1–50 characters.
-   For example, `add CAM001 Sony   Camera` creates the name `Sony Camera`.
+   lookup ignore letter case. `EquipmentName` trims and collapses whitespace, then requires 1–50 characters
+   made up of Unicode letters, digits, spaces and the symbols `- / ' . , & ( ) # + :`. Storage applies the same
+   check when loading, so the saved file cannot hold a name the `add` command would reject. For example, `add CAM001 Sony   Camera` creates the name `Sony Camera`.
 3. The parser creates an available `Equipment` with no borrower and passes it to `AddEquipmentCommand`.
    The command calls `model.hasEquipment`; an existing `cam001` therefore rejects `CAM001` as a duplicate.
 4. On success, `ModelManager.addEquipment` delegates through `ClubLogisticsData.addEquipment` to

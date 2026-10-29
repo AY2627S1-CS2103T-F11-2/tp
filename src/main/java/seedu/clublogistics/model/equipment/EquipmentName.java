@@ -8,9 +8,12 @@ import static seedu.clublogistics.commons.util.AppUtil.checkArgument;
  */
 public class EquipmentName {
 
+    public static final String ALLOWED_PUNCTUATION = "- / ' . , & ( ) # + :";
     public static final String MESSAGE_CONSTRAINTS =
-            "Error: Equipment name cannot be empty and must be 1–50 characters long.";
+            "Error: Equipment name must be 1 to 50 characters long and contain only letters, numbers, spaces"
+            + " and these symbols: " + ALLOWED_PUNCTUATION;
     public static final int MAX_LENGTH = 50;
+    public static final String VALIDATION_REGEX = "[\\p{L}\\p{N} \\-/'.,&()#+:]+";
 
     public final String value;
 
@@ -30,7 +33,7 @@ public class EquipmentName {
             return false;
         }
         String normalisedName = normalise(test);
-        return !normalisedName.isEmpty() && normalisedName.length() <= MAX_LENGTH;
+        return normalisedName.length() <= MAX_LENGTH && normalisedName.matches(VALIDATION_REGEX);
     }
 
     private static String normalise(String name) {

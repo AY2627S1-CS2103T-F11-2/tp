@@ -31,5 +31,6 @@ public class AddEquipmentCommandParserTest {
     public void parse_invalidValues_failure() {
         assertParseFailure(parser, "CAM-001 Sony Camera", EquipmentId.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "CAM001 " + "a".repeat(51), EquipmentName.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "TEST001 <script>&%$#@!", EquipmentName.MESSAGE_CONSTRAINTS);
     }
 }
