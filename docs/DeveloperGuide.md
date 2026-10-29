@@ -419,8 +419,8 @@ That method returns a new available record retaining ID/name and clearing the bo
 `ModelManager.setEquipment` → `ClubLogisticsData.setEquipment` → `UniqueEquipmentList.set` replaces the record,
 updates observers under the active predicate, and hands the register back to Logic for saving.
 
-Return follows the [issue interaction diagram](#issuing-equipment), replacing the available-state check
-with an issued-state check and calling `markReturned()` instead of `issueTo(borrower)`.
+The dedicated return sequence below shows the issued-state check and `markReturned()` call, including
+the missing and already-available rejection paths.
 
 After returning the issued example above, feedback is:
 
@@ -434,6 +434,21 @@ A missing item reports `Error: Equipment with ID CAM001 does not exist.`. An alr
 `markReturned` also checks the state defensively. As with issue, immutable replacement gives observers a
 single consistent status/borrower update. Return makes later reissue or removal possible. It does not retain
 loan history, return dates, or return condition: only the latest availability and borrower are represented.
+
+#### Return sequence and verification
+
+![Returning issued equipment and rejecting missing or available records](images/ReturnEquipmentSequence.png)
+
+The replacement has the stored ID/name, `AVAILABLE` status and no borrower. The source list position is
+retained; visibility can change when the selected predicate is re-evaluated. For example, an issued-only
+view loses CAM001 immediately after return, while an available-only view gains it. The success feedback
+still describes the returned item even when its card disappears from the selected view.
+
+`ReturnCommandParserTest` verifies the single-ID grammar. `ReturnCommandTest` checks target-only changes,
+missing targets and available-item rejection. `ReturnCommandIntegrationTest.execute_repeatedReturn_preservesSavedData`
+checks that a second return leaves saved data intact; its round-trip tests verify borrower removal and
+that issue followed by return restores the original record. `EquipmentTest` checks that `markReturned`
+leaves the old issued instance intact and rejects an already available record.
 
 
 ### Clearing the register

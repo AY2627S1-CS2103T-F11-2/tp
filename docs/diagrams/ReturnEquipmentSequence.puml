@@ -1,0 +1,39 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #222222
+skinparam sequenceParticipantBackgroundColor #F4F5F7
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceArrowColor #333333
+hide footbox
+title Return CAM001 (after single-ID parsing)
+participant ":LogicManager" as L
+participant ":ReturnCommand" as C
+participant ":ModelManager" as M
+participant "equipment:Equipment" as E
+participant ":ClubLogisticsData" as D
+participant ":UniqueEquipmentList" as U
+L -> C : execute(model)
+C -> M : findEquipment(id)
+ref over M, U : Lookup full register; ignore ID case
+M --> C : Optional<Equipment>
+alt missing
+  C --> L : throws not-found CommandException
+else record exists
+  C -> E : isIssued()
+  E --> C : issued?
+  alt already available
+    C --> L : throws not-issued CommandException
+    note over L, U : No replacement or save
+  else issued
+    C -> E : markReturned()
+    E --> C : copy (same ID/name, AVAILABLE, no borrower)
+    C -> M : setEquipment(equipment, returnedEquipment)
+    M -> D : setEquipment(equipment, returnedEquipment)
+    D -> U : set(equipment, returnedEquipment)
+    note over U : internalList.set(index, returnedEquipment)\nSame filtered view re-evaluates membership
+    C --> L : CommandResult
+    ref over L : Save full register, then return feedback to UI
+  end
+end
+@enduml
