@@ -95,7 +95,7 @@ public class LogicManagerTest {
         assertEquals(model.getClubLogisticsData(), saved);
 
         assertCommandException("add cam001 Other Camera",
-                String.format(AddEquipmentCommand.MESSAGE_DUPLICATE_EQUIPMENT, "cam001"));
+                String.format(AddEquipmentCommand.MESSAGE_DUPLICATE_EQUIPMENT, "CAM001"));
         assertEquals(saved, new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
 
         logic.execute("clear");

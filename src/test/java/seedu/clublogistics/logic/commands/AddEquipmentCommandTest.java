@@ -26,14 +26,26 @@ public class AddEquipmentCommandTest {
                 "Equipment CAM001 added successfully.", expectedModel);
     }
 
+    /** A duplicate typed in different case is reported with the ID as stored, matching the list. */
     @Test
-    public void execute_duplicateIdIgnoringCase_throwsCommandException() {
+    public void execute_duplicateIdIgnoringCase_reportsStoredId() {
         Model model = new ModelManager();
         model.addEquipment(CAMERA);
         Equipment sameId = new Equipment(new EquipmentId("cam001"), new EquipmentName("Other Camera"));
 
         assertCommandFailure(new AddEquipmentCommand(sameId), model,
-                "Error: Equipment with ID cam001 already exists.");
+                "Error: Equipment with ID CAM001 already exists.");
+    }
+
+    /** The stored lowercase ID is reported when the duplicate is typed in uppercase. */
+    @Test
+    public void execute_uppercaseDuplicateOfLowercaseId_reportsStoredId() {
+        Model model = new ModelManager();
+        model.addEquipment(new Equipment(new EquipmentId("cam002"), new EquipmentName("Tripod")));
+        Equipment sameId = new Equipment(new EquipmentId("CAM002"), new EquipmentName("Tripod"));
+
+        assertCommandFailure(new AddEquipmentCommand(sameId), model,
+                "Error: Equipment with ID cam002 already exists.");
     }
 
     @Test

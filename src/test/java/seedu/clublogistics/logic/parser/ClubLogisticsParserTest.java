@@ -51,7 +51,8 @@ public class ClubLogisticsParserTest {
     /** Parses the clear command. */
     @Test
     public void parseCommand_clear() throws Exception {
-        assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
+        assertEquals(new ClearCommand(false), parser.parseCommand(ClearCommand.COMMAND_WORD));
+        assertEquals(new ClearCommand(true), parser.parseCommand(ClearCommand.COMMAND_WORD + " force"));
         assertThrows(ParseException.class, ClearCommand.MESSAGE_INVALID_COMMAND_FORMAT, ()
                 -> parser.parseCommand(ClearCommand.COMMAND_WORD + " 3"));
     }

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.clublogistics.logic.commands.ClearCommand;
+import seedu.clublogistics.logic.commands.exceptions.CommandException;
 import seedu.clublogistics.logic.parser.exceptions.ParseException;
 import seedu.clublogistics.model.ModelManager;
 import seedu.clublogistics.model.equipment.BorrowerName;
@@ -57,10 +58,22 @@ public class ClearCommandIntegrationTest {
                 clubLogisticsStorage.readClubLogisticsData().orElseThrow().getEquipmentList());
     }
 
-    /** Verifies clear without arguments still empties the register and the saved file. */
+    /** Verifies clear refuses to discard issued equipment and leaves memory and the saved file untouched. */
     @Test
-    public void execute_clearWithoutArguments_clearsMemoryAndStorage() throws Exception {
-        assertEquals(ClearCommand.MESSAGE_SUCCESS, logic.execute("clear").getFeedbackToUser());
+    public void execute_clearWithIssuedEquipment_rejectsAndPreservesRecords() throws Exception {
+        assertThrows(CommandException.class,
+                String.format(ClearCommand.MESSAGE_EQUIPMENT_ISSUED, "MIC001 (Alice Lim)"), ()
+                -> logic.execute("clear"));
+
+        assertEquals(List.of(CAMERA, ISSUED_MICROPHONE), logic.getEquipmentList());
+        assertEquals(List.of(CAMERA, ISSUED_MICROPHONE),
+                clubLogisticsStorage.readClubLogisticsData().orElseThrow().getEquipmentList());
+    }
+
+    /** Verifies forced clear empties the register and the saved file even when equipment is issued. */
+    @Test
+    public void execute_forcedClear_clearsMemoryAndStorage() throws Exception {
+        assertEquals(ClearCommand.MESSAGE_SUCCESS, logic.execute("clear force").getFeedbackToUser());
 
         assertTrue(logic.getEquipmentList().isEmpty());
         assertTrue(clubLogisticsStorage.readClubLogisticsData().orElseThrow().getEquipmentList().isEmpty());
