@@ -16,6 +16,8 @@ import java.nio.file.StandardOpenOption;
 public class FileUtil {
 
     private static final String CHARSET = "UTF-8";
+    private static final int MAX_REPLACE_ATTEMPTS = 20;
+    private static final long REPLACE_RETRY_DELAY_MILLIS = 25;
 
     /**
      * Creates a file if it does not exist along with its missing parent directories.
@@ -66,10 +68,38 @@ public class FileUtil {
         Path staged = Files.createTempFile(destination.getParent(), ".clublogistics-", ".tmp");
         try {
             writeAndFlush(staged, content);
-            Files.move(staged, destination, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            replaceWithRetry(staged, destination);
         } catch (IOException | RuntimeException failure) {
             discardStagedFile(staged, failure);
             throw failure;
+        }
+    }
+
+    /**
+     * Atomically moves {@code staged} over {@code destination}, retrying briefly while access is denied.
+     * Windows refuses to replace a file that another process (e.g. antivirus or a sync client) has open,
+     * so a short bounded retry lets the save succeed once that process releases the file.
+     */
+    private static void replaceWithRetry(Path staged, Path destination) throws IOException {
+        for (int attempt = 1; ; attempt++) {
+            try {
+                Files.move(staged, destination, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                return;
+            } catch (AccessDeniedException denied) {
+                if (attempt >= MAX_REPLACE_ATTEMPTS || Files.isDirectory(destination)) {
+                    throw denied;
+                }
+                pauseBeforeRetry(denied);
+            }
+        }
+    }
+
+    private static void pauseBeforeRetry(AccessDeniedException denied) throws AccessDeniedException {
+        try {
+            Thread.sleep(REPLACE_RETRY_DELAY_MILLIS);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw denied;
         }
     }
 
