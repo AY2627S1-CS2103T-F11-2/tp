@@ -23,4 +23,9 @@ public class ClearCommand extends Command {
         model.setClubLogisticsData(new ClubLogisticsData());
         return new CommandResult(MESSAGE_SUCCESS);
     }
+
+    @Override
+    public boolean isDataMutating() {
+        return true;
+    }
 }

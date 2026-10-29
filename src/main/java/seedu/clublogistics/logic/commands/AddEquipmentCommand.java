@@ -32,6 +32,11 @@ public class AddEquipmentCommand extends Command {
     }
 
     @Override
+    public boolean isDataMutating() {
+        return true;
+    }
+
+    @Override
     public boolean equals(Object other) {
         return other == this || (other instanceof AddEquipmentCommand otherCommand
                 && equipmentToAdd.equals(otherCommand.equipmentToAdd));

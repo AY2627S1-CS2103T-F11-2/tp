@@ -46,6 +46,11 @@ public class ReturnCommand extends Command {
         return new CommandResult(String.format(MESSAGE_SUCCESS, returnedEquipment.getId(), returnedEquipment));
     }
 
+    @Override
+    public boolean isDataMutating() {
+        return true;
+    }
+
     /**
      * Returns the equipment matching {@code equipmentId}, which must exist and be currently issued.
      */

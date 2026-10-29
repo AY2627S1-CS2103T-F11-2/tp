@@ -12,6 +12,7 @@ import seedu.clublogistics.logic.commands.CommandResult;
 import seedu.clublogistics.logic.commands.exceptions.CommandException;
 import seedu.clublogistics.logic.parser.ClubLogisticsParser;
 import seedu.clublogistics.logic.parser.exceptions.ParseException;
+import seedu.clublogistics.model.ClubLogisticsData;
 import seedu.clublogistics.model.Model;
 import seedu.clublogistics.model.equipment.Equipment;
 import seedu.clublogistics.storage.Storage;
@@ -45,15 +46,22 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        CommandResult commandResult;
         Command command = clubLogisticsParser.parseCommand(commandText);
-        commandResult = command.execute(model);
+        ClubLogisticsData originalData = command.isDataMutating()
+                ? new ClubLogisticsData(model.getClubLogisticsData()) : null;
+        CommandResult commandResult = command.execute(model);
+
+        if (!command.isDataMutating()) {
+            return commandResult;
+        }
 
         try {
             storage.saveClubLogisticsData(model.getClubLogisticsData());
         } catch (AccessDeniedException e) {
+            model.setClubLogisticsData(originalData);
             throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
         } catch (IOException ioe) {
+            model.setClubLogisticsData(originalData);
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
 
