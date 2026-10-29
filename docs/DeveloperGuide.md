@@ -223,6 +223,26 @@ both commands and loaded data, at the cost of validating some inputs at more tha
 
 An active `filter issued` still hides a newly added available item; registration does not reset the view.
 
+#### Registration validation and verification
+
+Validation happens before the live register changes. The parser constructs value objects, the command
+checks the ID against the model, and the unique list protects the invariant for callers that bypass commands.
+This deliberate repetition keeps JSON loading and direct model calls safe without making the UI responsible
+for validation. A unique name would reject legitimate copies of the same camera model; a unique ID identifies
+the individual asset instead.
+
+| Input, starting with CAM001 registered | Outcome | Register change |
+| --- | --- | --- |
+| `add cam001 Replacement Camera` | Duplicate-ID error | None; original CAM001 is retained |
+| `add CAM002 Sony   Camera` | Available CAM002 named Sony Camera | Add one record, retaining CAM001 |
+| `add CAM003` | Usage error | None |
+
+`AddEquipmentCommandParserTest` checks splitting, whitespace and constraints. `AddEquipmentCommandTest`
+checks successful registration and duplicate IDs with different case. `LogicManagerTest` verifies the
+observable update and persisted record; `FilterCommandIntegrationTest` checks that adding an available
+item does not discard an issued filter. Together these cover the parser, invariant, UI source list and save
+boundary rather than treating feedback text alone as proof of registration.
+
 
 ### Removing equipment
 
