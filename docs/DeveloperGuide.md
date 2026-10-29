@@ -415,6 +415,11 @@ directory. It flushes that file through `FileChannel.force(true)` and closes the
 readers see the complete old or new file. Read-only destinations are rejected before staging. A failed save
 removes its staging file when possible; cleanup failures are attached to the original exception.
 
+Windows refuses to replace a file while another process, such as antivirus or a sync client, has it open, and
+reports this as `AccessDeniedException`. The move is therefore retried up to 20 times, 25 ms apart (about half a
+second in total), before the save is reported as failed. A directory at the destination fails immediately
+because waiting cannot fix it. Other platforms replace open files directly, so the retry does not trigger there.
+
 The filesystem must support atomic replacement. An unsupported or failed move reports an error without a
 non-atomic fallback. Both equipment data and preferences use this writer. Abrupt process termination can leave
 an unused `.clublogistics-*.tmp` file; startup still reads only the normal JSON filenames. This is not a backup
