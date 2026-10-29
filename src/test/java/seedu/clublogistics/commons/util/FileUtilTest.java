@@ -6,8 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
 import java.util.Set;
@@ -56,6 +58,33 @@ public class FileUtilTest {
             assertTrue(reader.get(10, TimeUnit.SECONDS) > 0);
         }
         assertEquals(previous, Files.readString(target));
+        assertOnlyTargetRemains(target);
+    }
+
+    /**
+     * A destination briefly held open by another reader (e.g. antivirus or a sync client) must still be replaced
+     * once the reader lets go. Windows refuses to replace a file while it is open, so this exercises the retry.
+     */
+    @Test
+    public void writeToFile_destinationBrieflyOpen_replacesAfterRelease() throws Exception {
+        Path target = testFolder.resolve("equipment.json");
+        Files.writeString(target, "previous data");
+        CountDownLatch opened = new CountDownLatch(1);
+        try (var executor = Executors.newSingleThreadExecutor()) {
+            var holder = executor.submit(() -> {
+                try (FileChannel channel = FileChannel.open(target, StandardOpenOption.READ)) {
+                    opened.countDown();
+                    Thread.sleep(150);
+                }
+                return null;
+            });
+            assertTrue(opened.await(5, TimeUnit.SECONDS));
+
+            FileUtil.writeToFile(target, "replacement");
+
+            holder.get(5, TimeUnit.SECONDS);
+        }
+        assertEquals("replacement", Files.readString(target));
         assertOnlyTargetRemains(target);
     }
 
