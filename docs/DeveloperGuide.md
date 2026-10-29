@@ -22,7 +22,12 @@ Refer to [Setting up and getting started](SettingUp.md). Build and run the proje
 
 **Main components**
 
-`Main` launches `MainApp`, which manages application startup and shutdown:
+`Main` acquires an OS file lock on `.clublogistics.lock` in the application home before launching `MainApp`.
+It holds the lock until the JavaFX application exits, preventing concurrent sessions from replacing the same
+register with stale data. A second instance reports a startup error without loading equipment or preferences.
+The lock file remains after shutdown; closing the channel, or process termination, releases the OS lock.
+
+`MainApp` manages application startup and shutdown:
 
 * On startup, it creates and connects the storage, model, logic, and UI components and loads preferences
   and equipment data. Missing equipment data uses sample data; invalid equipment data uses an empty register.

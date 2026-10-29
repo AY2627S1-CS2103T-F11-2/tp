@@ -292,6 +292,10 @@ Format: `exit`
 
 ### Saving the data
 
+Only one ClubLogistics instance can use the same home folder at a time. If startup reports that ClubLogistics
+is already running, use the existing window or close it before launching again. The app keeps a small
+`.clublogistics.lock` file in its home folder; do not delete it while the app is running.
+
 ClubLogistics saves the equipment register automatically after successful commands, except `help` and `exit`,
 which do not change or save equipment data. You do not need to save manually, and saved data is retained when
 you restart the application. If saving fails, the command reports an error and the previous equipment register
