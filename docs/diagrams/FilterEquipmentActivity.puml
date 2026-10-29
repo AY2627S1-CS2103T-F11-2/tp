@@ -1,0 +1,19 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #222222
+skinparam sequenceParticipantBackgroundColor #F4F5F7
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceArrowColor #333333
+hide footbox
+title Live membership under filter available
+start
+:Register has available CAM001;
+:filter available\nSet status predicate on existing FilteredList;
+:Panel shows CAM001;
+:issue CAM001 John Tan\nReplace source record with ISSUED copy;
+:Panel hides CAM001\nRegister still contains CAM001;
+:return CAM001\nFind in full register and replace with AVAILABLE copy;
+:Panel shows CAM001 again\nSame selected predicate and list binding;
+stop
+@enduml

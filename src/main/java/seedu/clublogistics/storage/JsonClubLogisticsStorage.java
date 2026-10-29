@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import seedu.clublogistics.commons.core.LogsCenter;
 import seedu.clublogistics.commons.exceptions.DataLoadingException;
 import seedu.clublogistics.commons.exceptions.IllegalValueException;
-import seedu.clublogistics.commons.util.FileUtil;
 import seedu.clublogistics.commons.util.JsonUtil;
 import seedu.clublogistics.model.ReadOnlyClubLogisticsData;
 
@@ -84,7 +83,6 @@ public class JsonClubLogisticsStorage {
         requireNonNull(clubLogisticsData);
         requireNonNull(filePath);
 
-        FileUtil.createIfMissing(filePath);
         JsonUtil.saveJsonFile(new JsonSerializableClubLogisticsData(clubLogisticsData), filePath);
     }
 

@@ -195,9 +195,7 @@ public class LogicManagerTest {
 
         // Triggers the saveClubLogisticsData method by executing an add command
         String addCommand = "add CAM001 Sony Camera";
-        Equipment expectedEquipment = new Equipment(new EquipmentId("CAM001"), new EquipmentName("Sony Camera"));
         ModelManager expectedModel = new ModelManager();
-        expectedModel.addEquipment(expectedEquipment);
         assertCommandFailure(addCommand, CommandException.class, expectedMessage, expectedModel);
     }
 }

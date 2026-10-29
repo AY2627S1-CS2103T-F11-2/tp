@@ -1,0 +1,32 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #222222
+skinparam sequenceParticipantBackgroundColor #F4F5F7
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceArrowColor #333333
+hide footbox
+title Successful equipment save (help and exit skip this flow)
+participant ":LogicManager" as L
+participant ":ModelManager" as M
+participant ":StorageManager" as S
+participant ":JsonClubLogisticsStorage" as J
+participant ":JsonSerializableClubLogisticsData" as SNAP
+participant "JsonUtil / FileUtil" as F
+note over L : Data command executed successfully
+L -> M : getClubLogisticsData()
+M --> L : read-only register
+L -> S : saveClubLogisticsData(register)
+S -> J : saveClubLogisticsData(register)
+J -> SNAP : new(register)
+note over SNAP : Copy all records into JsonAdaptedEquipment\nid, name, status, issuedTo
+J -> F : saveJsonFile(snapshot, filePath)
+F -> F : serialize snapshot to JSON
+F -> F : stage complete file beside destination
+F -> F : flush staged file and close channel
+F -> F : atomic replacement of destination
+F --> J : write completed
+J --> S
+S --> L
+note over L : Return CommandResult to UI
+@enduml

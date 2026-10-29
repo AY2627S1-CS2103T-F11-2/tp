@@ -1,0 +1,43 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #222222
+skinparam sequenceParticipantBackgroundColor #F4F5F7
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceArrowColor #333333
+hide footbox
+title Startup loading (equipment data)
+participant ":MainApp" as A
+participant ":StorageManager" as S
+participant ":JsonClubLogisticsStorage" as J
+participant "JsonUtil / Jackson" as F
+participant ":JsonSerializableClubLogisticsData" as SNAP
+participant ":ModelManager" as M
+A -> S : readClubLogisticsData()
+S -> J : readClubLogisticsData()
+J -> F : readJsonFile(path, snapshot class)
+alt file missing
+  F --> J : Optional.empty()
+  J --> S : Optional.empty()
+  S --> A : Optional.empty()
+  A -> A : select sample equipment data
+else invalid JSON, null document, or read failure
+  F --> J : throws DataLoadingException
+  J --> S : throws DataLoadingException
+  S --> A : throws DataLoadingException
+  A -> A : select empty register; log failure
+else deserialization succeeds
+  F --> J : deserialized snapshot
+  J -> SNAP : toModelType()
+  note over SNAP : Adapt each record; validate values,\nstatus/borrower agreement and unique IDs
+  alt valid
+    SNAP --> J : register
+    J --> S : Optional.of(register)
+    S --> A : Optional.of(register)
+  else invalid or null equipment record
+    note over A, SNAP : DataLoadingException propagates to MainApp\nSelect empty register and log failure
+  end
+end
+A -> M : new ModelManager(initialData, userPrefs)
+note over M : Copy register and construct FilteredList\nThen connect Logic and UI
+@enduml

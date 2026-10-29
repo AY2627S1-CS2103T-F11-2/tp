@@ -1,0 +1,31 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #222222
+skinparam sequenceParticipantBackgroundColor #F4F5F7
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceArrowColor #333333
+hide footbox
+title Issue equipment (after positional parsing)
+participant ":IssueCommand" as C
+participant ":ModelManager" as M
+participant "equipment:Equipment" as E
+participant ":ClubLogisticsData" as D
+participant ":UniqueEquipmentList" as U
+C -> M : findEquipment(id)
+ref over M, U : Case-insensitive lookup through register
+M --> C : Optional<Equipment>
+alt missing
+  note over C : Throw not-found CommandException
+else already issued
+  note over C : Throw state-precondition CommandException\nNo replacement or save
+else valid state
+  C -> E : issueTo(borrower)
+  E --> C : replacement (same ID/name)
+  C -> M : setEquipment(equipment, replacement)
+  M -> D : setEquipment(equipment, replacement)
+  D -> U : set(equipment, replacement)
+  note over U : internalList.set(index, replacement)\nFiltered view re-evaluates membership
+  note over C : Return success to LogicManager\nThen save full register
+end
+@enduml

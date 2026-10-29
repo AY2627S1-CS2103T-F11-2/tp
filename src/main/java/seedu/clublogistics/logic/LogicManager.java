@@ -12,7 +12,9 @@ import seedu.clublogistics.logic.commands.CommandResult;
 import seedu.clublogistics.logic.commands.exceptions.CommandException;
 import seedu.clublogistics.logic.parser.ClubLogisticsParser;
 import seedu.clublogistics.logic.parser.exceptions.ParseException;
+import seedu.clublogistics.model.ClubLogisticsData;
 import seedu.clublogistics.model.Model;
+import seedu.clublogistics.model.ReadOnlyClubLogisticsData;
 import seedu.clublogistics.model.equipment.Equipment;
 import seedu.clublogistics.storage.Storage;
 
@@ -45,19 +47,27 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        CommandResult commandResult;
         Command command = clubLogisticsParser.parseCommand(commandText);
-        commandResult = command.execute(model);
+        ReadOnlyClubLogisticsData previousData = new ClubLogisticsData(model.getClubLogisticsData());
+        CommandResult commandResult = command.execute(model);
 
-        try {
-            storage.saveClubLogisticsData(model.getClubLogisticsData());
-        } catch (AccessDeniedException e) {
-            throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-        } catch (IOException ioe) {
-            throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+        if (!commandResult.isShowHelp() && !commandResult.isExit()) {
+            saveDataOrRestore(previousData);
         }
 
         return commandResult;
+    }
+
+    private void saveDataOrRestore(ReadOnlyClubLogisticsData previousData) throws CommandException {
+        try {
+            storage.saveClubLogisticsData(model.getClubLogisticsData());
+        } catch (AccessDeniedException e) {
+            model.setClubLogisticsData(previousData);
+            throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
+        } catch (IOException ioe) {
+            model.setClubLogisticsData(previousData);
+            throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+        }
     }
 
     /** {@inheritDoc} */

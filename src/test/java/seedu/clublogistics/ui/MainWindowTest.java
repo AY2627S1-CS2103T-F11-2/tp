@@ -14,7 +14,9 @@ import org.junit.jupiter.api.io.TempDir;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import seedu.clublogistics.commons.core.GuiSettings;
 import seedu.clublogistics.logic.LogicManager;
 import seedu.clublogistics.model.ModelManager;
 import seedu.clublogistics.storage.JsonClubLogisticsStorage;
@@ -24,6 +26,69 @@ import seedu.clublogistics.storage.StorageManager;
 public class MainWindowTest extends JavaFxTest {
     @TempDir
     public Path testFolder;
+
+    /** Invalid saved positions must be discarded before a native window is shown. */
+    @Test
+    public void constructor_offScreenCoordinates_usesDefaultPosition() throws Exception {
+        runOnFxThread(() -> {
+            ModelManager model = new ModelManager();
+            model.setGuiSettings(new GuiSettings(740, 600, Integer.MAX_VALUE, Integer.MAX_VALUE));
+            Stage stage = createWindow(model);
+            try {
+                assertTrue(Double.isNaN(stage.getX()));
+                assertTrue(Double.isNaN(stage.getY()));
+            } finally {
+                stage.close();
+            }
+        });
+    }
+
+    /** Unsupported dimensions must not reach the native windowing API. */
+    @Test
+    public void constructor_invalidDimensions_usesUsableSize() throws Exception {
+        runOnFxThread(() -> {
+            for (double invalid : List.of(Double.NaN, Double.POSITIVE_INFINITY, -1.0, 0.0, Double.MAX_VALUE)) {
+                ModelManager model = new ModelManager();
+                model.setGuiSettings(new GuiSettings(invalid, invalid, 0, 0));
+                Stage stage = createWindow(model);
+                try {
+                    assertTrue(Double.isFinite(stage.getWidth()) && stage.getWidth() > 0);
+                    assertTrue(Double.isFinite(stage.getHeight()) && stage.getHeight() > 0);
+                    assertTrue(stage.getWidth() <= Screen.getPrimary().getVisualBounds().getWidth());
+                    assertTrue(stage.getHeight() <= Screen.getPrimary().getVisualBounds().getHeight());
+                } finally {
+                    stage.close();
+                }
+            }
+        });
+    }
+
+    /** A valid saved position on the current screen is retained. */
+    @Test
+    public void constructor_visibleCoordinates_preservesPosition() throws Exception {
+        runOnFxThread(() -> {
+            int x = (int) Screen.getPrimary().getVisualBounds().getMinX() + 20;
+            int y = (int) Screen.getPrimary().getVisualBounds().getMinY() + 20;
+            ModelManager model = new ModelManager();
+            model.setGuiSettings(new GuiSettings(500, 600, x, y));
+            Stage stage = createWindow(model);
+            try {
+                assertEquals(x, stage.getX());
+                assertEquals(y, stage.getY());
+            } finally {
+                stage.close();
+            }
+        });
+    }
+
+    private Stage createWindow(ModelManager model) {
+        Path dataFile = testFolder.resolve("window-data.json");
+        StorageManager storage = new StorageManager(new JsonClubLogisticsStorage(dataFile),
+                new JsonUserPrefsStorage(testFolder.resolve("window-prefs.json")));
+        Stage stage = new Stage();
+        new MainWindow(stage, new LogicManager(model, storage), dataFile);
+        return stage;
+    }
 
     @Test
     public void equipmentCommands_updateRenderedEquipmentPanel() throws Exception {
