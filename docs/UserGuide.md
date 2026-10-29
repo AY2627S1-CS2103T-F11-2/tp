@@ -97,8 +97,9 @@ Adds a new item to the equipment register. The new item is available and is not 
 Format: `add <equipment-id> <equipment-name>`
 
 * The equipment ID must follow the [equipment ID rules](#features) and must not already be in use.
-* The equipment name has 1–50 characters. Letters, digits, spaces, and common punctuation such as `-`, `/`, and `'`
-  are allowed. All text after the ID is treated as the name.
+* The equipment name has 1–50 characters. Only letters, digits, spaces, and the symbols
+  `-` `/` `'` `.` `,` `&` `(` `)` `#` `+` `:` are allowed. All text after the ID is treated as the name.
+  Existing equipment names saved by v1.4 remain loadable, including symbols that are no longer accepted for new items.
 * Leading and trailing spaces are removed from the name, and consecutive spaces are combined into one.
   The name is displayed with the capitalization you entered.
 * Several items may share a name as long as their IDs differ, since the club may own several identical items.
@@ -120,7 +121,7 @@ Situation | Error message
 ----------|--------------
 The ID is already in use (ignoring capitalization); the message shows the ID as it appears in the list | `Error: Equipment with ID CAM001 already exists.`
 The ID is invalid | `Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers, with no spaces.`
-The name is empty or too long | `Error: Equipment name cannot be empty and must be 1–50 characters long.`
+The name is empty, too long, or contains other symbols | `Error: Equipment name must be 1 to 50 characters long and contain only letters, numbers, spaces and these symbols: - / ' . , & ( ) # + :`
 A parameter is missing | `Error: Invalid command format. Usage: add <equipment-id> <equipment-name>`
 
 ### Removing equipment: `remove`
@@ -285,7 +286,9 @@ Examples: `find Alice`, `find alice lim`.
 * Matching ignores capitalization and uses a contiguous substring, so `find Alice` can show loans to both
   Alice Lim and Alice Tan. Only currently issued equipment can match.
 * All text after `find` is one search phrase. Leading/trailing spaces are removed and repeated spaces are combined.
-  The phrase follows the borrower-name rules: 1–50 English letters or spaces, without digits or punctuation.
+  The phrase follows the borrower-name rules: 1–50 characters made up of English letters and spaces,
+  with apostrophes (`'`) or hyphens (`-`) allowed between letters, as in `O'Brien` or `Mary-Jane`.
+  Digits and other punctuation are rejected.
 * The search replaces the previous status filter or borrower search. It stays active when equipment is changed;
   returning a matching item removes it from the results, and issuing another matching item adds it.
 * The equipment panel always shows the selected view above the cards. Run `list` to clear any search or filter.

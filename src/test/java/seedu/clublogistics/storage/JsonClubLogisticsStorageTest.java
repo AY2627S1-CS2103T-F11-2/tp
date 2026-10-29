@@ -113,6 +113,28 @@ public class JsonClubLogisticsStorageTest {
         assertEquals(returnedEquipment, new ClubLogisticsData(storage.readClubLogisticsData().get()));
     }
 
+    /** Previously accepted names remain loadable and retain their loans after saving and reloading. */
+    @Test
+    public void readAndSaveClubLogisticsData_legacyNameSymbols_preservesRecords() throws Exception {
+        Path filePath = testFolder.resolve("LegacyNames.json");
+        Files.writeString(filePath, """
+                {"equipment": [
+                  {"id": "CAM001", "name": "Camera <HD>"},
+                  {"id": "MIC001", "name": "Mic@Club", "issuedTo": "John Tan"}
+                ]}
+                """);
+        JsonClubLogisticsStorage storage = new JsonClubLogisticsStorage(filePath);
+        ReadOnlyClubLogisticsData loaded = storage.readClubLogisticsData().orElseThrow();
+        assertEquals("Camera <HD>", loaded.getEquipmentList().get(0).getName().value);
+        Equipment microphone = loaded.getEquipmentList().get(1);
+        assertEquals("Mic@Club", microphone.getName().value);
+        assertEquals(new BorrowerName("John Tan"), microphone.getIssuedTo().orElseThrow());
+        assertEquals("Mic@Club", microphone.markReturned().getName().value);
+        storage.saveClubLogisticsData(loaded);
+        assertEquals(new ClubLogisticsData(loaded),
+                new ClubLogisticsData(storage.readClubLogisticsData().orElseThrow()));
+    }
+
     /** Loads available equipment from the equipment-only JSON schema. */
     @Test
     public void readClubLogisticsData_equipmentOnly_success() throws Exception {
