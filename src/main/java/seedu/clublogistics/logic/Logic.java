@@ -1,5 +1,6 @@
 package seedu.clublogistics.logic;
 
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.collections.ObservableList;
 import seedu.clublogistics.commons.core.GuiSettings;
 import seedu.clublogistics.logic.commands.CommandResult;
@@ -22,6 +23,9 @@ public interface Logic {
 
     /** Returns an unmodifiable observable view of all registered equipment. */
     ObservableList<Equipment> getEquipmentList();
+
+    /** Returns the current view description for persistent UI feedback. */
+    ReadOnlyStringProperty equipmentFilterDescriptionProperty();
 
     /** Returns the equipment currently shown to the user. */
     ObservableList<Equipment> getFilteredEquipmentList();

@@ -47,6 +47,12 @@ public class ClearCommand extends Command {
         return new CommandResult(MESSAGE_SUCCESS);
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public boolean isDataMutating() {
+        return true;
+    }
+
     private static List<Equipment> findIssuedEquipment(Model model) {
         return model.getClubLogisticsData().getEquipmentList().stream()
                 .filter(Equipment::isIssued)
