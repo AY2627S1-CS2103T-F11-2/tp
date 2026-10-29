@@ -123,6 +123,23 @@ The ID is invalid | `Error: Equipment ID must contain only letters and numbers a
 The name is empty or too long | `Error: Equipment name cannot be empty and must be 1–50 characters long.`
 A parameter is missing | `Error: Invalid command format. Usage: add <equipment-id> <equipment-name>`
 
+### Correcting an equipment name: `rename`
+
+Format: `rename <equipment-id> <equipment-name>`
+
+Example: `rename cam001 Sony Camera Mark II`
+
+Corrects the name using the same validation and whitespace normalization as `add` (1–50 characters).
+ID lookup ignores case. The stored ID, availability, and current borrower are preserved, including for
+issued equipment or records hidden by a filter. The card and saved register update together through the
+normal save pipeline. If saving fails, the previous name and loan are restored.
+
+Success: `Equipment CAM001 renamed to Sony Camera Mark II.`
+
+A missing record reports `Error: Equipment with ID cam001 does not exist.`. Missing arguments report
+`Error: Invalid command format. Usage: rename <equipment-id> <equipment-name>`. Invalid IDs or names
+use the same constraint messages as `add`. `remove` continues to reject issued equipment.
+
 ### Removing equipment: `remove`
 
 Removes an item from the equipment register. Use this to correct an item that was added by mistake, or to stop
@@ -320,23 +337,6 @@ Exits the program.
 
 Format: `exit`
 
-### Correcting an equipment name: `rename`
-
-Format: `rename <equipment-id> <equipment-name>`
-
-Example: `rename cam001 Sony Camera Mark II`
-
-Corrects the name using the same validation and whitespace normalization as `add` (1–50 characters).
-ID lookup ignores case. The stored ID, availability, and current borrower are preserved, including for
-issued equipment or records hidden by a filter. The card and saved register update together through the
-normal save pipeline. If saving fails, the previous name and loan are restored.
-
-Success: `Equipment CAM001 renamed to Sony Camera Mark II.`
-
-A missing record reports `Error: Equipment with ID cam001 does not exist.`. Missing arguments report
-`Error: Invalid command format. Usage: rename <equipment-id> <equipment-name>`. Invalid IDs or names
-use the same constraint messages as `add`. `remove` continues to reject issued equipment.
-
 ### Saving the data
 
 Only one ClubLogistics instance can use the same home folder at a time. If startup reports that ClubLogistics
@@ -448,6 +448,7 @@ close ClubLogistics and delete `preferences.json` before starting it again; equi
 Action | Format, Examples
 --------|------------------
 **Add equipment** | `add <equipment-id> <equipment-name>`<br> e.g., `add CAM001 Sony Camera`
+**Rename equipment** | `rename <equipment-id> <equipment-name>`<br> e.g., `rename CAM001 Sony Camera Mark II`
 **Remove equipment** | `remove <equipment-id>`<br> e.g., `remove CAM001`
 **Issue equipment** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
 **Return equipment** | `return <equipment-id>`<br> e.g., `return CAM001`

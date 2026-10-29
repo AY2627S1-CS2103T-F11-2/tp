@@ -464,7 +464,7 @@ than waiting for shutdown. If file logging cannot start, console logging remains
 another filename is performed. External edits are read on the
 next startup only; a successful saving command in the running session writes its in-memory register to the file.
 Read-only commands do not save equipment data. `Command.isDataMutating()` defaults to false; `add`, `remove`,
-`issue`, `return` and `clear` override it to request a transactional save.
+`rename`, `issue`, `return` and `clear` override it to request a transactional save.
 
 Storage adapters isolate Jackson's representation and compatibility rules from immutable domain objects.
 The copied serialization snapshot is independent of later changes to the model, but does not provide
