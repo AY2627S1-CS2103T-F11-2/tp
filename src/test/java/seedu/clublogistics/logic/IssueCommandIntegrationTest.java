@@ -98,7 +98,8 @@ public class IssueCommandIntegrationTest {
         String savedData = Files.readString(clubLogisticsStorage.getClubLogisticsDataFilePath());
 
         assertThrows(ParseException.class,
-                "Error: Person name must contain only letters and spaces and be 1–50 characters long.", ()
+                "Error: Person name must be 1 to 50 characters long and contain only letters (A-Z, a-z),"
+                        + " spaces, and apostrophes (') and hyphens (-) between letters.", ()
                 -> logic.execute("issue CAM001 John123"));
         assertThrows(ParseException.class,
                 "Error: Invalid command format. Usage: issue <equipment-id> <person-name>", ()

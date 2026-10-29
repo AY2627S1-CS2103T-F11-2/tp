@@ -285,9 +285,10 @@ still passes through the shared save step.
 ### Issuing equipment
 
 For `issue CAM001 John Tan`, `IssueCommandParser` splits the trimmed arguments once into ID and complete
-borrower name. `BorrowerName` trims and collapses consecutive ordinary spaces and accepts 1–50 ASCII letters
-and spaces, beginning with a letter. Thus `John   Tan` becomes `John Tan`; digits, punctuation, and embedded
-tabs are invalid. Missing fields produce the issue usage message; invalid ID/name values produce their
+borrower name. `BorrowerName` trims and collapses consecutive ordinary spaces and accepts 1–50 characters
+forming space-separated words of ASCII letters, where an apostrophe or hyphen may join two letters. Thus
+`John   Tan` becomes `John Tan`, and `O'Brien` and `Mary-Jane` are valid; digits, other punctuation, a leading,
+trailing or doubled `'`/`-`, and embedded tabs are invalid. Missing fields produce the issue usage message; invalid ID/name values produce their
 constraint messages. The parser creates `IssueCommand(EquipmentId, BorrowerName)`.
 
 `IssueCommand` looks up the item through `ModelManager.findEquipment` in the full register, ignoring ID case.

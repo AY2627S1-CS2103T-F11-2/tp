@@ -184,7 +184,8 @@ Format: `issue <equipment-id> <person-name>`
 
 * The equipment ID must follow the [equipment ID rules](#features).
 * All text after the ID is treated as the person's name, including spaces.
-* The person's name has 1–50 characters and contains only the English letters `A–Z` and `a–z` and spaces. Digits,
+* The person's name has 1–50 characters and contains only the English letters `A–Z` and `a–z`, spaces, and
+  apostrophes (`'`) or hyphens (`-`) that join two letters, as in `O'Brien` or `Mary-Jane Tan`. Digits, other
   punctuation, and accented or non-English letters such as `é` are rejected.
   Leading and trailing spaces are removed, and consecutive spaces are combined into one.
 * The item must exist and be available. Each item can have only one holder at a time, so issuing an item that is
@@ -208,7 +209,7 @@ Situation | Error message
 ----------|--------------
 No item has this ID | `Error: Equipment with ID CAM001 does not exist.`
 The item is already issued | `Error: Equipment CAM001 is already issued to John Tan.`
-The person's name is invalid | `Error: Person name must contain only letters and spaces and be 1–50 characters long.`
+The person's name is invalid | `Error: Person name must be 1 to 50 characters long and contain only letters (A-Z, a-z), spaces, and apostrophes (') and hyphens (-) between letters.`
 A parameter is missing | `Error: Invalid command format. Usage: issue <equipment-id> <person-name>`
 
 ### Returning equipment: `return`
