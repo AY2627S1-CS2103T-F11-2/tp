@@ -33,7 +33,7 @@ public class ModelManager implements Model {
     public ModelManager(ReadOnlyClubLogisticsData clubLogisticsData, ReadOnlyUserPrefs userPrefs) {
         requireAllNonNull(clubLogisticsData, userPrefs);
 
-        logger.fine("Initializing with ClubLogistics data: " + clubLogisticsData + " and user prefs " + userPrefs);
+        logger.fine("Initializing equipment model and preferences.");
 
         this.clubLogisticsData = new ClubLogisticsData(clubLogisticsData);
         this.userPrefs = new UserPrefs(userPrefs);
