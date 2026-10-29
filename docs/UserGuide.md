@@ -456,3 +456,13 @@ Action | Format, Examples
 **Clear the register** | `clear [force]`<br> e.g., `clear`, `clear force`
 **Help** | `help`
 **Exit** | `exit`
+
+### Diagnostic logs and borrower privacy
+
+Command diagnostics record command types and completion/error categories. They omit command arguments
+and feedback because these can contain borrower names, including in repeat-issue or removal errors.
+This applies to borrower search as well as issue/return. The on-screen feedback and active loan record
+still show the borrower. No sensitive command logging mode is provided.
+
+Existing log files from older versions can retain names. Review and remove those files before sharing
+an application folder or diagnostic logs. Closing a loan does not erase older log files or backups.

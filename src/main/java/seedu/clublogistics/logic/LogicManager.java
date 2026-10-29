@@ -46,9 +46,8 @@ public class LogicManager implements Logic {
     /** {@inheritDoc} */
     @Override
     public CommandResult execute(String commandText) throws CommandException, ParseException {
-        logger.info("----------------[USER COMMAND][" + commandText + "]");
-
         Command command = clubLogisticsParser.parseCommand(commandText);
+        logger.info("Executing " + command.getClass().getSimpleName());
         boolean mutatesData = command.isDataMutating();
         ReadOnlyClubLogisticsData previousData = mutatesData
                 ? new ClubLogisticsData(model.getClubLogisticsData()) : null;
