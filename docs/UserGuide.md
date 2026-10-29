@@ -273,6 +273,16 @@ Status is missing, e.g., `filter` | `Error: Invalid command format. Usage: filte
 Extra arguments, e.g., `filter available extra` | `Error: Invalid command format. Usage: filter <available|issued>`
 Unsupported status, e.g., `filter damaged` | `Error: Invalid command format. Usage: filter <available|issued>`
 
+### Inventory counts
+
+`list` and `filter` append `Showing X of Y equipment records.` to their feedback, including zero matches.
+`X` is the number of matching cards and `Y` is the complete register size. For example, three available
+items in a register of four produce `Showing 3 of 4 equipment records.` after `filter available`.
+
+The view label above the cards also shows these counts. It updates after add, remove, issue, return,
+and clear, even when a command replaces the feedback. `list` resets the view and shows equal counts.
+Counts describe the current register; they do not count past loans.
+
 ### Finding a borrower's equipment: `find`
 
 Shows equipment whose current borrower's name contains the supplied name or name fragment.
@@ -319,16 +329,6 @@ Format: `help`
 Exits the program.
 
 Format: `exit`
-
-### Inventory counts
-
-`list` and `filter` append `Showing X of Y equipment records.` to their feedback, including zero matches.
-`X` is the number of matching cards and `Y` is the complete register size. For example, three available
-items in a register of four produce `Showing 3 of 4 equipment records.` after `filter available`.
-
-The view label above the cards also shows these counts. It updates after add, remove, issue, return,
-and clear, even when a command replaces the feedback. `list` resets the view and shows equal counts.
-Counts describe the current register; they do not count past loans.
 
 ### Saving the data
 

@@ -25,6 +25,7 @@ public class ListCommandTest {
         expectedModel = new ModelManager(model.getClubLogisticsData(), new UserPrefs());
     }
 
+    /** Verifies emptyRegister showsEmptyList and count feedback. */
     @Test
     public void execute_emptyRegister_showsEmptyList() {
         assertCommandSuccess(new ListCommand(), model,
@@ -33,6 +34,7 @@ public class ListCommandTest {
         assertEquals(0, model.getFilteredEquipmentList().size());
     }
 
+    /** Verifies equipmentRegister showsEveryItem and count feedback. */
     @Test
     public void execute_equipmentRegister_showsEveryItem() {
         model.addEquipment(equipment("CAM001", "Sony Camera"));
@@ -45,6 +47,7 @@ public class ListCommandTest {
         assertEquals(2, model.getFilteredEquipmentList().size());
     }
 
+    /** Verifies filteredRegister showsEveryItem and count feedback. */
     @Test
     public void execute_filteredRegister_showsEveryItem() {
         Equipment camera = equipment("CAM001", "Sony Camera");

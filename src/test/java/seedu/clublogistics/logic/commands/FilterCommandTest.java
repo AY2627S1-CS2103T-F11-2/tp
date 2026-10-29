@@ -37,6 +37,7 @@ public class FilterCommandTest {
         model.addEquipment(microphone);
     }
 
+    /** Verifies availableWithMatches showsOnlyAvailable and count feedback. */
     @Test
     public void execute_availableWithMatches_showsOnlyAvailable() {
         assertCommandSuccess(new FilterCommand(EquipmentStatus.AVAILABLE), model,
@@ -45,6 +46,7 @@ public class FilterCommandTest {
         assertEquals(List.of(camera), model.getFilteredEquipmentList());
     }
 
+    /** Verifies issuedWithMatches showsOnlyIssued and count feedback. */
     @Test
     public void execute_issuedWithMatches_showsOnlyIssued() {
         assertCommandSuccess(new FilterCommand(EquipmentStatus.ISSUED), model,
@@ -53,6 +55,7 @@ public class FilterCommandTest {
         assertEquals(List.of(microphone), model.getFilteredEquipmentList());
     }
 
+    /** Verifies availableWithoutMatches showsNoAvailableMessage and count feedback. */
     @Test
     public void execute_availableWithoutMatches_showsNoAvailableMessage() {
         model.setEquipment(camera, camera.issueTo(new BorrowerName("Bob")));
@@ -64,6 +67,7 @@ public class FilterCommandTest {
         assertTrue(model.getFilteredEquipmentList().isEmpty());
     }
 
+    /** Verifies issuedWithoutMatches showsNoIssuedMessage and count feedback. */
     @Test
     public void execute_issuedWithoutMatches_showsNoIssuedMessage() {
         model.setEquipment(microphone, microphone.markReturned());
