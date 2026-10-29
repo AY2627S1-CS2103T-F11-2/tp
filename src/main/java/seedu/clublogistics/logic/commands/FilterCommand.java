@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Objects;
 
 import seedu.clublogistics.commons.util.ToStringBuilder;
+import seedu.clublogistics.logic.Messages;
 import seedu.clublogistics.model.Model;
 import seedu.clublogistics.model.equipment.EquipmentStatus;
 
@@ -40,7 +41,9 @@ public class FilterCommand extends Command {
         model.updateFilteredEquipmentList(equipment -> equipment.getStatus() == status,
                 "Showing: " + (status == EquipmentStatus.AVAILABLE ? "Available" : "Issued")
                         + " — use list to show all");
-        return new CommandResult(selectMessage(model.getFilteredEquipmentList().isEmpty()));
+        int shown = model.getFilteredEquipmentList().size();
+        return new CommandResult(selectMessage(shown == 0) + "\n"
+                + Messages.formatEquipmentCount(shown, model.getEquipmentList().size()));
     }
 
     private String selectMessage(boolean noMatches) {

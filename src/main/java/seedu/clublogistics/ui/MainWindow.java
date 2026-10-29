@@ -116,7 +116,7 @@ public class MainWindow extends UiPart<Stage> {
      */
     void fillInnerParts() {
         equipmentListPanel = new EquipmentListPanel(logic.getFilteredEquipmentList(),
-                logic.equipmentFilterDescriptionProperty());
+                logic.equipmentFilterDescriptionProperty(), logic.getEquipmentList());
         equipmentListPanelPlaceholder.getChildren().add(equipmentListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
