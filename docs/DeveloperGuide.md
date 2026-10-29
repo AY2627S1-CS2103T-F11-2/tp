@@ -287,8 +287,9 @@ checks removals while another status is selected, so lookup and deletion remain 
 produces `Error: Invalid command format. Usage: list`. `ListCommand.execute` calls
 `ModelManager.updateFilteredEquipmentList(PREDICATE_SHOW_ALL_EQUIPMENT)`, which sets the predicate on the
 existing `FilteredList`. It does not copy or modify equipment records. The panel observes the changed view,
-and `ResultDisplay` receives `Listed all equipment.`. After resetting the predicate, an empty view means
-the entire register is empty, so the command returns `No equipment found.` instead.
+and `ResultDisplay` receives `Listed all equipment.` followed by `Showing X of Y equipment records.`.
+After resetting the predicate, X and Y are equal. An empty view means the entire register is empty,
+so the first line becomes `No equipment found.` and the count line is `Showing 0 of 0 equipment records.`.
 
 For example, with available `CAM001` and issued `MIC001`, `filter issued` shows only `MIC001`; `list` then
 shows both. A previously empty filtered result is not evidence of an empty register: `list` can reveal
@@ -326,7 +327,8 @@ case; missing, unsupported, or extra tokens produce
 | available | `Showing available equipment.` | `No available equipment found.` |
 | issued | `Showing issued equipment.` | `No issued equipment found.` |
 
-The messages describe the result when the filter command executes. Subsequent record changes update the
+The table shows the first feedback line. Each result also appends `Showing X of Y equipment records.`,
+where X counts matches and Y counts the full register. The messages describe the result when the filter command executes. Subsequent record changes update the
 cards automatically, without rerunning the filter command or regenerating its feedback.
 
 ![Available-filter membership changes during issue and return](images/FilterEquipmentActivity.png)
@@ -346,7 +348,7 @@ skips equipment saving because it changes only the view.
 
 Status filtering is a read-only view operation. `FilterCommand` inherits `isDataMutating() == false`,
 so applying or switching a filter does not write the equipment file. Later successful `issue`, `return`,
-`add`, `remove`, or `clear` commands save the complete source register, including hidden records. The
+`add`, `remove`, `rename`, or `clear` commands save the complete source register, including hidden records. The
 selected predicate remains only in memory; restarting rebuilds an unfiltered view from the saved records.
 
 `FilterCommandParserTest` verifies case handling and rejects extra/unsupported tokens. `FilterCommandTest`
@@ -473,6 +475,30 @@ without first returning every item. A stateless keyword is used instead of a two
 confirmation state has to survive between commands. Clear provides no undo or retained loan history.
 Resetting contents through the shared register API avoids replacing the model/list objects bound to the UI.
 
+#### Clear scope and verification
+
+With `filter available` selected, the visible cards are only a view of the reset target:
+
+| State | Full register | Visible available view | Saved equipment |
+| --- | --- | --- | --- |
+| Before `clear` | CAM001 available; MIC001 issued to Alice Lim | CAM001 | Both records |
+| After refused `clear` | CAM001 available; MIC001 issued to Alice Lim | CAM001, same selected predicate | Both records unchanged |
+| After `clear force` | Empty | Empty, same selected predicate | Empty array |
+| After restart | Empty | Empty, fresh show-all predicate | Empty array |
+
+A present empty register differs from a missing file: the former loads zero records, while the latter
+selects samples. Clearing does not delete the equipment file to request sample initialization. Unlike
+repeated per-item removal, a forced register reset also removes issued items; unlike replacing the model,
+`setAll` preserves the observable collection that existing UI controls observe.
+
+`ClearCommandParserTest` accepts blank arguments or case-insensitive `force` and rejects other arguments.
+`ClearCommandTest` covers empty and populated registers, including refusal while equipment is issued.
+`ClearCommandIntegrationTest` checks forced empty persistence and that refused clears or rejected arguments
+retain saved records.
+`EquipmentFilterModelTest` verifies predicate-preserving lifecycle changes, and `MainWindowTest` checks
+that the equipment panel empties when the register is cleared. There is no undo or stored loan history to recover
+borrower assignments after a successful clear; manual backups remain separate from this command.
+
 
 ### Correcting equipment names
 
@@ -516,7 +542,11 @@ button. Opening Help does not fetch remote content, so the syntax reference work
 
 #### Startup and recovery
 
-`MainApp.init` creates `JsonUserPrefsStorage`, loads preferences, and creates `JsonClubLogisticsStorage` and
+`MainApp.init` first checks for a legacy-only register. If `addressbook.json` exists and the destination
+`clublogistics.json` does not, it shows backup/copy instructions and exits before creating preferences or
+selecting samples. The loading sequence below applies after this preflight allows startup to continue.
+
+`MainApp.init` then creates `JsonUserPrefsStorage`, loads preferences, and creates `JsonClubLogisticsStorage` and
 `StorageManager`. `initModelManager` calls `StorageManager.readClubLogisticsData`, delegated to the JSON
 storage. `JsonUtil.readJsonFile` deserializes with Jackson; `JsonSerializableClubLogisticsData.toModelType`
 adapts each `JsonAdaptedEquipment` and checks ID uniqueness while constructing a separate register.
@@ -596,18 +626,9 @@ null inputs, duplicates, and round trips. `IssueCommandIntegrationTest`, `Return
 restart behavior; `LogicManagerTest` checks the save handoff and storage error reporting. `FileUtilTest` checks
 complete-file visibility, failed replacement cleanup, missing folders and read-only protection.
 
-## **Documentation, logging, testing, dev-ops**
-
-* [Documentation guide](Documentation.md)
-* [Testing guide](Testing.md)
-* [Logging guide](Logging.md)
-* [DevOps guide](DevOps.md)
-
-## **Appendix: Requirements**
-
 #### Load/save boundary verification
 
-Startup selects in-memory data before any equipment-changing command. Missing-file sample selection
+After the legacy-register preflight, startup selects in-memory data before any equipment-changing command. Missing-file sample selection
 itself does not write an equipment file; an initial `list` or `filter` also leaves it absent. Likewise,
 invalid-file fallback does not repair the rejected file. The first successful equipment-changing command
 saves the full in-memory register, so users must preserve a rejected file before changing records.
@@ -626,6 +647,15 @@ equipment entry are rejected through the same loading-error path. An absent/null
 still represents an empty register. These distinct inputs must not be conflated when extending compatibility.
 The tables and sequence diagrams describe the current code, including read-only save suppression and atomic
 file replacement, rather than assuming behavior from the earlier release.
+
+## **Documentation, logging, testing, dev-ops**
+
+* [Documentation guide](Documentation.md)
+* [Testing guide](Testing.md)
+* [Logging guide](Logging.md)
+* [DevOps guide](DevOps.md)
+
+## **Appendix: Requirements**
 
 
 ### Product scope
@@ -699,7 +729,7 @@ The stories below describe the full product vision. They include deferred capabi
 (For all use cases below, the **System** is `ClubLogistics` and the **Actor** is the logistics coordinator.)
 
 The use cases below describe the product vision, not only the released commands. Each use case is labelled with
-its release status. The implemented release supports `add`, `remove`, `list`, `filter`, `issue`, `return`,
+its release status. The implemented release supports `add`, `remove`, `rename`, `list`, `filter`, `find`, `issue`, `return`,
 `clear`, `help`, and `exit`; refer to the [User Guide](UserGuide.md) for their exact command formats.
 
 #### Use case UC01: Register a new asset

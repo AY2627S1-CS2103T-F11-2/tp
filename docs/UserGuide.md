@@ -269,7 +269,8 @@ Examples:
 * `filter issued` shows equipment currently held by borrowers.
 * `filter AVAILABLE` has the same effect as `filter available`.
 
-The command reports one of the following results:
+The first feedback line reports one of the following results; a second line shows
+`Showing X of Y equipment records.` as described under [Inventory counts](#inventory-counts):
 
 Selected status | Matching equipment exists | No equipment matches
 ----------------|---------------------------|---------------------
@@ -385,7 +386,7 @@ Only one ClubLogistics instance can use the same home folder at a time. If start
 is already running, use the existing window or close it before launching again. The app keeps a small
 `.clublogistics.lock` file in its home folder; do not delete it while the app is running.
 
-ClubLogistics saves the equipment register automatically after successful `add`, `remove`, `issue`, `return`,
+ClubLogistics saves the equipment register automatically after successful `add`, `remove`, `rename`, `issue`, `return`,
 or `clear` commands. Read-only commands (`list`, `filter`, `find`, `help` and `exit`) do not save equipment data. You do not need to save manually, and saved data is retained when
 you restart the application. If saving fails, the command reports an error and the previous equipment register
 is restored in memory. Resolve the reported file or folder problem before retrying; Read-only commands remain available.
@@ -453,7 +454,7 @@ your records:
    * **Repair the file:** if there is no backup, edit the file so it follows the format described above. Each item needs
      a valid `id` and `name`, and a `status` that is `AVAILABLE` with an empty `issuedTo`, or `ISSUED` with a valid
      borrower name in `issuedTo`. Equipment IDs must be unique.
-3. Start ClubLogistics and run `list` to check that your records loaded. Do not run `add`, `remove`, `issue`,
+3. Start ClubLogistics and run `list` to check that your records loaded. Do not run `add`, `remove`, `rename`, `issue`,
    `return` or `clear` until you have confirmed recovery, because a successful equipment-changing command overwrites the file.
 
 --------------------------------------------------------------------------------------------------------------------
