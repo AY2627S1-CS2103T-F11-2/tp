@@ -3,24 +3,25 @@
 skinparam arrowThickness 1.1
 skinparam arrowColor STORAGE_COLOR
 skinparam classBackgroundColor STORAGE_COLOR
+skinparam classAttributeFontColor #FFFFFF
 
 package Storage as StoragePackage {
 
 Class "<<interface>>\nStorage" as Storage
 Class StorageManager
-
-package "UserPrefs Storage" #F4F6F6{
 Class JsonUserPrefsStorage
-}
-
-package "ClubLogisticsData Storage" #F4F6F6{
 Class JsonClubLogisticsStorage
 Class JsonSerializableClubLogisticsData
-Class JsonAdaptedPerson
-Class JsonAdaptedTag
+Class JsonAdaptedEquipment {
+    id : String
+    name : String
+    status : String
+    issuedTo : String
 }
 
 }
+
+show JsonAdaptedEquipment fields
 
 Class HiddenOutside #FFFFFF
 HiddenOutside ..> Storage
@@ -30,7 +31,6 @@ StorageManager -down-> "1" JsonUserPrefsStorage
 StorageManager -down-> "1" JsonClubLogisticsStorage
 
 JsonClubLogisticsStorage ..> JsonSerializableClubLogisticsData
-JsonSerializableClubLogisticsData --> "*" JsonAdaptedPerson
-JsonAdaptedPerson --> "*" JsonAdaptedTag
+JsonSerializableClubLogisticsData --> "*" JsonAdaptedEquipment
 
 @enduml

@@ -18,6 +18,20 @@ public class HelpWindow extends UiPart<Stage> {
     public static final String USERGUIDE_URL = "https://ay2627s1-cs2103t-f11-2.github.io/tp/UserGuide.html";
     public static final String HELP_MESSAGE = "Refer to the user guide: " + USERGUIDE_URL;
 
+    public static final String QUICK_REFERENCE = String.join("\n",
+            "Command quick reference (available offline)",
+            "add <equipment-id> <equipment-name>",
+            "remove <equipment-id>",
+            "issue <equipment-id> <person-name>",
+            "return <equipment-id>",
+            "find <borrower-name> — search current borrowers",
+            "filter <available|issued> — select a status",
+            "list — show all equipment and clear filters",
+            "clear — delete every equipment record, including loans",
+            "help — show this reference (also F1)",
+            "exit — close the application",
+            "Up / Down — recall the last 100 successful commands; Down restores your draft");
+
     private static final Logger logger = LogsCenter.getLogger(HelpWindow.class);
     private static final String FXML = "HelpWindow.fxml";
 
@@ -27,6 +41,9 @@ public class HelpWindow extends UiPart<Stage> {
     @FXML
     private Label helpMessage;
 
+    @FXML
+    private Label quickReference;
+
     /**
      * Creates a new HelpWindow.
      *
@@ -35,6 +52,7 @@ public class HelpWindow extends UiPart<Stage> {
     public HelpWindow(Stage root) {
         super(FXML, root);
         helpMessage.setText(HELP_MESSAGE);
+        quickReference.setText(QUICK_REFERENCE);
     }
 
     /**

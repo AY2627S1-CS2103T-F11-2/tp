@@ -7,6 +7,12 @@ title: Documentation guide
 
 * We use [**Jekyll**](https://jekyllrb.com/) to manage documentation.
 * The `docs/` folder is used for documentation.
+* `.github/workflows/pages.yml` builds this folder on documentation pull requests and publishes changes on `master`.
+  Configure **Settings > Pages > Build and deployment > Source** as **GitHub Actions** after merging the workflow.
+  The **Product website** workflow can also be run manually to recover a stalled deployment.
+* Publishing checks the rendered homepage, User Guide and Developer Guide for current equipment content, then checks
+  the live site and its `deployment.json` source revision. An HTTP 200 response alone does not prove the site is current.
+  To repeat the check locally, run `python3 .github/check-website.py https://ay2627s1-cs2103t-f11-2.github.io/tp/ --commit <commit-sha>`.
 * To learn how to set up and maintain the project website, follow the guide [_[se-edu/guides] **Using Jekyll for project documentation**_](https://se-education.org/guides/tutorials/jekyll.html).
 * Note these points when adapting the documentation to a different project/product:
   * The 'Site-wide settings' section of the page linked above has information on how to update site-wide elements such as the top navigation bar.

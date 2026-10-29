@@ -2,12 +2,12 @@ package seedu.clublogistics;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import seedu.clublogistics.commons.core.AppPaths;
 import seedu.clublogistics.commons.core.LogsCenter;
 import seedu.clublogistics.commons.exceptions.DataLoadingException;
 import seedu.clublogistics.commons.util.StringUtil;
@@ -32,11 +32,11 @@ import seedu.clublogistics.ui.UiManager;
  */
 public class MainApp extends Application {
 
-    public static final String VERSION = "V0.5.1";
+    public static final String VERSION = "V1.4";
 
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
-    private static final Path USER_PREFS_FILE_PATH = Paths.get("preferences.json");
-    private static final Path CLUB_LOGISTICS_FILE_PATH = Paths.get("data", "clublogistics.json");
+    private static final Path USER_PREFS_FILE_PATH = AppPaths.getHomeFolder().resolve("preferences.json");
+    private static final Path CLUB_LOGISTICS_FILE_PATH = AppPaths.getHomeFolder().resolve("data/clublogistics.json");
 
     protected Ui ui;
     protected Logic logic;
@@ -64,7 +64,7 @@ public class MainApp extends Application {
      * Loads ClubLogistics data and preferences into a model manager.
      * Uses sample data when the file is missing, or empty data when loading fails.
      */
-    private Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
+    protected Model initModelManager(Storage storage, ReadOnlyUserPrefs userPrefs) {
         logger.info("Using data file : " + storage.getClubLogisticsDataFilePath());
 
         Optional<ReadOnlyClubLogisticsData> clubLogisticsDataOptional;

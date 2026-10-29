@@ -4,51 +4,42 @@ skinparam arrowThickness 1.1
 skinparam arrowColor MODEL_COLOR
 skinparam classBackgroundColor MODEL_COLOR
 
-Package Model as ModelPackage <<Rectangle>>{
+package Model as ModelPackage <<Rectangle>> {
 Class "<<interface>>\nReadOnlyClubLogisticsData" as ReadOnlyClubLogisticsData
 Class "<<interface>>\nReadOnlyUserPrefs" as ReadOnlyUserPrefs
 Class "<<interface>>\nModel" as Model
 Class ClubLogisticsData
 Class ModelManager
 Class UserPrefs
-
-Class UniquePersonList
-Class Person
-Class Address
-Class Email
-Class Name
-Class Phone
-Class Tag
-
-Class I #FFFFFF
+Class UniqueEquipmentList
+Class Equipment
+Class EquipmentId
+Class EquipmentName
+Enum EquipmentStatus
+Class BorrowerName
+Class "FilteredList<Equipment>" as FilteredEquipment
 }
 
-Class HiddenOutside #FFFFFF
-HiddenOutside ..> Model
-
 ClubLogisticsData .up.|> ReadOnlyClubLogisticsData
-
-ModelManager .up.|> Model
-Model .right.> ReadOnlyUserPrefs
-Model .left.> ReadOnlyClubLogisticsData
-ModelManager -left-> "1" ClubLogisticsData
-ModelManager -right-> "1" UserPrefs
 UserPrefs .up.|> ReadOnlyUserPrefs
+ModelManager .up.|> Model
+Model ..> ReadOnlyClubLogisticsData
+Model ..> ReadOnlyUserPrefs
 
-ClubLogisticsData *--> "1" UniquePersonList
-UniquePersonList --> "~* all" Person
-Person *--> Name
-Person *--> Phone
-Person *--> Email
-Person *--> Address
-Person *--> "*" Tag
+ModelManager *--> "1" ClubLogisticsData
+ModelManager *--> "1" UserPrefs
+ModelManager --> FilteredEquipment
+FilteredEquipment ..> "view of" UniqueEquipmentList
 
-Person -[hidden]up--> I
-UniquePersonList -[hidden]right-> I
+ClubLogisticsData *--> "1" UniqueEquipmentList
+UniqueEquipmentList --> "0..*" Equipment
+Equipment *--> "1" EquipmentId
+Equipment *--> "1" EquipmentName
+Equipment --> "1" EquipmentStatus
+Equipment *--> "0..1 issuedTo" BorrowerName
 
-Name -[hidden]right-> Phone
-Phone -[hidden]right-> Address
-Address -[hidden]right-> Email
-
-ModelManager --> "~* filtered" Person
+note bottom of Equipment
+  AVAILABLE has no borrower.
+  ISSUED has one borrower.
+end note
 @enduml

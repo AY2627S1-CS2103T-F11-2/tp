@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.logging.Logger;
 
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.collections.ObservableList;
 import seedu.clublogistics.commons.core.GuiSettings;
 import seedu.clublogistics.commons.core.LogsCenter;
@@ -14,6 +15,7 @@ import seedu.clublogistics.logic.parser.ClubLogisticsParser;
 import seedu.clublogistics.logic.parser.exceptions.ParseException;
 import seedu.clublogistics.model.ClubLogisticsData;
 import seedu.clublogistics.model.Model;
+import seedu.clublogistics.model.ReadOnlyClubLogisticsData;
 import seedu.clublogistics.model.equipment.Equipment;
 import seedu.clublogistics.storage.Storage;
 
@@ -47,31 +49,40 @@ public class LogicManager implements Logic {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
         Command command = clubLogisticsParser.parseCommand(commandText);
-        ClubLogisticsData originalData = command.isDataMutating()
+        boolean mutatesData = command.isDataMutating();
+        ReadOnlyClubLogisticsData previousData = mutatesData
                 ? new ClubLogisticsData(model.getClubLogisticsData()) : null;
         CommandResult commandResult = command.execute(model);
 
-        if (!command.isDataMutating()) {
-            return commandResult;
-        }
-
-        try {
-            storage.saveClubLogisticsData(model.getClubLogisticsData());
-        } catch (AccessDeniedException e) {
-            model.setClubLogisticsData(originalData);
-            throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
-        } catch (IOException ioe) {
-            model.setClubLogisticsData(originalData);
-            throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+        if (mutatesData) {
+            saveDataOrRestore(previousData);
         }
 
         return commandResult;
+    }
+
+    private void saveDataOrRestore(ReadOnlyClubLogisticsData previousData) throws CommandException {
+        try {
+            storage.saveClubLogisticsData(model.getClubLogisticsData());
+        } catch (AccessDeniedException e) {
+            model.setClubLogisticsData(previousData);
+            throw new CommandException(String.format(FILE_OPS_PERMISSION_ERROR_FORMAT, e.getMessage()), e);
+        } catch (IOException ioe) {
+            model.setClubLogisticsData(previousData);
+            throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public ObservableList<Equipment> getEquipmentList() {
         return model.getEquipmentList();
+    }
+
+    /** Returns the model's persistent view description. */
+    @Override
+    public ReadOnlyStringProperty equipmentFilterDescriptionProperty() {
+        return model.equipmentFilterDescriptionProperty();
     }
 
     /** {@inheritDoc} */

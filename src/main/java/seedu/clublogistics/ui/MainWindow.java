@@ -10,6 +10,7 @@ import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import seedu.clublogistics.commons.core.GuiSettings;
 import seedu.clublogistics.commons.core.LogsCenter;
@@ -114,7 +115,8 @@ public class MainWindow extends UiPart<Stage> {
      * Fills up all the placeholders of this window.
      */
     void fillInnerParts() {
-        equipmentListPanel = new EquipmentListPanel(logic.getFilteredEquipmentList());
+        equipmentListPanel = new EquipmentListPanel(logic.getFilteredEquipmentList(),
+                logic.equipmentFilterDescriptionProperty());
         equipmentListPanelPlaceholder.getChildren().add(equipmentListPanel.getRoot());
 
         resultDisplay = new ResultDisplay();
@@ -131,11 +133,13 @@ public class MainWindow extends UiPart<Stage> {
      * Sets the default size based on {@code guiSettings}.
      */
     private void setWindowDefaultSize(GuiSettings guiSettings) {
-        primaryStage.setHeight(guiSettings.getWindowHeight());
-        primaryStage.setWidth(guiSettings.getWindowWidth());
-        if (guiSettings.getWindowCoordinates() != null) {
-            primaryStage.setX(guiSettings.getWindowCoordinates().getX());
-            primaryStage.setY(guiSettings.getWindowCoordinates().getY());
+        WindowPlacement placement = WindowPlacement.resolve(guiSettings,
+                Screen.getScreens().stream().map(Screen::getVisualBounds).toList());
+        primaryStage.setHeight(placement.height());
+        primaryStage.setWidth(placement.width());
+        if (placement.position() != null) {
+            primaryStage.setX(placement.position().x);
+            primaryStage.setY(placement.position().y);
         }
     }
 

@@ -53,6 +53,7 @@ public class IssueCommand extends Command {
         return new CommandResult(String.format(MESSAGE_SUCCESS, issuedEquipment.getId(), borrower, issuedEquipment));
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isDataMutating() {
         return true;

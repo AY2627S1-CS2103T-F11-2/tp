@@ -24,6 +24,7 @@ public class ClearCommand extends Command {
         return new CommandResult(MESSAGE_SUCCESS);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isDataMutating() {
         return true;

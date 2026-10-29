@@ -1,0 +1,38 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+skinparam ParticipantFontColor #222222
+skinparam sequenceParticipantBackgroundColor #F4F5F7
+skinparam sequenceParticipantBorderColor #555555
+skinparam sequenceArrowColor #333333
+hide footbox
+title Registering CAM001 (command execution detail)
+participant ":LogicManager" as L
+participant ":ClubLogisticsParser" as P
+participant ":AddEquipmentCommandParser" as AP
+participant ":AddEquipmentCommand" as C
+participant ":ModelManager" as M
+participant ":ClubLogisticsData" as D
+participant ":UniqueEquipmentList" as U
+L -> P : parseCommand("add CAM001 Sony Camera")
+P -> AP : parse(arguments)
+AP --> P : command with available Equipment
+P --> L : command
+L -> C : execute(model)
+C -> M : hasEquipment(equipment)
+M -> D : hasEquipment(equipment)
+D -> U : contains(equipment)
+U --> D : duplicate?
+D --> M : duplicate?
+M --> C : duplicate?
+alt ID already present (ignoring case)
+  C --> L : throws CommandException
+else unique ID
+  C -> M : addEquipment(equipment)
+  M -> D : addEquipment(equipment)
+  D -> U : add(equipment)
+  note over U : internalList.add(equipment)\nObservable view updates
+  C --> L : CommandResult
+  ref over L : Save full register (SaveEquipmentSequence)
+end
+@enduml

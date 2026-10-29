@@ -47,6 +47,7 @@ public class RemoveCommand extends Command {
         return new CommandResult(String.format(MESSAGE_SUCCESS, equipment.getId()));
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isDataMutating() {
         return true;
