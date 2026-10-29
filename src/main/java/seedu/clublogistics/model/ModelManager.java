@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import seedu.clublogistics.commons.core.GuiSettings;
@@ -23,6 +25,7 @@ public class ModelManager implements Model {
     private final ClubLogisticsData clubLogisticsData;
     private final UserPrefs userPrefs;
     private final FilteredList<Equipment> filteredEquipment;
+    private final ReadOnlyStringWrapper filterDescription = new ReadOnlyStringWrapper("Showing all equipment");
 
     /**
      * Initializes a ModelManager with the given clubLogisticsData and userPrefs.
@@ -106,7 +109,22 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredEquipmentList(Predicate<Equipment> predicate) {
         requireNonNull(predicate);
+        updateFilteredEquipmentList(predicate, predicate == PREDICATE_SHOW_ALL_EQUIPMENT
+                ? "Showing all equipment" : "Showing a filtered selection — use list to show all");
+    }
+
+    /** Applies a view and its description without changing equipment data. */
+    @Override
+    public void updateFilteredEquipmentList(Predicate<Equipment> predicate, String description) {
+        requireAllNonNull(predicate, description);
         filteredEquipment.setPredicate(predicate);
+        filterDescription.set(description);
+    }
+
+    /** Returns the observable description of the selected view. */
+    @Override
+    public ReadOnlyStringProperty equipmentFilterDescriptionProperty() {
+        return filterDescription.getReadOnlyProperty();
     }
 
     /** {@inheritDoc} */

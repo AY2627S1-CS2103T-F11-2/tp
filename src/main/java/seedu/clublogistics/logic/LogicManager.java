@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.logging.Logger;
 
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.collections.ObservableList;
 import seedu.clublogistics.commons.core.GuiSettings;
 import seedu.clublogistics.commons.core.LogsCenter;
@@ -74,6 +75,12 @@ public class LogicManager implements Logic {
     @Override
     public ObservableList<Equipment> getEquipmentList() {
         return model.getEquipmentList();
+    }
+
+    /** Returns the model's persistent view description. */
+    @Override
+    public ReadOnlyStringProperty equipmentFilterDescriptionProperty() {
+        return model.equipmentFilterDescriptionProperty();
     }
 
     /** {@inheritDoc} */

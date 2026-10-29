@@ -360,6 +360,26 @@ including borrower assignments. It provides no confirmation step, undo, or retai
 Resetting contents through the shared register API avoids replacing the model/list objects bound to the UI.
 
 
+### Borrower search and view descriptions
+
+`FindCommandParser` validates and normalizes the name fragment with `BorrowerName`. `FindCommand` applies a
+case-insensitive substring predicate to the current borrower, excluding available equipment. This uses the same
+observable filtered equipment list as status filtering. A search replaces the previous predicate and is preserved
+across register changes until `list` or another search/filter replaces it; view state is not serialized.
+
+`ModelManager` publishes a read-only string property alongside the predicate. Status filters, borrower searches
+and `list` set an explicit view description. `LogicManager` exposes it to `EquipmentListPanel`, whose label binds
+to the property. Command feedback can change independently without hiding the selected view.
+
+### Keyboard history and local Help
+
+`CommandBox` keeps the most recent 100 successful command strings in memory. Its key-event filter handles
+unmodified Up/Down, tracks the selected history index and preserves the draft typed before browsing. Recall does
+not execute a command; failed commands are not retained. The bounded history is never written to disk.
+
+`HelpWindow` renders an embedded, scrollable command quick reference and retains the online guide link and copy
+button. Opening Help does not fetch remote content, so the syntax reference works offline.
+
 ### Saving and loading equipment data
 
 #### Startup and recovery

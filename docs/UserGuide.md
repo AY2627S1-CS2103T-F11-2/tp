@@ -260,6 +260,7 @@ Selected status | Matching equipment exists | No equipment matches
 An empty result means no equipment matches the selected status; it does not necessarily mean
 that the whole register is empty. Filtering changes only the displayed list, not the equipment records.
 
+A persistent label above the equipment cards identifies the selected status even after other command feedback.
 The selected filter remains active as equipment is added, issued, returned, or removed, and the
 visible list updates to reflect each item's current status. Run `list` to clear the filter and
 show all equipment again. The filter is not saved between application sessions.
@@ -272,6 +273,33 @@ Status is missing, e.g., `filter` | `Error: Invalid command format. Usage: filte
 Extra arguments, e.g., `filter available extra` | `Error: Invalid command format. Usage: filter <available|issued>`
 Unsupported status, e.g., `filter damaged` | `Error: Invalid command format. Usage: filter <available|issued>`
 
+### Finding a borrower's equipment: `find`
+
+Shows equipment whose current borrower's name contains the supplied name or name fragment.
+
+Format: `find <borrower-name>`
+
+Examples: `find Alice`, `find alice lim`.
+
+* Matching ignores capitalization and uses a contiguous substring, so `find Alice` can show loans to both
+  Alice Lim and Alice Tan. Only currently issued equipment can match.
+* All text after `find` is one search phrase. Leading/trailing spaces are removed and repeated spaces are combined.
+  The phrase follows the borrower-name rules: 1–50 English letters or spaces, without digits or punctuation.
+* The search replaces the previous status filter or borrower search. It stays active when equipment is changed;
+  returning a matching item removes it from the results, and issuing another matching item adds it.
+* The equipment panel always shows the selected view above the cards. Run `list` to clear any search or filter.
+  This selection is not saved between sessions.
+* Feedback reports the number of matches or `No equipment found for borrower: <name>.` Missing input shows
+  `Error: Invalid command format. Usage: find <borrower-name>`; invalid characters show the borrower-name error.
+
+### Recalling recent commands
+
+With the command box focused, press **Up** to recall older successful commands and **Down** to move forward.
+After the newest command, Down restores the draft you were typing before browsing. Recalling a command does not
+execute it: edit it if needed and press Enter. Only the last 100 successful commands are retained for the current
+session; failed commands are not added, and history is cleared when the app closes. Modified arrow shortcuts
+(such as Ctrl+Up) retain their normal text-editing behavior.
+
 ### Clearing the register: `clear`
 
 Removes all equipment records, including issued items, and saves the empty register.
@@ -280,7 +308,9 @@ Format: `clear`
 
 ### Viewing help: `help`
 
-Opens a window containing the ClubLogistics User Guide link. F1 opens the same help window.
+Opens a local command quick reference, including command formats and history shortcuts, that works without
+an Internet connection. The window also contains the ClubLogistics User Guide link and a Copy URL button for
+detailed online instructions. F1 opens the same help window.
 
 Format: `help`
 
@@ -403,6 +433,7 @@ Action | Format, Examples
 **Issue equipment** | `issue <equipment-id> <person-name>`<br> e.g., `issue CAM001 John Tan`
 **Return equipment** | `return <equipment-id>`<br> e.g., `return CAM001`
 **List all equipment** | `list`
+**Find by borrower** | `find <borrower-name>`<br> e.g., `find Alice`
 **Filter by status** | `filter available` or `filter issued`
 **Clear the register** | `clear`
 **Help** | `help`
