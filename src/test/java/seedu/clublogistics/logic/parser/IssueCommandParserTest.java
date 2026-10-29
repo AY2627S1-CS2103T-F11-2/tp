@@ -51,7 +51,8 @@ public class IssueCommandParserTest {
 
     @Test
     public void parse_invalidEquipmentId_failure() {
-        String message = "Error: Equipment ID must contain only letters and numbers and cannot contain spaces.";
+        String message = "Error: Equipment ID must be 1 to 20 characters long and contain only letters and numbers,"
+                + " with no spaces.";
 
         assertParseFailure(parser, "CAM-001 John Tan", message);
         assertParseFailure(parser, "CAM/001 John Tan", message);
