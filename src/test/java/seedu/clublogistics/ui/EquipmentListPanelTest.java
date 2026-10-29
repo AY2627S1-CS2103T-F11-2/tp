@@ -77,4 +77,25 @@ public class EquipmentListPanelTest extends JavaFxTest {
         });
     }
 
+    /** Keeps the view description visible when another command replaces result feedback. */
+    @Test
+    public void viewDescription_tracksFiltersAndListReset() throws Exception {
+        runOnFxThread(() -> {
+            ModelManager model = new ModelManager();
+            EquipmentListPanel panel = new EquipmentListPanel(model.getFilteredEquipmentList(),
+                    model.equipmentFilterDescriptionProperty());
+            Label label = (Label) panel.getRoot().lookup("#filterDescription");
+            seedu.clublogistics.logic.parser.ClubLogisticsParser parser =
+                    new seedu.clublogistics.logic.parser.ClubLogisticsParser();
+            parser.parseCommand("filter issued").execute(model);
+            parser.parseCommand("add CAM001 Camera").execute(model);
+            assertTrue(label.getText().contains("Issued"));
+            assertTrue(label.getText().contains("list"));
+            parser.parseCommand("find Alice").execute(model);
+            assertTrue(label.getText().contains("Alice"));
+            parser.parseCommand("list").execute(model);
+            assertEquals("Showing all equipment", label.getText());
+        });
+    }
+
 }
