@@ -371,6 +371,14 @@ across register changes until `list` or another search/filter replaces it; view 
 and `list` set an explicit view description. `LogicManager` exposes it to `EquipmentListPanel`, whose label binds
 to the property. Command feedback can change independently without hiding the selected view.
 
+### Inventory count presentation
+
+`ListCommand` and `FilterCommand` append a count snapshot from the filtered and full observable lists.
+`EquipmentListPanel` binds its view label to both lists and the view description, using
+`Messages.formatEquipmentCount` for the same wording. Source-list changes invalidate that binding, so
+counts remain current after hidden records change as well as visible additions and replacements.
+Feedback describes the moment a command executes; the label continues observing later commands.
+
 ### Keyboard history and local Help
 
 `CommandBox` keeps the most recent 100 successful command strings in memory. Its key-event filter handles

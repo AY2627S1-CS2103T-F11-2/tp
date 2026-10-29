@@ -27,7 +27,9 @@ public class ListCommandTest {
 
     @Test
     public void execute_emptyRegister_showsEmptyList() {
-        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_EMPTY_REGISTER, expectedModel);
+        assertCommandSuccess(new ListCommand(), model,
+                ListCommand.MESSAGE_EMPTY_REGISTER + "\nShowing 0 of 0 equipment records.",
+                expectedModel);
         assertEquals(0, model.getFilteredEquipmentList().size());
     }
 
@@ -37,7 +39,9 @@ public class ListCommandTest {
         model.addEquipment(equipment("MIC001", "Wireless Microphone"));
         expectedModel = new ModelManager(model.getClubLogisticsData(), new UserPrefs());
 
-        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(new ListCommand(), model,
+                ListCommand.MESSAGE_SUCCESS + "\nShowing 2 of 2 equipment records.",
+                expectedModel);
         assertEquals(2, model.getFilteredEquipmentList().size());
     }
 

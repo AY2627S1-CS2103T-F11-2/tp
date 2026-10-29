@@ -40,14 +40,16 @@ public class FilterCommandTest {
     @Test
     public void execute_availableWithMatches_showsOnlyAvailable() {
         assertCommandSuccess(new FilterCommand(EquipmentStatus.AVAILABLE), model,
-                FilterCommand.MESSAGE_SHOWING_AVAILABLE, expectedModelFilteredBy(EquipmentStatus.AVAILABLE));
+                FilterCommand.MESSAGE_SHOWING_AVAILABLE + "\nShowing 1 of 2 equipment records.",
+                expectedModelFilteredBy(EquipmentStatus.AVAILABLE));
         assertEquals(List.of(camera), model.getFilteredEquipmentList());
     }
 
     @Test
     public void execute_issuedWithMatches_showsOnlyIssued() {
         assertCommandSuccess(new FilterCommand(EquipmentStatus.ISSUED), model,
-                FilterCommand.MESSAGE_SHOWING_ISSUED, expectedModelFilteredBy(EquipmentStatus.ISSUED));
+                FilterCommand.MESSAGE_SHOWING_ISSUED + "\nShowing 1 of 2 equipment records.",
+                expectedModelFilteredBy(EquipmentStatus.ISSUED));
         assertEquals(List.of(microphone), model.getFilteredEquipmentList());
     }
 
@@ -57,7 +59,8 @@ public class FilterCommandTest {
 
         CommandResult result = new FilterCommand(EquipmentStatus.AVAILABLE).execute(model);
 
-        assertEquals(FilterCommand.MESSAGE_NO_AVAILABLE, result.getFeedbackToUser());
+        assertEquals(FilterCommand.MESSAGE_NO_AVAILABLE + "\nShowing 0 of 2 equipment records.",
+                result.getFeedbackToUser());
         assertTrue(model.getFilteredEquipmentList().isEmpty());
     }
 
@@ -67,7 +70,8 @@ public class FilterCommandTest {
 
         CommandResult result = new FilterCommand(EquipmentStatus.ISSUED).execute(model);
 
-        assertEquals(FilterCommand.MESSAGE_NO_ISSUED, result.getFeedbackToUser());
+        assertEquals(FilterCommand.MESSAGE_NO_ISSUED + "\nShowing 0 of 2 equipment records.",
+                result.getFeedbackToUser());
         assertTrue(model.getFilteredEquipmentList().isEmpty());
     }
 
