@@ -314,9 +314,9 @@ Examples: `find Alice`, `find alice lim`.
 * Matching ignores capitalization and uses a contiguous substring, so `find Alice` can show loans to both
   Alice Lim and Alice Tan. Only currently issued equipment can match.
 * All text after `find` is one search phrase. Leading/trailing spaces are removed and repeated spaces are combined.
-  The phrase follows the borrower-name rules: 1–50 characters made up of English letters and spaces,
-  with apostrophes (`'`) or hyphens (`-`) allowed between letters, as in `O'Brien` or `Mary-Jane`.
-  Digits and other punctuation are rejected.
+  The phrase has 1–50 characters made up of English letters, spaces, apostrophes (`'`) and hyphens (`-`), and
+  must contain at least one letter. Because it can be part of a name, it may start or end with `'` or `-`, so
+  `find O'` and `find Mary-` match `O'Brien` and `Mary-Jane`. Digits and other punctuation are rejected.
 * The search replaces the previous status filter or borrower search. It stays active when equipment is changed;
   returning a matching item removes it from the results, and issuing another matching item adds it.
 * The equipment panel always shows the selected view above the cards. Run `list` to clear any search or filter.
@@ -382,9 +382,13 @@ would discard changes made in the new register. ClubLogistics does not merge the
 
 ### Saving the data
 
-Only one ClubLogistics instance can use the same home folder at a time. If startup reports that ClubLogistics
-is already running, use the existing window or close it before launching again. The app keeps a small
-`.clublogistics.lock` file in its home folder; do not delete it while the app is running.
+Only one ClubLogistics instance can use the same home folder at a time. If a "ClubLogistics cannot start" dialog
+reports that ClubLogistics is already running, use the existing window or close it before launching again. The app
+keeps a small `.clublogistics.lock` file in its home folder; do not delete it while the app is running.
+
+ClubLogistics must be able to create files in the folder containing `clublogistics.jar`. If that folder is read-only
+(e.g. a protected system folder), the same dialog explains this instead of opening the app; move the JAR to a folder
+you can write to, such as Documents, and start it again.
 
 ClubLogistics saves the equipment register automatically after successful `add`, `remove`, `rename`, `issue`, `return`,
 or `clear` commands. Read-only commands (`list`, `filter`, `find`, `help` and `exit`) do not save equipment data. You do not need to save manually, and saved data is retained when
@@ -447,9 +451,11 @@ changes, and your edits are lost. To edit the data file safely:
 ClubLogistics does not repair an invalid data file automatically. At startup it shows a warning, saves a copy of the
 invalid file as `data/clublogistics.invalid.json`, and starts with an empty register. Read-only commands leave the
 equipment file untouched; successful equipment-changing commands replace it with the in-memory register, but the copy
-is kept. A later invalid file replaces that copy, so move it somewhere safe first. To recover your records:
+is kept. Existing copies are never replaced: later failures use numbered names such as
+`data/clublogistics.invalid-1.json`. The warning names the actual copy, or reports if no copy could be saved.
+To recover your records:
 
-1. Close ClubLogistics, then move `data/clublogistics.invalid.json` somewhere safe (if the warning said no copy
+1. Close ClubLogistics, then move the recovery copy named in the warning somewhere safe (if the warning said no copy
    could be saved, copy the invalid `data/clublogistics.json` instead).
 2. Choose one of the following:
    * **Restore a backup:** replace `data/clublogistics.json` with a valid backup copy.

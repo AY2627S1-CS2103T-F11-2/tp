@@ -1,9 +1,9 @@
 package seedu.clublogistics;
 
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -119,10 +119,9 @@ public class MainApp extends Application {
      * and returns the warning to show the user.
      */
     private String preserveInvalidDataFile(Path dataFile) {
-        Path copy = dataFile.resolveSibling(INVALID_DATA_COPY_NAME);
         String preserved;
         try {
-            Files.copy(dataFile, copy, StandardCopyOption.REPLACE_EXISTING);
+            Path copy = copyInvalidDataFile(dataFile);
             preserved = "A copy of the unreadable file was saved as:\n" + copy;
         } catch (IOException e) {
             logger.warning("Could not copy invalid data file: " + StringUtil.getDetails(e));
@@ -131,6 +130,20 @@ public class MainApp extends Application {
         return "The data file could not be read:\n" + dataFile + "\n\nClubLogistics started with an empty register. "
                 + preserved + "\n\nAdding, removing, renaming, issuing, returning or clearing equipment will replace "
                 + "the data file. See \"Recovering from an invalid data file\" in the User Guide.";
+    }
+
+    private Path copyInvalidDataFile(Path dataFile) throws IOException {
+        if (!Files.isRegularFile(dataFile)) {
+            throw new IOException("Only a regular equipment data file can be copied.");
+        }
+        Path copy = dataFile.resolveSibling(INVALID_DATA_COPY_NAME);
+        for (int suffix = 1; ; suffix++) {
+            try {
+                return Files.copy(dataFile, copy);
+            } catch (FileAlreadyExistsException e) {
+                copy = dataFile.resolveSibling("clublogistics.invalid-" + suffix + ".json");
+            }
+        }
     }
 
     /** Returns the warning to show once the main window opens, if the data file could not be loaded. */

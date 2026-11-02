@@ -78,6 +78,39 @@ public class MainAppTest {
         assertTrue(warning.contains("empty register"), warning);
     }
 
+    /** A path that is a directory must not replace an existing recovery file with an empty directory. */
+    @Test
+    public void initModelManager_dataPathIsDirectory_preservesExistingRecoveryFile() throws IOException {
+        Path dataFile = testFolder.resolve("clublogistics.json");
+        Files.createDirectory(dataFile);
+        Path copy = testFolder.resolve("clublogistics.invalid.json");
+        Files.writeString(copy, "previous recoverable records");
+        MainApp app = new MainApp();
+
+        app.initModelManager(storageFor(dataFile), new UserPrefs());
+
+        assertTrue(Files.isRegularFile(copy));
+        assertEquals("previous recoverable records", Files.readString(copy));
+        assertTrue(app.getStartupWarning().orElseThrow().contains("could not be saved"));
+    }
+
+    /** Separate loading failures keep separate recovery copies rather than overwriting older records. */
+    @Test
+    public void initModelManager_laterInvalidData_preservesBothRecoveryFiles() throws IOException {
+        Path dataFile = testFolder.resolve("clublogistics.json");
+        Files.writeString(dataFile, "first broken register");
+        new MainApp().initModelManager(storageFor(dataFile), new UserPrefs());
+        Files.writeString(dataFile, "second broken register");
+        MainApp app = new MainApp();
+
+        app.initModelManager(storageFor(dataFile), new UserPrefs());
+
+        assertEquals("first broken register", Files.readString(testFolder.resolve("clublogistics.invalid.json")));
+        Path secondCopy = testFolder.resolve("clublogistics.invalid-1.json");
+        assertEquals("second broken register", Files.readString(secondCopy));
+        assertTrue(app.getStartupWarning().orElseThrow().contains(secondCopy.toString()));
+    }
+
     /** A readable data file loads silently, without a warning or a copy. */
     @Test
     public void initModelManager_validData_noWarningOrCopy() throws IOException {

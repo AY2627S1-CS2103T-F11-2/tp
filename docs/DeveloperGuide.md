@@ -25,6 +25,9 @@ Refer to [Setting up and getting started](SettingUp.md). Build and run the proje
 `Main` acquires an OS file lock on `.clublogistics.lock` in the application home before launching `MainApp`.
 It holds the lock until the JavaFX application exits, preventing concurrent sessions from replacing the same
 register with stale data. A second instance reports a startup error without loading equipment or preferences.
+If the lock cannot be obtained, either because another session holds it or because the home folder does not allow
+creating the lock file, `Main.launchOrReport` launches `StartupProblemApp` instead, which shows the reason in an
+error dialog and exits. A log message alone would go unseen when the JAR is started without a console.
 The lock file remains after shutdown; closing the channel, or process termination, releases the OS lock.
 
 `MainApp` manages application startup and shutdown:
@@ -513,7 +516,9 @@ mutation. The issued-item removal guard remains independent of descriptive name 
 
 ### Borrower search and view descriptions
 
-`FindCommandParser` validates and normalizes the name fragment with `BorrowerName`. `FindCommand` applies a
+`FindCommandParser` normalizes spaces in the name fragment and checks it against the borrower-name characters and
+`BorrowerName.MAX_LENGTH`. It does not construct a `BorrowerName`, because a fragment such as `O'` may end at an
+apostrophe or hyphen, which a complete name may not; it must still contain a letter. `FindCommand` applies a
 case-insensitive substring predicate to the current borrower, excluding available equipment. This uses the same
 observable filtered equipment list as status filtering. A search replaces the previous predicate and is preserved
 across register changes until `list` or another search/filter replaces it; view state is not serialized.
@@ -562,7 +567,9 @@ does not load a valid prefix of the file. An existing object with absent/null `e
 empty register. Recovery selects in-memory startup data; it does not repair an invalid file. Instead,
 `MainApp` immediately copies it to `clublogistics.invalid.json` beside the data file and shows a warning over the
 main window naming both files. Copying at startup, rather than before the first save, keeps the user's records
-safe without coupling the save path to load history. A later invalid file replaces an older copy.
+safe without coupling the save path to load history. Existing copies are retained: later failures use the next
+unused numbered name, such as `clublogistics.invalid-1.json`. A non-file source or failed copy leaves earlier
+recovery copies untouched and the warning asks the user to back up the source manually.
 
 #### Saving and the persisted schema
 

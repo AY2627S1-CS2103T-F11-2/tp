@@ -11,6 +11,8 @@ import java.nio.file.StandardOpenOption;
 final class AppInstanceLock implements AutoCloseable {
     private static final String ALREADY_RUNNING =
             "ClubLogistics is already running in this folder. Close the existing window before starting another.";
+    private static final String FOLDER_NOT_WRITABLE = "ClubLogistics must be able to create files in its folder:\n"
+            + "%s\nMove clublogistics.jar to a folder you can write to (e.g. Documents) and start it again.";
 
     private final FileChannel channel;
     private final FileLock lock;
@@ -22,8 +24,7 @@ final class AppInstanceLock implements AutoCloseable {
 
     /** Acquires ownership before any equipment or preference data is loaded. */
     static AppInstanceLock acquire(Path home) throws IOException {
-        FileChannel channel = FileChannel.open(home.resolve(".clublogistics.lock"),
-                StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        FileChannel channel = openLockFile(home);
         try {
             FileLock lock = channel.tryLock();
             if (lock == null) {
@@ -36,6 +37,15 @@ final class AppInstanceLock implements AutoCloseable {
         } catch (IOException | RuntimeException e) {
             channel.close();
             throw e;
+        }
+    }
+
+    private static FileChannel openLockFile(Path home) throws IOException {
+        try {
+            return FileChannel.open(home.resolve(".clublogistics.lock"),
+                    StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        } catch (IOException e) {
+            throw new IOException(String.format(FOLDER_NOT_WRITABLE, home), e);
         }
     }
 
