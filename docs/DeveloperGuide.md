@@ -556,6 +556,9 @@ selecting samples. The loading sequence below applies after this preflight allow
 `StorageManager`. `initModelManager` calls `StorageManager.readClubLogisticsData`, delegated to the JSON
 storage. `JsonUtil.readJsonFile` deserializes with Jackson; `JsonSerializableClubLogisticsData.toModelType`
 adapts each `JsonAdaptedEquipment` and checks ID uniqueness while constructing a separate register.
+The file parser enables duplicate-property detection and checks for end-of-input after the first document.
+Repeated property names, another root document or trailing garbage therefore raise a loading error instead
+of silently discarding earlier or later records. Trailing whitespace and a UTF-8 BOM remain supported.
 `ModelManager` copies the resulting data and creates its filtered view before Logic and UI are connected.
 
 ![Startup loading and recovery branches](images/LoadEquipmentSequence.png)

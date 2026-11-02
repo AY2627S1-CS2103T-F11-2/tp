@@ -64,6 +64,50 @@ public class JsonClubLogisticsStorageTest {
         assertThrows(DataLoadingException.class, () -> readClubLogisticsData("nullClubLogisticsData.json"));
     }
 
+    /** Extra JSON documents must not be silently discarded after the first register. */
+    @Test
+    public void read_secondDocument_throwsDataLoadingException() throws IOException {
+        assertRejectedWithoutChangingBytes("{\"equipment\":[]} "
+                + "{\"equipment\":[{\"id\":\"CAM001\",\"name\":\"Camera\"}]}");
+    }
+
+    /** Trailing garbage must trigger recovery rather than silently loading a valid prefix. */
+    @Test
+    public void read_trailingGarbage_throwsDataLoadingException() throws IOException {
+        assertRejectedWithoutChangingBytes("{\"equipment\":[]} INVALID TRAILER");
+    }
+
+    /** Duplicate collections are ambiguous and must not silently replace earlier records. */
+    @Test
+    public void read_duplicateEquipmentProperty_throwsDataLoadingException() throws IOException {
+        assertRejectedWithoutChangingBytes("{\"equipment\":[{\"id\":\"CAM001\",\"name\":\"Camera\"}],"
+                + "\"equipment\":[]}");
+    }
+
+    /** Duplicate fields inside a record must not silently change its identity. */
+    @Test
+    public void read_duplicateRecordProperty_throwsDataLoadingException() throws IOException {
+        assertRejectedWithoutChangingBytes("{\"equipment\":[{\"id\":\"CAM001\",\"id\":\"MIC001\","
+                + "\"name\":\"Camera\"}]}");
+    }
+
+    private void assertRejectedWithoutChangingBytes(String json) throws IOException {
+        Path file = testFolder.resolve("Ambiguous.json");
+        Files.writeString(file, json);
+        assertThrows(DataLoadingException.class, new JsonClubLogisticsStorage(file)::readClubLogisticsData);
+        assertEquals(json, Files.readString(file));
+    }
+
+    /** Ordinary trailing whitespace remains valid. */
+    @Test
+    public void read_trailingWhitespace_loadsRegister() throws Exception {
+        Path file = testFolder.resolve("Whitespace.json");
+        Files.writeString(file, "{\"equipment\":[{\"id\":\"CAM001\",\"name\":\"Camera\"}]} \r\n\t");
+        var loaded = new JsonClubLogisticsStorage(file).readClubLogisticsData().orElseThrow();
+        assertEquals(1, loaded.getEquipmentList().size());
+        assertEquals(new EquipmentId("CAM001"), loaded.getEquipmentList().get(0).getId());
+    }
+
     /** Verifies saving, updating, and reloading the equipment register. */
     @Test
     public void readAndSaveClubLogisticsData_allInOrder_success() throws Exception {

@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,8 +39,14 @@ public class JsonUtil {
 
     static <T> T deserializeObjectFromJsonFile(Path jsonFile, Class<T> classOfObjectToDeserialize)
             throws IOException {
-        try (var input = Files.newInputStream(jsonFile)) {
-            return objectMapper.readValue(input, classOfObjectToDeserialize);
+        try (var input = Files.newInputStream(jsonFile);
+                JsonParser parser = objectMapper.getFactory().createParser(input)) {
+            parser.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+            T result = objectMapper.readValue(parser, classOfObjectToDeserialize);
+            if (parser.nextToken() != null) {
+                throw new IOException("Unexpected content after JSON document");
+            }
+            return result;
         }
     }
 

@@ -404,7 +404,9 @@ Keep separate backups for recovery from device failures; the app does not keep b
 The equipment register is saved as `data/clublogistics.json` inside the folder containing the JAR file, even if
 you launch it from another directory. Window preferences and log files also stay inside that home folder.
 Advanced users are welcome to update the equipment data directly by editing that file.
-UTF-8 files saved with or without a leading byte-order mark (BOM) are accepted. If an older version
+UTF-8 files saved with or without a leading byte-order mark (BOM) are accepted. The file must contain one
+JSON document with no duplicate property names or trailing content except whitespace. Ambiguous files
+trigger the same warning and recovery-copy handling as other invalid files. If an older version
 saved your data in a different launch folder, close the app, back up that file, and copy it into the new home
 folder's `data` directory before starting the updated version.
 
