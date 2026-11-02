@@ -25,6 +25,9 @@ Refer to [Setting up and getting started](SettingUp.md). Build and run the proje
 `Main` acquires an OS file lock on `.clublogistics.lock` in the application home before launching `MainApp`.
 It holds the lock until the JavaFX application exits, preventing concurrent sessions from replacing the same
 register with stale data. A second instance reports a startup error without loading equipment or preferences.
+If the lock cannot be obtained, either because another session holds it or because the home folder does not allow
+creating the lock file, `Main.launchOrReport` launches `StartupProblemApp` instead, which shows the reason in an
+error dialog and exits. A log message alone would go unseen when the JAR is started without a console.
 The lock file remains after shutdown; closing the channel, or process termination, releases the OS lock.
 
 `MainApp` manages application startup and shutdown:
