@@ -126,6 +126,7 @@ How the parsing works:
 | `rename` | `RenameCommandParser` | `RenameCommand` |
 | `list` | `ListCommandParser` | `ListCommand` |
 | `filter` | `FilterCommandParser` | `FilterCommand` |
+| `find` | `FindCommandParser` | `FindCommand` |
 | `issue` | `IssueCommandParser` | `IssueCommand` |
 | `return` | `ReturnCommandParser` | `ReturnCommand` |
 | `clear` | `ClearCommandParser` | `ClearCommand` |
