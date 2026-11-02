@@ -56,6 +56,80 @@ public class MainAppTest {
         assertEquals(new ClubLogisticsData(), model.getClubLogisticsData());
     }
 
+    /**
+     * An unreadable data file is copied aside before any command can overwrite it,
+     * and the user is warned where the copy is.
+     */
+    @Test
+    public void initModelManager_invalidData_keepsCopyAndWarns() throws IOException {
+        Path dataFilePath = testFolder.resolve("data").resolve("clublogistics.json");
+        Files.createDirectories(dataFilePath.getParent());
+        String invalid = "{\"equipment\":[{\"id\":\"BAD ID\",\"name\":\"Mic\",\"status\":\"AVAILABLE\"}]}";
+        Files.writeString(dataFilePath, invalid);
+        MainApp app = new MainApp();
+
+        Model model = app.initModelManager(storageFor(dataFilePath), new UserPrefs());
+
+        Path copy = dataFilePath.resolveSibling("clublogistics.invalid.json");
+        assertEquals(new ClubLogisticsData(), model.getClubLogisticsData());
+        assertEquals(invalid, Files.readString(copy));
+        String warning = app.getStartupWarning().orElseThrow();
+        assertTrue(warning.contains(copy.toString()), warning);
+        assertTrue(warning.contains("empty register"), warning);
+    }
+
+    /** A path that is a directory must not replace an existing recovery file with an empty directory. */
+    @Test
+    public void initModelManager_dataPathIsDirectory_preservesExistingRecoveryFile() throws IOException {
+        Path dataFile = testFolder.resolve("clublogistics.json");
+        Files.createDirectory(dataFile);
+        Path copy = testFolder.resolve("clublogistics.invalid.json");
+        Files.writeString(copy, "previous recoverable records");
+        MainApp app = new MainApp();
+
+        app.initModelManager(storageFor(dataFile), new UserPrefs());
+
+        assertTrue(Files.isRegularFile(copy));
+        assertEquals("previous recoverable records", Files.readString(copy));
+        assertTrue(app.getStartupWarning().orElseThrow().contains("could not be saved"));
+    }
+
+    /** Separate loading failures keep separate recovery copies rather than overwriting older records. */
+    @Test
+    public void initModelManager_laterInvalidData_preservesBothRecoveryFiles() throws IOException {
+        Path dataFile = testFolder.resolve("clublogistics.json");
+        Files.writeString(dataFile, "first broken register");
+        new MainApp().initModelManager(storageFor(dataFile), new UserPrefs());
+        Files.writeString(dataFile, "second broken register");
+        MainApp app = new MainApp();
+
+        app.initModelManager(storageFor(dataFile), new UserPrefs());
+
+        assertEquals("first broken register", Files.readString(testFolder.resolve("clublogistics.invalid.json")));
+        Path secondCopy = testFolder.resolve("clublogistics.invalid-1.json");
+        assertEquals("second broken register", Files.readString(secondCopy));
+        assertTrue(app.getStartupWarning().orElseThrow().contains(secondCopy.toString()));
+    }
+
+    /** A readable data file loads silently, without a warning or a copy. */
+    @Test
+    public void initModelManager_validData_noWarningOrCopy() throws IOException {
+        Path dataFilePath = testFolder.resolve("data").resolve("clublogistics.json");
+        Files.createDirectories(dataFilePath.getParent());
+        Files.writeString(dataFilePath, "{\"equipment\":[]}");
+        MainApp app = new MainApp();
+
+        app.initModelManager(storageFor(dataFilePath), new UserPrefs());
+
+        assertTrue(app.getStartupWarning().isEmpty());
+        assertTrue(Files.notExists(dataFilePath.resolveSibling("clublogistics.invalid.json")));
+    }
+
+    private StorageManager storageFor(Path dataFilePath) {
+        return new StorageManager(new JsonClubLogisticsStorage(dataFilePath),
+                new JsonUserPrefsStorage(testFolder.resolve("preferences.json")));
+    }
+
     /** A v1.3 register must be detected before samples are offered, without changing either file. */
     @Test
     public void legacyMigrationNotice_onlyLegacyExists_explainsSafeCopy() throws Exception {
