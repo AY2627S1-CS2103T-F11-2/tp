@@ -429,7 +429,7 @@ If a record has no `status` field, ClubLogistics works out the status from `issu
 compatibility with older data files; ClubLogistics always writes `status` when it saves.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If your changes make the data file invalid, ClubLogistics starts with an empty equipment register at the next run. Read-only commands leave the equipment file untouched. A successful add, remove, rename, issue, return or clear replaces it with the in-memory register. Back up the file before editing it or changing equipment records.<br>
+If your changes make the data file invalid, ClubLogistics warns you at the next run, saves a copy of the invalid file as `data/clublogistics.invalid.json`, and starts with an empty equipment register. Read-only commands leave the equipment file untouched. A successful add, remove, rename, issue, return or clear replaces it with the in-memory register. Back up the file before editing it or changing equipment records.<br>
 Furthermore, certain edits can cause ClubLogistics to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </div>
 
@@ -444,14 +444,17 @@ changes, and your edits are lost. To edit the data file safely:
 
 #### Recovering from an invalid data file
 
-ClubLogistics does not repair an invalid data file automatically. It starts with an empty register. Read-only commands
-leave the equipment file untouched; successful equipment-changing commands replace it with the in-memory register. To recover
-your records:
+ClubLogistics does not repair an invalid data file automatically. At startup it shows a warning, saves a copy of the
+invalid file as `data/clublogistics.invalid.json`, and starts with an empty register. Read-only commands leave the
+equipment file untouched; successful equipment-changing commands replace it with the in-memory register, but the copy
+is kept. A later invalid file replaces that copy, so move it somewhere safe first. To recover your records:
 
-1. Close ClubLogistics, then copy the invalid `data/clublogistics.json` somewhere safe before changing anything.
+1. Close ClubLogistics, then move `data/clublogistics.invalid.json` somewhere safe (if the warning said no copy
+   could be saved, copy the invalid `data/clublogistics.json` instead).
 2. Choose one of the following:
    * **Restore a backup:** replace `data/clublogistics.json` with a valid backup copy.
-   * **Repair the file:** if there is no backup, edit the file so it follows the format described above. Each item needs
+   * **Repair the file:** if there is no backup, edit a copy of the saved file so it follows the format described
+     above, then use it to replace `data/clublogistics.json`. Each item needs
      a valid `id` and `name`, and a `status` that is `AVAILABLE` with an empty `issuedTo`, or `ISSUED` with a valid
      borrower name in `issuedTo`. Equipment IDs must be unique.
 3. Start ClubLogistics and run `list` to check that your records loaded. Do not run `add`, `remove`, `rename`, `issue`,

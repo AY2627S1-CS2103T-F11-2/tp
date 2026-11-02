@@ -3,6 +3,7 @@ package seedu.clublogistics;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.logging.Logger;
 
@@ -40,6 +41,7 @@ public class MainApp extends Application {
     private static final Logger logger = LogsCenter.getLogger(MainApp.class);
     private static final Path USER_PREFS_FILE_PATH = AppPaths.getHomeFolder().resolve("preferences.json");
     private static final Path CLUB_LOGISTICS_FILE_PATH = AppPaths.getHomeFolder().resolve("data/clublogistics.json");
+    private static final String INVALID_DATA_COPY_NAME = "clublogistics.invalid.json";
 
     protected Ui ui;
     protected Logic logic;
@@ -47,6 +49,7 @@ public class MainApp extends Application {
     protected Model model;
 
     private Optional<String> legacyMigrationNotice = Optional.empty();
+    private Optional<String> startupWarning = Optional.empty();
 
     /** Initializes components unless a legacy register needs manual migration first. */
     @Override
@@ -105,9 +108,34 @@ public class MainApp extends Application {
             logger.warning("Data file at " + storage.getClubLogisticsDataFilePath() + " could not be loaded."
                     + " Will be starting with an empty ClubLogisticsData.");
             initialData = new ClubLogisticsData();
+            startupWarning = Optional.of(preserveInvalidDataFile(storage.getClubLogisticsDataFilePath()));
         }
 
         return new ModelManager(initialData, userPrefs);
+    }
+
+    /**
+     * Copies the unreadable data file aside, so a later save cannot destroy the only copy,
+     * and returns the warning to show the user.
+     */
+    private String preserveInvalidDataFile(Path dataFile) {
+        Path copy = dataFile.resolveSibling(INVALID_DATA_COPY_NAME);
+        String preserved;
+        try {
+            Files.copy(dataFile, copy, StandardCopyOption.REPLACE_EXISTING);
+            preserved = "A copy of the unreadable file was saved as:\n" + copy;
+        } catch (IOException e) {
+            logger.warning("Could not copy invalid data file: " + StringUtil.getDetails(e));
+            preserved = "A copy could not be saved, so back up the file yourself before changing records.";
+        }
+        return "The data file could not be read:\n" + dataFile + "\n\nClubLogistics started with an empty register. "
+                + preserved + "\n\nAdding, removing, renaming, issuing, returning or clearing equipment will replace "
+                + "the data file. See \"Recovering from an invalid data file\" in the User Guide.";
+    }
+
+    /** Returns the warning to show once the main window opens, if the data file could not be loaded. */
+    protected Optional<String> getStartupWarning() {
+        return startupWarning;
     }
 
     /**
@@ -151,6 +179,16 @@ public class MainApp extends Application {
         }
         logger.info("Starting ClubLogistics " + MainApp.VERSION);
         ui.start(primaryStage);
+        startupWarning.ifPresent(warning -> showStartupWarning(primaryStage, warning));
+    }
+
+    private void showStartupWarning(Stage owner, String warning) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.initOwner(owner);
+        alert.setTitle("ClubLogistics");
+        alert.setHeaderText("Your saved equipment data could not be loaded");
+        alert.setContentText(warning);
+        alert.showAndWait();
     }
 
     private void showLegacyMigrationNotice() {

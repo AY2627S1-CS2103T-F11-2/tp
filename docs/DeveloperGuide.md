@@ -559,7 +559,10 @@ A missing file yields `Optional.empty()` and `MainApp` selects `SampleDataUtil.g
 Malformed JSON, unreadable data, a literal JSON `null` document, null equipment records, or invalid records
 raise `DataLoadingException`; `MainApp` logs the failure and starts with an empty register. A bad later record
 does not load a valid prefix of the file. An existing object with absent/null `equipment` is accepted as an
-empty register. Recovery selects in-memory startup data; it does not repair or back up an invalid file.
+empty register. Recovery selects in-memory startup data; it does not repair an invalid file. Instead,
+`MainApp` immediately copies it to `clublogistics.invalid.json` beside the data file and shows a warning over the
+main window naming both files. Copying at startup, rather than before the first save, keeps the user's records
+safe without coupling the save path to load history. A later invalid file replaces an older copy.
 
 #### Saving and the persisted schema
 
@@ -935,8 +938,9 @@ The User Guide describes the implemented commands and current limitations.
 
 1. Add equipment, issue it, exit, and relaunch. Expect the item and borrower to be retained.
 2. With the app closed, check `data/clublogistics.json`. Expect only an `equipment` array at the top level.
-3. In a disposable test folder, replace the data file with invalid JSON and launch the app. Expect an empty register.
-   Read-only commands leave the equipment file untouched; successful equipment-changing commands replace it when saving.
-   Back up the invalid file before running saving commands.
+3. In a disposable test folder, replace the data file with invalid JSON and launch the app. Expect a warning
+   naming the data file and `data/clublogistics.invalid.json`, then an empty register. Check that the copy matches
+   the invalid file. Read-only commands leave the equipment file untouched; successful equipment-changing commands
+   replace it when saving, while the copy remains.
 4. Run `help`. Expect the ClubLogistics User Guide link.
 5. Try an invalid equipment ID or an unknown command. Expect an error without changing any records.
