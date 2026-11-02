@@ -8,6 +8,9 @@ import seedu.clublogistics.model.equipment.BorrowerName;
 
 /** Parses a full borrower name or a name fragment. */
 public class FindCommandParser implements Parser<FindCommand> {
+    /** Uses the borrower-name characters, but allows a fragment to start or end at an apostrophe or hyphen. */
+    private static final String FRAGMENT_REGEX = "[A-Za-z' -]*[A-Za-z][A-Za-z' -]*";
+
     /** Rejects missing or invalid names before changing the current view. */
     @Override
     public FindCommand parse(String args) throws ParseException {
@@ -15,10 +18,10 @@ public class FindCommandParser implements Parser<FindCommand> {
         if (args.isBlank()) {
             throw new ParseException("Error: Invalid command format. Usage: " + FindCommand.MESSAGE_USAGE);
         }
-        try {
-            return new FindCommand(new BorrowerName(args));
-        } catch (IllegalArgumentException e) {
-            throw new ParseException(BorrowerName.MESSAGE_CONSTRAINTS, e);
+        String fragment = args.trim().replaceAll(" +", " ");
+        if (fragment.length() > BorrowerName.MAX_LENGTH || !fragment.matches(FRAGMENT_REGEX)) {
+            throw new ParseException(BorrowerName.MESSAGE_CONSTRAINTS);
         }
+        return new FindCommand(fragment);
     }
 }

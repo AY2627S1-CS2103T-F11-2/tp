@@ -5,16 +5,15 @@ import static java.util.Objects.requireNonNull;
 import java.util.Locale;
 
 import seedu.clublogistics.model.Model;
-import seedu.clublogistics.model.equipment.BorrowerName;
 
 /** Shows equipment whose current borrower contains the supplied name fragment. */
 public class FindCommand extends Command {
     public static final String COMMAND_WORD = "find";
     public static final String MESSAGE_USAGE = "find <borrower-name>";
-    private final BorrowerName query;
+    private final String query;
 
     /** Creates a search using a validated, normalized borrower name or fragment. */
-    public FindCommand(BorrowerName query) {
+    public FindCommand(String query) {
         this.query = requireNonNull(query);
     }
 
@@ -22,7 +21,7 @@ public class FindCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        String fragment = query.toString().toLowerCase(Locale.ROOT);
+        String fragment = query.toLowerCase(Locale.ROOT);
         model.updateFilteredEquipmentList(item -> item.getIssuedTo()
                 .map(name -> name.toString().toLowerCase(Locale.ROOT).contains(fragment)).orElse(false),
                 "Showing borrower: " + query + " — use list to show all");

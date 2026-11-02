@@ -54,6 +54,34 @@ public class BorrowerSearchTest {
         assertTrue(model.equipmentFilterDescriptionProperty().get().contains("Nobody"));
     }
 
+    /** Partial names may end or start at an apostrophe or hyphen, since find matches any part of a name. */
+    @Test
+    public void find_fragmentsAroundApostrophesAndHyphens_match() throws Exception {
+        ModelManager model = new ModelManager();
+        Equipment camera = new Equipment(new EquipmentId("CAM001"), "Camera", new BorrowerName("Tom O'Brien"));
+        Equipment mic = new Equipment(new EquipmentId("MIC001"), "Microphone", new BorrowerName("Mary-Jane Tan"));
+        model.addEquipment(camera);
+        model.addEquipment(mic);
+        ClubLogisticsParser parser = new ClubLogisticsParser();
+        for (String fragment : List.of("O'", "'Brien", "o'b")) {
+            parser.parseCommand("find " + fragment).execute(model);
+            assertEquals(List.of(camera), model.getFilteredEquipmentList(), fragment);
+        }
+        for (String fragment : List.of("Mary-", "-Jane", "y-j")) {
+            parser.parseCommand("find " + fragment).execute(model);
+            assertEquals(List.of(mic), model.getFilteredEquipmentList(), fragment);
+        }
+    }
+
+    /** A query must still contain a letter, so punctuation alone is rejected. */
+    @Test
+    public void find_punctuationOnly_rejected() {
+        ClubLogisticsParser parser = new ClubLogisticsParser();
+        for (String query : List.of("find '", "find -", "find ' -")) {
+            assertThrows(ParseException.class, () -> parser.parseCommand(query), query);
+        }
+    }
+
     /** The status indicator remains meaningful after adding an item that the view excludes. */
     @Test
     public void filter_addExcludedItem_retainsDescription() throws Exception {
