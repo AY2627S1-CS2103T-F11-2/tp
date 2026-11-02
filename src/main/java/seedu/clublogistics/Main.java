@@ -2,6 +2,7 @@ package seedu.clublogistics;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import javafx.application.Application;
@@ -32,10 +33,20 @@ public class Main {
 
         logger.warning("The warnings about a 'restricted method in java.lang.System' "
             + "and 'enabling native access' appearing below (if any) can be ignored.");
+        launchOrReport(AppPaths.getHomeFolder(), () -> Application.launch(MainApp.class, args),
+                problem -> Application.launch(StartupProblemApp.class, problem));
+    }
+
+    /**
+     * Launches the application while owning {@code home}, or passes the reason to {@code reportProblem}
+     * when ownership cannot be obtained, so the user is told why no window opened.
+     */
+    static void launchOrReport(Path home, Runnable launchApplication, Consumer<String> reportProblem) {
         try {
-            launchWithLock(AppPaths.getHomeFolder(), () -> Application.launch(MainApp.class, args));
+            launchWithLock(home, launchApplication);
         } catch (IOException e) {
             logger.severe("Cannot start ClubLogistics: " + e.getMessage());
+            reportProblem.accept(e.getMessage());
         }
     }
 

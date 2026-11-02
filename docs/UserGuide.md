@@ -382,9 +382,13 @@ would discard changes made in the new register. ClubLogistics does not merge the
 
 ### Saving the data
 
-Only one ClubLogistics instance can use the same home folder at a time. If startup reports that ClubLogistics
-is already running, use the existing window or close it before launching again. The app keeps a small
-`.clublogistics.lock` file in its home folder; do not delete it while the app is running.
+Only one ClubLogistics instance can use the same home folder at a time. If a "ClubLogistics cannot start" dialog
+reports that ClubLogistics is already running, use the existing window or close it before launching again. The app
+keeps a small `.clublogistics.lock` file in its home folder; do not delete it while the app is running.
+
+ClubLogistics must be able to create files in the folder containing `clublogistics.jar`. If that folder is read-only
+(e.g. a protected system folder), the same dialog explains this instead of opening the app; move the JAR to a folder
+you can write to, such as Documents, and start it again.
 
 ClubLogistics saves the equipment register automatically after successful `add`, `remove`, `rename`, `issue`, `return`,
 or `clear` commands. Read-only commands (`list`, `filter`, `find`, `help` and `exit`) do not save equipment data. You do not need to save manually, and saved data is retained when

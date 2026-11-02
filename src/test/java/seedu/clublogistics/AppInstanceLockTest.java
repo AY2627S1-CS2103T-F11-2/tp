@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -51,6 +53,50 @@ public class AppInstanceLockTest {
     public void acquire_lockPathIsDirectory_throwsIoException() throws IOException {
         Files.createDirectory(home.resolve(".clublogistics.lock"));
         assertThrows(IOException.class, () -> AppInstanceLock.acquire(home));
+    }
+
+    /** A home folder where the lock file cannot be created is explained, not reported as a raw path. */
+    @Test
+    public void acquire_lockFileCannotBeCreated_explainsWritableFolder() throws IOException {
+        Path notAFolder = Files.writeString(home.resolve("not-a-folder"), "");
+        IOException error = assertThrows(IOException.class, () -> AppInstanceLock.acquire(notAFolder));
+        assertTrue(error.getMessage().contains("must be able to create files"), error.getMessage());
+        assertTrue(error.getMessage().contains(notAFolder.toString()), error.getMessage());
+    }
+
+    /** A second session is refused visibly instead of only being logged. */
+    @Test
+    public void launchOrReport_existingInstance_reportsWithoutLaunching() throws IOException {
+        List<String> reports = new ArrayList<>();
+        try (AppInstanceLock first = AppInstanceLock.acquire(home)) {
+            Main.launchOrReport(home, () -> {
+                throw new AssertionError("A second session must not load or save the register");
+            }, reports::add);
+        }
+        assertEquals(1, reports.size());
+        assertTrue(reports.get(0).contains("already running"));
+    }
+
+    /** An unusable home folder is reported visibly instead of the app silently not starting. */
+    @Test
+    public void launchOrReport_unusableHome_reportsWritableFolder() throws IOException {
+        Path notAFolder = Files.writeString(home.resolve("not-a-folder"), "");
+        List<String> reports = new ArrayList<>();
+        Main.launchOrReport(notAFolder, () -> {
+            throw new AssertionError("The app must not start without owning its home folder");
+        }, reports::add);
+        assertEquals(1, reports.size());
+        assertTrue(reports.get(0).contains("must be able to create files"));
+    }
+
+    /** A free home launches normally and reports nothing. */
+    @Test
+    public void launchOrReport_freeHome_launchesWithoutReport() {
+        List<String> reports = new ArrayList<>();
+        List<String> launches = new ArrayList<>();
+        Main.launchOrReport(home, () -> launches.add("launched"), reports::add);
+        assertEquals(List.of("launched"), launches);
+        assertTrue(reports.isEmpty());
     }
 
     /** Verifies exclusion across JVMs, not just overlapping locks in one JVM. */
@@ -98,9 +144,12 @@ public class AppInstanceLockTest {
         assertDoesNotThrow(() -> Main.launchWithLock(home, () -> { }));
     }
 
-    /** Checks the packaged entry point refuses a second session before touching its register. */
+    /**
+     * Checks the packaged entry point refuses a second session before touching its register.
+     * The refusal is shown in a dialog that waits for the user, so the process is closed by the test.
+     */
     @Test
-    public void packagedJar_existingInstance_exitsWithoutLoadingData() throws Exception {
+    public void packagedJar_existingInstance_refusesWithoutLoadingData() throws Exception {
         Path jar = home.resolve("clublogistics.jar");
         Files.copy(Path.of("build", "libs", "clublogistics.jar"), jar);
         Path output = home.resolve("second-instance.txt");
@@ -109,8 +158,7 @@ public class AppInstanceLockTest {
                     "-jar", jar.toString()).directory(home.toFile())
                     .redirectErrorStream(true).redirectOutput(output.toFile()).start();
             try {
-                assertTrue(process.waitFor(10, java.util.concurrent.TimeUnit.SECONDS), "Second instance must exit");
-                String message = Files.readString(output, StandardCharsets.UTF_8);
+                String message = awaitOutputContaining(output, "already running", process);
                 assertTrue(message.contains("already running"), message);
                 assertTrue(Files.notExists(home.resolve("preferences.json")));
                 assertTrue(Files.notExists(home.resolve("data/clublogistics.json")));
@@ -118,6 +166,20 @@ public class AppInstanceLockTest {
                 process.destroyForcibly();
             }
         }
+    }
+
+    /** Waits up to 10 seconds for {@code expected} to appear in the process output, or for the process to end. */
+    private static String awaitOutputContaining(Path output, String expected, Process process) throws Exception {
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(10);
+        String text = "";
+        while (System.nanoTime() < deadline) {
+            text = Files.readString(output, StandardCharsets.UTF_8);
+            if (text.contains(expected) || !process.isAlive()) {
+                return Files.readString(output, StandardCharsets.UTF_8);
+            }
+            Thread.sleep(100);
+        }
+        return text;
     }
 
     private int runProbe() throws Exception {
