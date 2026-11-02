@@ -314,9 +314,9 @@ Examples: `find Alice`, `find alice lim`.
 * Matching ignores capitalization and uses a contiguous substring, so `find Alice` can show loans to both
   Alice Lim and Alice Tan. Only currently issued equipment can match.
 * All text after `find` is one search phrase. Leading/trailing spaces are removed and repeated spaces are combined.
-  The phrase follows the borrower-name rules: 1–50 characters made up of English letters and spaces,
-  with apostrophes (`'`) or hyphens (`-`) allowed between letters, as in `O'Brien` or `Mary-Jane`.
-  Digits and other punctuation are rejected.
+  The phrase has 1–50 characters made up of English letters, spaces, apostrophes (`'`) and hyphens (`-`), and
+  must contain at least one letter. Because it can be part of a name, it may start or end with `'` or `-`, so
+  `find O'` and `find Mary-` match `O'Brien` and `Mary-Jane`. Digits and other punctuation are rejected.
 * The search replaces the previous status filter or borrower search. It stays active when equipment is changed;
   returning a matching item removes it from the results, and issuing another matching item adds it.
 * The equipment panel always shows the selected view above the cards. Run `list` to clear any search or filter.

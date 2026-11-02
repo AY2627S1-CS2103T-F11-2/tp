@@ -513,7 +513,9 @@ mutation. The issued-item removal guard remains independent of descriptive name 
 
 ### Borrower search and view descriptions
 
-`FindCommandParser` validates and normalizes the name fragment with `BorrowerName`. `FindCommand` applies a
+`FindCommandParser` normalizes spaces in the name fragment and checks it against the borrower-name characters and
+`BorrowerName.MAX_LENGTH`. It does not construct a `BorrowerName`, because a fragment such as `O'` may end at an
+apostrophe or hyphen, which a complete name may not; it must still contain a letter. `FindCommand` applies a
 case-insensitive substring predicate to the current borrower, excluding available equipment. This uses the same
 observable filtered equipment list as status filtering. A search replaces the previous predicate and is preserved
 across register changes until `list` or another search/filter replaces it; view state is not serialized.
