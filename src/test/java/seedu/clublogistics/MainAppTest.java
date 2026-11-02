@@ -111,6 +111,21 @@ public class MainAppTest {
         assertTrue(app.getStartupWarning().orElseThrow().contains(secondCopy.toString()));
     }
 
+    /** Recovery retains the entire ambiguous file, including data after the first JSON document. */
+    @Test
+    public void initModelManager_multipleDocuments_warnsAndPreservesAllBytes() throws IOException {
+        Path file = testFolder.resolve("clublogistics.json");
+        String json = "{\"equipment\":[]} {\"equipment\":[{\"id\":\"CAM001\",\"name\":\"Camera\"}]}";
+        Files.writeString(file, json);
+        MainApp app = new MainApp();
+
+        app.initModelManager(storageFor(file), new UserPrefs());
+
+        assertTrue(app.getStartupWarning().isPresent());
+        assertEquals(json, Files.readString(testFolder.resolve("clublogistics.invalid.json")));
+        assertEquals(json, Files.readString(file));
+    }
+
     /** A readable data file loads silently, without a warning or a copy. */
     @Test
     public void initModelManager_validData_noWarningOrCopy() throws IOException {
